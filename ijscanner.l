@@ -63,39 +63,39 @@ NEWLINE "\n"
 {SINGLE_LINE_COMMENT}.*                 IGNORE
 {WHITESPACE}                            IGNORE
 {NEWLINE}                               IGNORE_NEWLINE
-{RESERVED}                              PRINT_TOKEN_ARG(RESERVED)
-{BOOLLIT}                               PRINT_TOKEN_ARG(BOOLLIT)
-{INTLIT}                                PRINT_TOKEN_ARG(INTLIT)
-{INT}                                   PRINT_TOKEN(INT)
-{BOOL}                                  PRINT_TOKEN(BOOL)
-{NEW}                                   PRINT_TOKEN(NEW)
-{IF}                                    PRINT_TOKEN(IF)
-{ELSE}                                  PRINT_TOKEN(ELSE)
-{WHILE}                                 PRINT_TOKEN(WHILE)
-{PRINT}                                 PRINT_TOKEN(PRINT)
-{PARSEINT}                              PRINT_TOKEN(PARSEINT)
-{CLASS}                                 PRINT_TOKEN(CLASS)
-{PUBLIC}                                PRINT_TOKEN(PUBLIC)
-{STATIC}                                PRINT_TOKEN(STATIC)
-{VOID}                                  PRINT_TOKEN(VOID)
-{STRING}                                PRINT_TOKEN(STRING)
-{DOTLENGTH}                             PRINT_TOKEN(DOTLENGTH)
-{RETURN}                                PRINT_TOKEN(RETURN)
-{OCURV}                                 PRINT_TOKEN(OCURV)
-{CCURV}                                 PRINT_TOKEN(CCURV)
-{OBRACE}                                PRINT_TOKEN(OBRACE)
-{CBRACE}                                PRINT_TOKEN(CBRACE)
-{OSQUARE}                               PRINT_TOKEN(OSQUARE)
-{CSQUARE}                               PRINT_TOKEN(CSQUARE)
-{OP1}                                   PRINT_TOKEN_ARG(OP1)
-{OP2}                                   PRINT_TOKEN_ARG(OP2)
-{OP3}                                   PRINT_TOKEN_ARG(OP3)
-{OP4}                                   PRINT_TOKEN_ARG(OP4)
-{NOT}                                   PRINT_TOKEN(NOT)
-{ASSIGN}                                PRINT_TOKEN(ASSIGN)
-{SEMIC}                                 PRINT_TOKEN(SEMIC)
-{COMMA}                                 PRINT_TOKEN(COMMA)
-{ID}                                    PRINT_TOKEN_ARG(ID)
+{RESERVED}                              return RESERVED;
+{BOOLLIT}                               return BOOLLIT;
+{INTLIT}                                return INTLIT;
+{INT}                                   return INT;
+{BOOL}                                  return BOOL;
+{NEW}                                   return NEW;
+{IF}                                    return IF;
+{ELSE}                                  return ELSE;
+{WHILE}                                 return WHILE;
+{PRINT}                                 return PRINT;
+{PARSEINT}                              return PARSEINT;
+{CLASS}                                 return CLASS;
+{PUBLIC}                                return PUBLIC;
+{STATIC}                                return STATIC;
+{VOID}                                  return VOID;
+{STRING}                                return STRING;
+{DOTLENGTH}                             return DOTLENGTH;
+{RETURN}                                return RETURN;
+{OCURV}                                 return OCURV;
+{CCURV}                                 return CCURV)
+{OBRACE}                                return OBRACE;
+{CBRACE}                                return CBRACE;
+{OSQUARE}                               return OSQUARE;
+{CSQUARE}                               return CSQUARE;
+{OP1}                                   return OP1;
+{OP2}                                   return OP2;
+{OP3}                                   return OP3;
+{OP4}                                   return OP4;
+{NOT}                                   return NOT;
+{ASSIGN}                                return ASSIGN;
+{SEMIC}                                 return SEMIC;
+{COMMA}                                 return COMMA;
+{ID}                                    return ID;
 .                                       {ERROR_ILLEGAL_CHARACTER(yytext[0]);}
 %%
 int main() {
