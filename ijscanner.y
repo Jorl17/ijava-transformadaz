@@ -22,6 +22,9 @@ ToDo:
 */
 %}
 
+%nonassoc THEN
+%nonassoc ELSE
+
 %token CLASS
 %token ID
 %token OBRACE
@@ -67,8 +70,8 @@ Program:		CLASS ID OBRACE CBRACE					{/*Zero repetitions*/}
 	|			CLASS ID OBRACE Declarations CBRACE		{/*One or more repetitions*/}
 	;
 
-Declarations:	Declarations FieldDecl					{/*More than one repetition*/}
-	|			Declarations MethodDecl					{/*More than one repetition*/}
+Declarations:	FieldDecl Declarations					{/*More than one repetition*/}
+	|			MethodDecl Declarations					{/*More than one repetition*/}
 	|			FieldDecl								{/*One repetition*/}
 	|			MethodDecl								{/*One repetition*/}
 	;
@@ -92,11 +95,11 @@ MethodType:		Type
 	|			VOID
 	;
 
-Go_Statement:	Go_Statement Statement  						{/*More than one repetition*/}
+Go_Statement:	Statement Go_Statement  						{/*More than one repetition*/}
 	|			Statement 										{/*One Repetition*/}
 	;
 
-Go_VarDecl:		Go_VarDecl VarDecl 								{/*More than one repetition*/}
+Go_VarDecl:		VarDecl Go_VarDecl 								{/*More than one repetition*/}
 	|			VarDecl 										{/*One repetition*/}
 	;
 
@@ -107,7 +110,7 @@ FormalParams:	Type ID 										{/*Zero repetitions*/}
 	|			STRING OSQUARE CSQUARE ID
 	;
 
-Go_Comma_Type:	Go_Comma_Type COMMA Type ID 					{/*More than one repetition*/}
+Go_Comma_Type:	COMMA Type ID Go_Comma_Type 					{/*More than one repetition*/}
 	|			COMMA Type ID 									{/*One repetition*/}
 	;
 
@@ -116,7 +119,7 @@ VarDecl:		Type ID SEMIC 									{/*Zero repetitions*/}
 	|			Type ID Go_Comma_ID SEMIC						{/*One or more repetitions*/}
 	;
 
-Go_Comma_ID:	Go_Comma_ID COMMA ID 							{/*More than one repetition*/}
+Go_Comma_ID:	COMMA ID Go_Comma_ID							{/*More than one repetition*/}
 	|			COMMA ID 										{/*One repetition*/}
 	;
 
@@ -137,8 +140,8 @@ Statement → PRINT OCURV Expr CCURV SEMIC
 Statement → ID [ OSQUARE Expr CSQUARE ] ASSIGN Expr SEMIC
 Statement → RETURN [ Expr ] SEMIC*/
 Statement:		OBRACE CBRACE 									{/*With no repetitions of Statement*/}
-	|			OBRACE Go_Statement_Statement CBRACE 			{/*With one or more repetitions of Stamente - FIXME: IS THIS REALLY NEEDED???*/}
-	|			IF OCURV Expr CCURV Statement 					{/*With no "ELSE Statement"*/}
+	|			OBRACE Statement CBRACE 						{/*With one or more repetitions of Stament*/}
+	|			IF OCURV Expr CCURV Statement %prec THEN		{/*With no "ELSE Statement". The "%prec" is to solve the if-else conflict*/}
 	|			IF OCURV Expr CCURV Statement ELSE Statement 	{/*With "ELSE Statement"*/}
 	|			WHILE OCURV Expr CCURV Statement
 	|			PRINT OCURV Expr CCURV SEMIC
@@ -146,10 +149,6 @@ Statement:		OBRACE CBRACE 									{/*With no repetitions of Statement*/}
 	|			ID OSQUARE Expr CSQUARE ASSIGN Expr SEMIC 		{/*With "OSQUARE Expr CSQUARE"*/}
 	|			RETURN SEMIC									{/*With no "Expr"*/}
 	|			RETURN Expr SEMIC
-	;
-
-Go_Statement_Statement:		Go_Statement_Statement Statement 	{/*More than one repetition*/}
-	|						Statement 							{/*One repetition*/}
 	;
 
 /*Expr -> Expr ( OP1 | OP2 | OP3 | OP4 ) Expr
@@ -161,20 +160,20 @@ Expr -> Expr DOTLENGTH | ( OP3 | NOT ) Expr
 Expr -> PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
 Expr _> ID OCURV [ Args ] CCURV*/
 Expr:			Expr Expressions Expr 							{/*FIXME-> CONFLICT*/}
-	|			Expr OSQUARE Expr CSQUARE
-	|			ID
-	|			INTLIT
-	|			BOOLLIT
-	|			NEW Type_Type OSQUARE Expr2 CSQUARE				{/*Remember that Type_Type: INT | BOOL; FIXME -> PROBLEM HERE: How to detect "NEW INT [2]" is correct, and "NEW INT [2][7]" is not=*/}
+	|			Expr OSQUARE Expr CSQUARE 						{/*FIXME-> CONFLICT: 3 s/r*/}
+	|			NEW Type_Type OSQUARE Expr CSQUARE				{/*Remember that Type_Type: INT | BOOL;*/}
 	|			OCURV Expr CCURV
-	|			Expr DOTLENGTH Expr
+	|			Expr DOTLENGTH Expr 							{/*Confirmar que esta linha e a seguinte estao bem*/}
 	| 			Expr_OP3_NOT Expr
 	|			PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
-	|			ID OCURV CCURV 									{/*With no "Args"*/}
-	|			ID OCURV Args CCURV								{/*With "Args"*/}
+	|			Terminal
 	;
 
-Expr2:			ID 												{/*With this are we solving the "NEW INT [2][7]" problem?*/}
+Terminal:		ID
+	|			INTLIT
+	|			BOOLLIT
+	|			ID OCURV CCURV 									{/*With no "Args"*/}
+	|			ID OCURV Args CCURV								{/*With "Args"*/}
 	;
 
 Expressions: 	OP1
@@ -192,7 +191,7 @@ Args:			Expr											{/*Zero repetitions*/}
 	|			Expr Go_Comma_Expression						{/*One or more repetitions*/}
 	;
 
-Go_Comma_Expression:	Go_Comma_Expression COMMA Expr 			{/*More than one repetition*/}
+Go_Comma_Expression:	COMMA Expr Go_Comma_Expression 			{/*More than one repetition*/}
 	|					COMMA Expr								{/*One repetition*/}
 	;
 
