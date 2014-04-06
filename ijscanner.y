@@ -123,6 +123,7 @@ Go_Comma_ID:	Go_Comma_ID COMMA ID 							{/*More than one repetition*/}
 /*Type -> ( INT | BOOL ) [ OSQUARE CSQUARE ]*/
 Type:			Type_Type										{/*No OSQUARE CSQUARE*/}
 	|			Type_Type OSQUARE CSQUARE						{/*With OSQUARE CSQUARE*/}
+	;
 
 
 Type_Type:		INT
