@@ -1,4 +1,5 @@
 %{
+    #include "y.tab.h"
     int in_comment = 0, comment_start_line = 0, comment_start_col = 0;
     int line=1, col=1;
 
@@ -82,7 +83,7 @@ NEWLINE "\n"
 {DOTLENGTH}                             return DOTLENGTH;
 {RETURN}                                return RETURN;
 {OCURV}                                 return OCURV;
-{CCURV}                                 return CCURV)
+{CCURV}                                 return CCURV;
 {OBRACE}                                return OBRACE;
 {CBRACE}                                return CBRACE;
 {OSQUARE}                               return OSQUARE;
@@ -98,9 +99,6 @@ NEWLINE "\n"
 {ID}                                    return ID;
 .                                       {ERROR_ILLEGAL_CHARACTER(yytext[0]);}
 %%
-int main() {
-    yylex();
-}
 
 int yywrap() {
     if ( in_comment ) {
