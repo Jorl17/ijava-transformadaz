@@ -56,8 +56,8 @@ Start:	Program
 Program:		CLASS ID OBRACE Declarations CBRACE
 	;
 
-Declarations:	FieldDecl Declarations
-	|			MethodDecl Declarations
+Declarations:	Declarations FieldDecl
+	|			Declarations MethodDecl
 	|			;
 
 /*FieldDecl -> STATIC VarDecl*/
@@ -72,10 +72,10 @@ MethodType:		Type
 	|			VOID
 	;
 
-Go_Statement:	Statement Go_Statement  						{/*One or more repetitions*/}
+Go_Statement:	Go_Statement Statement  						{/*One or more repetitions*/}
 	|			;		 										/*Zero Repetitions*/
 
-Go_VarDecl:		VarDecl Go_VarDecl 								{/*One or more repetitions*/}
+Go_VarDecl:		Go_VarDecl VarDecl 								{/*One or more repetitions*/}
 	|			; 												/*Zero repetitions*/
 
 /*FormalParams -> Type ID { COMMA Type ID }
@@ -84,14 +84,14 @@ FormalParams:	Type ID Go_Comma_Type							{/*Zero or more repetitions*/}
 	|			STRING OSQUARE CSQUARE ID
 	|			;												/*Nothing*/
 
-Go_Comma_Type:	COMMA Type ID Go_Comma_Type 					{/*More than one repetition*/}
+Go_Comma_Type:	Go_Comma_Type COMMA Type ID 					{/*More than one repetition*/}
 	|			; 												/*Zero repetitions*/
 
 /*VarDecl -> Type ID { COMMA ID } SEMIC*/
 VarDecl:		Type ID Go_Comma_ID SEMIC						{/*Zero or more repetitions*/}
 	;
 
-Go_Comma_ID:	COMMA ID Go_Comma_ID							{/*One or more repetitions*/}
+Go_Comma_ID:	Go_Comma_ID COMMA ID 							{/*One or more repetitions*/}
 	|			;		 										/*Zero repetitions*/
 
 /*Type -> ( INT | BOOL ) [ OSQUARE CSQUARE ]*/
@@ -110,8 +110,7 @@ Statement → WHILE OCURV Expr CCURV Statement
 Statement → PRINT OCURV Expr CCURV SEMIC
 Statement → ID [ OSQUARE Expr CSQUARE ] ASSIGN Expr SEMIC
 Statement → RETURN [ Expr ] SEMIC*/
-Statement:		OBRACE CBRACE 									{/*With no repetitions of Statement*/}
-	|			OBRACE Statement CBRACE 						{/*With one or more repetitions of Stament*/}
+Statement:		OBRACE Statement_Repeat CBRACE 					{/*With zero or more repetitions of Statement*/}
 	|			IF OCURV Expr CCURV Statement %prec THEN		{/*With no "ELSE Statement". The "%prec" is to solve the if-else conflict*/}
 	|			IF OCURV Expr CCURV Statement ELSE Statement 	{/*With "ELSE Statement"*/}
 	|			WHILE OCURV Expr CCURV Statement
@@ -120,6 +119,9 @@ Statement:		OBRACE CBRACE 									{/*With no repetitions of Statement*/}
 	|			RETURN SEMIC									{/*With no "Expr"*/}
 	|			RETURN Expr SEMIC
 	;
+
+Statement_Repeat:	Statement_Repeat Statement
+	|			;
 
 OC_Square:		OSQUARE Expr CSQUARE
 	|			;
