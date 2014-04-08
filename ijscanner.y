@@ -156,14 +156,14 @@ Expr -> Expr OSQUARE Expr CSQUARE
 Expr -> ID | INTLIT | BOOLLIT
 Expr -> NEW ( INT | BOOL ) OSQUARE Expr CSQUARE
 Expr -> OCURV Expr CCURV
-Expr -> Expr DOTLENGTH | ( OP3 | NOT ) Expr
+Expr -> Expr DOTLENGTH | ( OP3 | NOT ) Expr pode desdobrar-se nisto: "Expr -> Expr DOTLENGTH" e "Expr -> (OP3 | NOT) Expr" ??
 Expr -> PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
 Expr _> ID OCURV [ Args ] CCURV*/
 Expr:			Expr Expressions Expr 							{/*FIXME-> CONFLICT*/}
 	|			Expr OSQUARE Expr CSQUARE 						{/*FIXME-> CONFLICT: 3 s/r*/}
 	|			NEW Type_Type OSQUARE Expr CSQUARE				{/*Remember that Type_Type: INT | BOOL;*/}
 	|			OCURV Expr CCURV
-	|			Expr DOTLENGTH Expr 							{/*Confirmar que esta linha e a seguinte estao bem*/}
+	|			Expr DOTLENGTH		 							{/*Confirmar que esta linha e a seguinte estao bem*/}
 	| 			Expr_OP3_NOT Expr
 	|			PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
 	|			Terminal
