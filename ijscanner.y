@@ -144,7 +144,7 @@ Expr -> NEW ( INT | BOOL ) OSQUARE Expr CSQUARE
 Expr -> OCURV Expr CCURV
 Expr -> Expr DOTLENGTH | ( OP3 | NOT ) Expr pode desdobrar-se nisto: "Expr -> Expr DOTLENGTH" e "Expr -> (OP3 | NOT) Expr" ??
 Expr -> PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
-Expr _> ID OCURV [ Args ] CCURV*/
+Expr -> ID OCURV [ Args ] CCURV*/
 Expr:			Expr Expressions Expr 							{/*FIXME-> CONFLICT*/}
 	|			Expr OSQUARE Expr CSQUARE 						{/*FIXME-> CONFLICT*/}
 	|			NEW Type_Type OSQUARE Expr CSQUARE				{/*Remember that Type_Type: INT | BOOL;*/}
