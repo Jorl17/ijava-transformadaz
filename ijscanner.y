@@ -171,6 +171,7 @@ Comma_Expression:	COMMA Expr Comma_Expression 				{/*Zero or more repetitions*/}
 int main()
 {
 	yyparse();
+	return 0;
 }
 
 int yyerror(char* s)
