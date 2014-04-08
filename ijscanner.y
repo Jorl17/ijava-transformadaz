@@ -147,8 +147,7 @@ Expr:			Expr Operators Expr 							{/*FIXME-> CONFLICT*/}
 Terminal:		ID
 	|			INTLIT
 	|			BOOLLIT
-	|			ID OCURV CCURV 									{/*With no "Args"*/}
-	|			ID OCURV Args CCURV								{/*With "Args"*/}
+	|			ID OCURV Args CCURV								{/*Zero or more repetitions of "Args"*/}
 	;
 
 Operators: 		OP1
@@ -163,7 +162,7 @@ OP3_NOT:		OP3
 
 /*Args → Expr { COMMA Expr }*/
 Args:			Expr Comma_Expression							{/*Zero or more repetitions*/}
-	;
+	|			;
 
 Comma_Expression:	COMMA Expr Comma_Expression 				{/*Zero or more repetitions*/}
 	|					;										/*No repetitions*/
