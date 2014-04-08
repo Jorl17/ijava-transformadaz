@@ -1,4 +1,5 @@
 %{
+    #include "y.tab.h"
     int in_comment = 0, comment_start_line = 0, comment_start_col = 0;
     int line=1, col=1;
 
@@ -74,7 +75,7 @@ NEWLINE "\n"
 {WHILE}                                 {PRINT_TOKEN(WHILE); return WHILE;}
 {PRINT}                                 {PRINT_TOKEN(PRINT); return PRINT;}
 {PARSEINT}                              {PRINT_TOKEN(PARSEINT); return PARSEINT;}
-{CLASS}                                 {PRINT_TOKEN(CLASS); return CLASSIC;}
+{CLASS}                                 {PRINT_TOKEN(CLASS); return CLASS;}
 {PUBLIC}                                {PRINT_TOKEN(PUBLIC); return PUBLIC;}
 {STATIC}                                {PRINT_TOKEN(STATIC); return STATIC;}
 {VOID}                                  {PRINT_TOKEN(VOID); return VOID;}
@@ -98,9 +99,6 @@ NEWLINE "\n"
 {ID}                                    {PRINT_TOKEN_ARG(ID); return ID;}
 .                                       {ERROR_ILLEGAL_CHARACTER(yytext[0]);}
 %%
-int main() {
-    yylex();
-}
 
 int yywrap() {
     if ( in_comment ) {

@@ -163,7 +163,7 @@ Expr:			Expr Expressions Expr 							{/*FIXME-> CONFLICT*/}
 	|			Expr OSQUARE Expr CSQUARE 						{/*FIXME-> CONFLICT: 3 s/r*/}
 	|			NEW Type_Type OSQUARE Expr CSQUARE				{/*Remember that Type_Type: INT | BOOL;*/}
 	|			OCURV Expr CCURV
-	|			Expr DOTLENGTH		 							{/*Confirmar que esta linha e a seguinte estao bem*/}
+	|			Expr DOTLENGTH
 	| 			Expr_OP3_NOT Expr
 	|			PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
 	|			Terminal
