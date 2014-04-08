@@ -138,8 +138,8 @@ Expr:			Expr Operators Expr 							/*FIXME-> CONFLICT*/
 	|			Expr OSQUARE Expr CSQUARE 						/*FIXME-> CONFLICT*/
 	|			NEW Type_Type OSQUARE Expr CSQUARE				/*Remember that Type_Type: INT | BOOL;*/
 	|			OCURV Expr CCURV
-	|			Expr DOTLENGTH
-	| 			OP3_NOT Expr
+	|			Expr DOTLENGTH 									/*FIXME-> CAN GENERATE CONFLICT*/
+	| 			OP3_NOT Expr 									/*FIXME-> CAN GENERATE CONFLICT*/
 	|			PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
 	|			Terminal
 	;
