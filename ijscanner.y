@@ -66,62 +66,46 @@ Start:	Program
 	;
 
 /*Program -> CLASS ID OBRACE { FieldDecl | MethodDecl } CBRACE*/
-Program:		CLASS ID OBRACE CBRACE					{/*Zero repetitions*/}
-	|			CLASS ID OBRACE Declarations CBRACE		{/*One or more repetitions*/}
+Program:		CLASS ID OBRACE Declarations CBRACE
 	;
 
-Declarations:	FieldDecl Declarations					{/*More than one repetition*/}
-	|			MethodDecl Declarations					{/*More than one repetition*/}
-	|			FieldDecl								{/*One repetition*/}
-	|			MethodDecl								{/*One repetition*/}
-	;
+Declarations:	FieldDecl Declarations
+	|			MethodDecl Declarations
+	|			;
 
 /*FieldDecl -> STATIC VarDecl*/
 FieldDecl:		STATIC VarDecl
 	;
 
 /*MethodDecl -> PUBLIC STATIC ( Type | VOID ) ID OCURV [ FormalParams ] CCURV OBRACE { VarDecl } { Statement } CBRACE*/
-MethodDecl:		PUBLIC STATIC MethodType ID OCURV CCURV OBRACE CBRACE										{/*Zero repetitions of VarDecl and Statement*/}
-	|			PUBLIC STATIC MethodType ID OCURV CCURV OBRACE Go_Statement CBRACE  						{/*Zero repetitions of VarDecl and 1 or more repetitions of Statement*/}
-	|			PUBLIC STATIC MethodType ID OCURV CCURV OBRACE Go_VarDecl CBRACE    						{/*Zero repetitions of Statement and 1 or more repetitions of VarDecl*/}
-	|			PUBLIC STATIC MethodType ID OCURV CCURV OBRACE Go_Statement Go_VarDecl CBRACE   			{/*1 or more repetitions of VarDecl and Statement*/}
-	|			PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE CBRACE							{/*Same thing but now with FormalParams*/}
-	|			PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE Go_Statement CBRACE  			{/*Zero repetitions of VarDecl and 1 or more repetitions of Statement*/}
-	|			PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE Go_VarDecl CBRACE    			{/*Zero repetitions of Statement and 1 or more repetitions of VarDecl*/}
-	|			PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE Go_VarDecl Go_Statement CBRACE  {/*1 or more repetitions of VarDecl and Statement*/}
+MethodDecl:		PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE Go_VarDecl Go_Statement CBRACE
 	;
 
 MethodType:		Type
 	|			VOID
 	;
 
-Go_Statement:	Statement Go_Statement  						{/*More than one repetition*/}
-	|			Statement 										{/*One Repetition*/}
-	;
+Go_Statement:	Statement Go_Statement  						{/*One or more repetitions*/}
+	|			;		 										/*Zero Repetitions*/
 
-Go_VarDecl:		VarDecl Go_VarDecl 								{/*More than one repetition*/}
-	|			VarDecl 										{/*One repetition*/}
-	;
+Go_VarDecl:		VarDecl Go_VarDecl 								{/*One or more repetitions*/}
+	|			; 												/*Zero repetitions*/
 
 /*FormalParams -> Type ID { COMMA Type ID }
 FormalParams -> STRING OSQUARE CSQUARE ID*/
-FormalParams:	Type ID 										{/*Zero repetitions*/}
-	|			Type ID Go_Comma_Type							{/*One or more repetitions*/}
+FormalParams:	Type ID Go_Comma_Type							{/*Zero or more repetitions*/}
 	|			STRING OSQUARE CSQUARE ID
-	;
+	|			;												/*Nothing*/
 
 Go_Comma_Type:	COMMA Type ID Go_Comma_Type 					{/*More than one repetition*/}
-	|			COMMA Type ID 									{/*One repetition*/}
-	;
+	|			; 												/*Zero repetitions*/
 
 /*VarDecl -> Type ID { COMMA ID } SEMIC*/
-VarDecl:		Type ID SEMIC 									{/*Zero repetitions*/}
-	|			Type ID Go_Comma_ID SEMIC						{/*One or more repetitions*/}
+VarDecl:		Type ID Go_Comma_ID SEMIC						{/*Zero or more repetitions*/}
 	;
 
-Go_Comma_ID:	COMMA ID Go_Comma_ID							{/*More than one repetition*/}
-	|			COMMA ID 										{/*One repetition*/}
-	;
+Go_Comma_ID:	COMMA ID Go_Comma_ID							{/*One or more repetitions*/}
+	|			;		 										/*Zero repetitions*/
 
 /*Type -> ( INT | BOOL ) [ OSQUARE CSQUARE ]*/
 Type:			Type_Type										{/*No OSQUARE CSQUARE*/}
@@ -145,11 +129,13 @@ Statement:		OBRACE CBRACE 									{/*With no repetitions of Statement*/}
 	|			IF OCURV Expr CCURV Statement ELSE Statement 	{/*With "ELSE Statement"*/}
 	|			WHILE OCURV Expr CCURV Statement
 	|			PRINT OCURV Expr CCURV SEMIC
-	|			ID ASSIGN Expr SEMIC   							{/*With no "OSQUARE Expr CSQUARE"*/}
-	|			ID OSQUARE Expr CSQUARE ASSIGN Expr SEMIC 		{/*With "OSQUARE Expr CSQUARE"*/}
+	|			ID OC_Square ASSIGN Expr SEMIC
 	|			RETURN SEMIC									{/*With no "Expr"*/}
 	|			RETURN Expr SEMIC
 	;
+
+OC_Square:		OSQUARE Expr CSQUARE
+	|			;
 
 /*Expr -> Expr ( OP1 | OP2 | OP3 | OP4 ) Expr
 Expr -> Expr OSQUARE Expr CSQUARE
@@ -160,11 +146,11 @@ Expr -> Expr DOTLENGTH | ( OP3 | NOT ) Expr pode desdobrar-se nisto: "Expr -> Ex
 Expr -> PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
 Expr _> ID OCURV [ Args ] CCURV*/
 Expr:			Expr Expressions Expr 							{/*FIXME-> CONFLICT*/}
-	|			Expr OSQUARE Expr CSQUARE 						{/*FIXME-> CONFLICT: 3 s/r*/}
+	|			Expr OSQUARE Expr CSQUARE 						{/*FIXME-> CONFLICT*/}
 	|			NEW Type_Type OSQUARE Expr CSQUARE				{/*Remember that Type_Type: INT | BOOL;*/}
 	|			OCURV Expr CCURV
 	|			Expr DOTLENGTH
-	| 			Expr_OP3_NOT Expr
+	| 			OP3_NOT Expr
 	|			PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
 	|			Terminal
 	;
@@ -182,18 +168,16 @@ Expressions: 	OP1
 	|			OP4
 	;
 
-Expr_OP3_NOT:	OP3
+OP3_NOT:		OP3
 	|			NOT
 	;
 
 /*Args → Expr { COMMA Expr }*/
-Args:			Expr											{/*Zero repetitions*/}
-	|			Expr Go_Comma_Expression						{/*One or more repetitions*/}
+Args:			Expr Comma_Expression							{/*Zero or more repetitions*/}
 	;
 
-Go_Comma_Expression:	COMMA Expr Go_Comma_Expression 			{/*More than one repetition*/}
-	|					COMMA Expr								{/*One repetition*/}
-	;
+Comma_Expression:	COMMA Expr Comma_Expression 				{/*Zero or more repetitions*/}
+	|					;										/*No repetitions*/
 
 %%
 int main()

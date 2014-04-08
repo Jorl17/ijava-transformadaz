@@ -1,3 +1,3 @@
 lex ijscanner.l
-yacc -d ijscanner.y
+yacc -d -v ijscanner.y
 gcc -g -o ijscanner lex.yy.c y.tab.c
