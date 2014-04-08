@@ -3,22 +3,9 @@
 #include <stdlib.h>
 
 /*
-
----------------------------------------------------README MAXI-------------------------------------------------------------------
-
-NAO TENHO A CERTEZA SE O YACC PERMITE CRIAR UMA REGRA DA GRAMATICA QUE SEJA TIPO A->LAMBDA (USADA PARA OS CASOS EM QUE TEMOS CENAS
-QUE OCORREM 0 OU MAIS VEZES). MAS TENHO IDEIA DE TER OUVIDO O PROF DIZER QUE NAO PERMITIA ISSO. ANDEI A PROCURA NA NET E TAMBEM NAO
-ENCONTREI NADA, POR ISSO PARA NAO PERDER MUITO TEMPO DESENVOLVI TUDO ASSUMINDO QUE NAO E POSSIVEL FAZER ESTE TIPO DE REGRAS.
-SE POR ACASO DESCOBRIRMOS QUE E POSSIVEL IT WILL BE A RELIEVE, CASO CONTRARIO DIRIA QUE FICAMOS COM UMA GRAMATICA FEIA COMO TUDO
----------------------------------------------------README MAXI-------------------------------------------------------------------
-
 Simbolos:
 [] -> Opcional
 {} -> 0 ou mais repeticoes
-
-ToDo:
-- Read readme file
-- Prioratize operators
 */
 %}
 
@@ -145,7 +132,7 @@ Expr -> OCURV Expr CCURV
 Expr -> Expr DOTLENGTH | ( OP3 | NOT ) Expr pode desdobrar-se nisto: "Expr -> Expr DOTLENGTH" e "Expr -> (OP3 | NOT) Expr" ??
 Expr -> PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
 Expr -> ID OCURV [ Args ] CCURV*/
-Expr:			Expr Expressions Expr 							{/*FIXME-> CONFLICT*/}
+Expr:			Expr Operators Expr 							{/*FIXME-> CONFLICT*/}
 	|			Expr OSQUARE Expr CSQUARE 						{/*FIXME-> CONFLICT*/}
 	|			NEW Type_Type OSQUARE Expr CSQUARE				{/*Remember that Type_Type: INT | BOOL;*/}
 	|			OCURV Expr CCURV
@@ -162,7 +149,7 @@ Terminal:		ID
 	|			ID OCURV Args CCURV								{/*With "Args"*/}
 	;
 
-Expressions: 	OP1
+Operators: 		OP1
 	|			OP2
 	|			OP3
 	|			OP4
