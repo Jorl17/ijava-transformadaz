@@ -46,6 +46,22 @@ Simbolos:
 %token RESERVED
 %token WHILE
 
+%left OR
+%left AND
+%left OP2
+%left OP3
+%left OP4
+%right ASSIGN
+%left OSQUARE
+%left OBRACE
+%left NOT
+%left DOTLENGTH
+%right UNARY_HIGHEST_VAL
+
+%nonassoc REDUCEEXPRESSON1
+
+
+
 %% 
 
 /*Start -> Program*/
@@ -115,7 +131,7 @@ Statement:		OBRACE Statement_Repeat CBRACE 					/*With zero or more repetitions 
 	|			IF OCURV Expr CCURV Statement ELSE Statement 	/*With "ELSE Statement"*/
 	|			WHILE OCURV Expr CCURV Statement
 	|			PRINT OCURV Expr CCURV SEMIC
-	|			ID OC_Square ASSIGN Expr SEMIC
+	|			ID OC_Square ASSIGN Expr SEMIC					/* Note that we include "ID = Expr ;" in here */
 	|			RETURN SEMIC									/*With no "Expr"*/
 	|			RETURN Expr SEMIC
 	;
@@ -131,33 +147,36 @@ Expr -> Expr OSQUARE Expr CSQUARE
 Expr -> ID | INTLIT | BOOLLIT
 Expr -> NEW ( INT | BOOL ) OSQUARE Expr CSQUARE
 Expr -> OCURV Expr CCURV
-Expr -> Expr DOTLENGTH | ( OP3 | NOT ) Expr pode desdobrar-se nisto: "Expr -> Expr DOTLENGTH" e "Expr -> (OP3 | NOT) Expr" ??
 Expr -> PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
 Expr -> ID OCURV [ Args ] CCURV*/
-Expr:			Expr Operators Expr 							/*FIXME-> CONFLICT*/
-	|			Expr OSQUARE Expr CSQUARE 						/*FIXME-> CONFLICT*/
-	|			NEW Type_Type OSQUARE Expr CSQUARE				/*Remember that Type_Type: INT | BOOL;*/
-	|			OCURV Expr CCURV
-	|			Expr DOTLENGTH 									/*FIXME-> CAN GENERATE CONFLICT*/
-	| 			OP3_NOT Expr 									/*FIXME-> CAN GENERATE CONFLICT*/
-	|			PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
-	|			Terminal
+
+Expr: exprType1 %prec REDUCEEXPRESSON1
+	| exprType1 OSQUARE Expr CSQUARE
+	| exprType2
 	;
+
+
+exprType1: Expr AND Expr                                                              
+     | Expr OR Expr
+     | Expr OP2 Expr
+     | Expr OP3 Expr
+     | Expr OP4 Expr
+     | Terminal     
+     | NOT Expr %prec UNARY_HIGHEST_VAL 
+     | OP3 Expr %prec UNARY_HIGHEST_VAL
+     | Expr DOTLENGTH
+     | PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
+     | OCURV Expr CCURV     
+     ;
+
+exprType2:			 NEW Type_Type OSQUARE Expr CSQUARE				/*Remember that Type_Type: INT | BOOL;*/    
+	;
+
 
 Terminal:		ID
 	|			INTLIT
 	|			BOOLLIT
 	|			ID OCURV Args CCURV								/*Zero or more repetitions of "Args"*/
-	;
-
-Operators: 		OP1
-	|			OP2
-	|			OP3
-	|			OP4
-	;
-
-OP3_NOT:		OP3
-	|			NOT
 	;
 
 /*Args → Expr { COMMA Expr }*/

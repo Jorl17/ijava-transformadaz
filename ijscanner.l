@@ -4,8 +4,8 @@
     int line=1, col=1;
 
     #define INCREASE_COL do {col += yyleng; } while (0)
-    #define PRINT_TOKEN(x)  {INCREASE_COL; /*printf("%s\n", #x);*/  }
-    #define PRINT_TOKEN_ARG(x)  {INCREASE_COL; /*printf("%s(%s)\n",#x,yytext);*/ }
+    #define PRINT_TOKEN(x)  {INCREASE_COL; /*printf("%s\n", #x);*/ return x;  }
+    #define PRINT_TOKEN_ARG(x)  {INCREASE_COL; /*printf("%s(%s)\n",#x,yytext);*/  return x;}
     #define IGNORE {col+=yyleng;}
     #define IGNORE_NEWLINE {line++; col=1;}
     #define PRINT_LINE_COL do { printf("Line %d, col %d", line, col); } while(0)
@@ -45,7 +45,8 @@ OBRACE "{"
 CBRACE "}"
 OSQUARE "["
 CSQUARE "]"
-OP1 "&&"|"||"
+OR "||"
+AND "&&"
 OP2 "<"|">"|"=="|"!="|"<="|">="
 OP3 "+"|"-"
 OP4 "*"|"/"|"%"
@@ -64,39 +65,40 @@ NEWLINE "\n"
 {SINGLE_LINE_COMMENT}.*                 IGNORE
 {WHITESPACE}                            IGNORE
 {NEWLINE}                               IGNORE_NEWLINE
-{RESERVED}                              {PRINT_TOKEN_ARG(RESERVED); return RESERVED;}
-{BOOLLIT}                               {PRINT_TOKEN_ARG(BOOLLIT); return BOOLLIT;}
-{INTLIT}                                {PRINT_TOKEN_ARG(INTLIT); return INTLIT;}
-{INT}                                   {PRINT_TOKEN(INT); return INT;}
-{BOOL}                                  {PRINT_TOKEN(BOOL); return BOOL;}
-{NEW}                                   {PRINT_TOKEN(NEW); return NEW;}
-{IF}                                    {PRINT_TOKEN(IF); return IF;}
-{ELSE}                                  {PRINT_TOKEN(ELSE); return ELSE;}
-{WHILE}                                 {PRINT_TOKEN(WHILE); return WHILE;}
-{PRINT}                                 {PRINT_TOKEN(PRINT); return PRINT;}
-{PARSEINT}                              {PRINT_TOKEN(PARSEINT); return PARSEINT;}
-{CLASS}                                 {PRINT_TOKEN(CLASS); return CLASS;}
-{PUBLIC}                                {PRINT_TOKEN(PUBLIC); return PUBLIC;}
-{STATIC}                                {PRINT_TOKEN(STATIC); return STATIC;}
-{VOID}                                  {PRINT_TOKEN(VOID); return VOID;}
-{STRING}                                {PRINT_TOKEN(STRING); return STRING;}
-{DOTLENGTH}                             {PRINT_TOKEN(DOTLENGTH); return DOTLENGTH;}
-{RETURN}                                {PRINT_TOKEN(RETURN); return RETURN;}
-{OCURV}                                 {PRINT_TOKEN(OCURV); return OCURV;}
-{CCURV}                                 {PRINT_TOKEN(CCURV); return CCURV;}
-{OBRACE}                                {PRINT_TOKEN(OBRACE); return OBRACE;}
-{CBRACE}                                {PRINT_TOKEN(CBRACE); return CBRACE;}
-{OSQUARE}                               {PRINT_TOKEN(OSQUARE); return OSQUARE;}
-{CSQUARE}                               {PRINT_TOKEN(CSQUARE); return CSQUARE;}
-{OP1}                                   {PRINT_TOKEN_ARG(OP1); return OP1;}
-{OP2}                                   {PRINT_TOKEN_ARG(OP2); return OP2;}
-{OP3}                                   {PRINT_TOKEN_ARG(OP3); return OP3;}
-{OP4}                                   {PRINT_TOKEN_ARG(OP4); return OP4;}
-{NOT}                                   {PRINT_TOKEN(NOT); return NOT;}
-{ASSIGN}                                {PRINT_TOKEN(ASSIGN); return ASSIGN;}
-{SEMIC}                                 {PRINT_TOKEN(SEMIC); return SEMIC;}
-{COMMA}                                 {PRINT_TOKEN(COMMA); return COMMA;}
-{ID}                                    {PRINT_TOKEN_ARG(ID); return ID;}
+{RESERVED}                              {PRINT_TOKEN_ARG(RESERVED); }
+{BOOLLIT}                               {PRINT_TOKEN_ARG(BOOLLIT); }
+{INTLIT}                                {PRINT_TOKEN_ARG(INTLIT); }
+{INT}                                   {PRINT_TOKEN(INT); }
+{BOOL}                                  {PRINT_TOKEN(BOOL); }
+{NEW}                                   {PRINT_TOKEN(NEW); }
+{IF}                                    {PRINT_TOKEN(IF); }
+{ELSE}                                  {PRINT_TOKEN(ELSE); }
+{WHILE}                                 {PRINT_TOKEN(WHILE); }
+{PRINT}                                 {PRINT_TOKEN(PRINT); }
+{PARSEINT}                              {PRINT_TOKEN(PARSEINT); }
+{CLASS}                                 {PRINT_TOKEN(CLASS); }
+{PUBLIC}                                {PRINT_TOKEN(PUBLIC); }
+{STATIC}                                {PRINT_TOKEN(STATIC); }
+{VOID}                                  {PRINT_TOKEN(VOID); }
+{STRING}                                {PRINT_TOKEN(STRING); }
+{DOTLENGTH}                             {PRINT_TOKEN(DOTLENGTH); }
+{RETURN}                                {PRINT_TOKEN(RETURN); }
+{OCURV}                                 {PRINT_TOKEN(OCURV); }
+{CCURV}                                 {PRINT_TOKEN(CCURV); }
+{OBRACE}                                {PRINT_TOKEN(OBRACE); }
+{CBRACE}                                {PRINT_TOKEN(CBRACE); }
+{OSQUARE}                               {PRINT_TOKEN(OSQUARE); }
+{CSQUARE}                               {PRINT_TOKEN(CSQUARE); }
+{OR}                                    {PRINT_TOKEN_ARG(OR); }
+{AND}                                   {PRINT_TOKEN_ARG(AND); }
+{OP2}                                   {PRINT_TOKEN_ARG(OP2); }
+{OP3}                                   {PRINT_TOKEN_ARG(OP3); }
+{OP4}                                   {PRINT_TOKEN_ARG(OP4); }
+{NOT}                                   {PRINT_TOKEN(NOT); }
+{ASSIGN}                                {PRINT_TOKEN(ASSIGN); }
+{SEMIC}                                 {PRINT_TOKEN(SEMIC); }
+{COMMA}                                 {PRINT_TOKEN(COMMA); }
+{ID}                                    {PRINT_TOKEN_ARG(ID); }
 .                                       {ERROR_ILLEGAL_CHARACTER(yytext[0]);}
 %%
 
