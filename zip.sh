@@ -1,2 +1,2 @@
 #!/bin/bash
-zip -r ijscanner.zip ijscanner.l
+zip -r ijparser.zip ijparser.l ijparser.y

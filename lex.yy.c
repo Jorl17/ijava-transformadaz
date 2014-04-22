@@ -636,17 +636,17 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "ijscanner.l"
-#line 2 "ijscanner.l"
+#line 1 "ijparser.l"
+#line 2 "ijparser.l"
     #include "y.tab.h"
     int in_comment = 0, comment_start_line = 0, comment_start_col = 0;
-    int line=1, col=1;
+    int line=1, col=1, prev_line=1, prev_col=1;
 
-    #define INCREASE_COL do {col += yyleng; } while (0)
+    #define INCREASE_COL do {prev_line = line; prev_col = col; col += yyleng; } while (0)
     #define PRINT_TOKEN(x)  {INCREASE_COL; /*printf("%s\n", #x);*/ return x;  }
     #define PRINT_TOKEN_ARG(x)  {INCREASE_COL; /*printf("%s(%s)\n",#x,yytext);*/  return x;}
-    #define IGNORE {col+=yyleng;}
-    #define IGNORE_NEWLINE {line++; col=1;}
+    #define IGNORE {INCREASE_COL;}
+    #define IGNORE_NEWLINE {prev_line = line++; prev_col = col; col=1;}
     #define PRINT_LINE_COL do { printf("Line %d, col %d", line, col); } while(0)
     #define PRINT_LINE_COL_COMMENT  do { printf("Line %d, col %d", comment_start_line, comment_start_col); } while(0)
     #define ERROR_UNTERMINATED_COMMENT do { PRINT_LINE_COL_COMMENT; printf(": unterminated comment\n"); } while(0)
@@ -837,7 +837,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 60 "ijscanner.l"
+#line 60 "ijparser.l"
 
 #line 843 "lex.yy.c"
 
@@ -924,219 +924,219 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 61 "ijscanner.l"
+#line 61 "ijparser.l"
 START_MULTILINE_COMMENT
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 62 "ijscanner.l"
+#line 62 "ijparser.l"
 END_MULTILINE_COMMENT
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 63 "ijscanner.l"
+#line 63 "ijparser.l"
 IGNORE
 	YY_BREAK
 case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
-#line 64 "ijscanner.l"
+#line 64 "ijparser.l"
 IGNORE_NEWLINE
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 65 "ijscanner.l"
+#line 65 "ijparser.l"
 IGNORE
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 66 "ijscanner.l"
+#line 66 "ijparser.l"
 IGNORE
 	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
-#line 67 "ijscanner.l"
+#line 67 "ijparser.l"
 IGNORE_NEWLINE
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 68 "ijscanner.l"
+#line 68 "ijparser.l"
 {PRINT_TOKEN_ARG(RESERVED); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 69 "ijscanner.l"
+#line 69 "ijparser.l"
 {PRINT_TOKEN_ARG(BOOLLIT); }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 70 "ijscanner.l"
+#line 70 "ijparser.l"
 {PRINT_TOKEN_ARG(INTLIT); }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 71 "ijscanner.l"
+#line 71 "ijparser.l"
 {PRINT_TOKEN(INT); }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 72 "ijscanner.l"
+#line 72 "ijparser.l"
 {PRINT_TOKEN(BOOL); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 73 "ijscanner.l"
+#line 73 "ijparser.l"
 {PRINT_TOKEN(NEW); }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 74 "ijscanner.l"
+#line 74 "ijparser.l"
 {PRINT_TOKEN(IF); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 75 "ijscanner.l"
+#line 75 "ijparser.l"
 {PRINT_TOKEN(ELSE); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 76 "ijscanner.l"
+#line 76 "ijparser.l"
 {PRINT_TOKEN(WHILE); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 77 "ijscanner.l"
+#line 77 "ijparser.l"
 {PRINT_TOKEN(PRINT); }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 78 "ijscanner.l"
+#line 78 "ijparser.l"
 {PRINT_TOKEN(PARSEINT); }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 79 "ijscanner.l"
+#line 79 "ijparser.l"
 {PRINT_TOKEN(CLASS); }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 80 "ijscanner.l"
+#line 80 "ijparser.l"
 {PRINT_TOKEN(PUBLIC); }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 81 "ijscanner.l"
+#line 81 "ijparser.l"
 {PRINT_TOKEN(STATIC); }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 82 "ijscanner.l"
+#line 82 "ijparser.l"
 {PRINT_TOKEN(VOID); }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 83 "ijscanner.l"
+#line 83 "ijparser.l"
 {PRINT_TOKEN(STRING); }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 84 "ijscanner.l"
+#line 84 "ijparser.l"
 {PRINT_TOKEN(DOTLENGTH); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 85 "ijscanner.l"
+#line 85 "ijparser.l"
 {PRINT_TOKEN(RETURN); }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 86 "ijscanner.l"
+#line 86 "ijparser.l"
 {PRINT_TOKEN(OCURV); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 87 "ijscanner.l"
+#line 87 "ijparser.l"
 {PRINT_TOKEN(CCURV); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 88 "ijscanner.l"
+#line 88 "ijparser.l"
 {PRINT_TOKEN(OBRACE); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 89 "ijscanner.l"
+#line 89 "ijparser.l"
 {PRINT_TOKEN(CBRACE); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 90 "ijscanner.l"
+#line 90 "ijparser.l"
 {PRINT_TOKEN(OSQUARE); }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 91 "ijscanner.l"
+#line 91 "ijparser.l"
 {PRINT_TOKEN(CSQUARE); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 92 "ijscanner.l"
+#line 92 "ijparser.l"
 {PRINT_TOKEN_ARG(OR); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 93 "ijscanner.l"
+#line 93 "ijparser.l"
 {PRINT_TOKEN_ARG(AND); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 94 "ijscanner.l"
+#line 94 "ijparser.l"
 {PRINT_TOKEN_ARG(OP2); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 95 "ijscanner.l"
+#line 95 "ijparser.l"
 {PRINT_TOKEN_ARG(OP3); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 96 "ijscanner.l"
+#line 96 "ijparser.l"
 {PRINT_TOKEN_ARG(OP4); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 97 "ijscanner.l"
+#line 97 "ijparser.l"
 {PRINT_TOKEN(NOT); }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 98 "ijscanner.l"
+#line 98 "ijparser.l"
 {PRINT_TOKEN(ASSIGN); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 99 "ijscanner.l"
+#line 99 "ijparser.l"
 {PRINT_TOKEN(SEMIC); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 100 "ijscanner.l"
+#line 100 "ijparser.l"
 {PRINT_TOKEN(COMMA); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 101 "ijscanner.l"
+#line 101 "ijparser.l"
 {PRINT_TOKEN_ARG(ID); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 102 "ijscanner.l"
+#line 102 "ijparser.l"
 {ERROR_ILLEGAL_CHARACTER(yytext[0]);}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 103 "ijscanner.l"
+#line 103 "ijparser.l"
 ECHO;
 	YY_BREAK
 #line 1143 "lex.yy.c"
@@ -2137,7 +2137,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 103 "ijscanner.l"
+#line 103 "ijparser.l"
 
 
 

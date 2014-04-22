@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+extern int prev_col, prev_line;
+extern char* yytext;
+
 /*
 Simbolos:
 [] -> Opcional
@@ -11,6 +14,8 @@ Simbolos:
 
 %nonassoc THEN
 %nonassoc ELSE
+
+%nonassoc REDUCEEXPRESSON1
 
 %token CLASS
 %token ID
@@ -57,8 +62,6 @@ Simbolos:
 %left NOT
 %left DOTLENGTH
 %right UNARY_HIGHEST_VAL
-
-%nonassoc REDUCEEXPRESSON1
 
 
 
@@ -195,5 +198,5 @@ int main()
 
 int yyerror(char* s)
 {
-	printf("%s\n", s);
+	printf("Line %d, col %d: %s: %s\n", prev_line, prev_col, s, yytext);
 }

@@ -13,7 +13,9 @@ class Test
 
         d = 5;
 
-        /* This is supposed to fail, because if you check the grammar, it isn't supported */
+        /* This is supposed to fail, because if you check the grammar, it isn't supported 
+
+        */
         d = (e = 5);
     }
 }
