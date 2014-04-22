@@ -160,17 +160,17 @@ Expr: exprType1 %prec REDUCEEXPRESSON1
 
 
 exprType1: Expr AND Expr                                                              
-     | Expr OR Expr
-     | Expr OP2 Expr
-     | Expr OP3 Expr
-     | Expr OP4 Expr
-     | Terminal     
-     | NOT Expr %prec UNARY_HIGHEST_VAL 
-     | OP3 Expr %prec UNARY_HIGHEST_VAL
-     | Expr DOTLENGTH
-     | PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
-     | OCURV Expr CCURV     
-     ;
+    | Expr OR Expr
+    | Expr OP2 Expr
+    | Expr OP3 Expr
+    | Expr OP4 Expr
+    | Terminal     
+    | NOT Expr %prec UNARY_HIGHEST_VAL 
+    | OP3 Expr %prec UNARY_HIGHEST_VAL
+    | Expr DOTLENGTH
+    | PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
+    | OCURV Expr CCURV     
+    ;
 
 exprType2:			 NEW Type_Type OSQUARE Expr CSQUARE				/*Remember that Type_Type: INT | BOOL;*/    
 	;
