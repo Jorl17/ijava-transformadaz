@@ -182,7 +182,7 @@ Terminal:		ID
 	|			ID OCURV Args CCURV								/*Zero or more repetitions of "Args"*/
 	;
 
-/*Args → Expr { COMMA Expr }*/
+/*Args -> Expr { COMMA Expr }*/
 Args:			Expr Comma_Expression							/*Zero or more repetitions*/
 	|			;
 
@@ -190,6 +190,7 @@ Comma_Expression:	COMMA Expr Comma_Expression 				/*Zero or more repetitions*/
 	|					;										/*No repetitions*/
 
 %%
+
 int main()
 {
 	yyparse();
