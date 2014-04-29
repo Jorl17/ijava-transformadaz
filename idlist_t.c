@@ -4,6 +4,8 @@
 
 #include "idlist_t.h"
 
+/*FIXME: ADD Documentation*/
+
 idlist_t * insere(idlist_t   *list, char *nome)
 {
 	idlist_t   *novo;
