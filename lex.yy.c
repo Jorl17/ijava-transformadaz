@@ -650,7 +650,7 @@ char *yytext;
     #define PRINT_LINE_COL do { printf("Line %d, col %d", line, col); } while(0)
     #define PRINT_LINE_COL_COMMENT  do { printf("Line %d, col %d", comment_start_line, comment_start_col); } while(0)
     #define ERROR_UNTERMINATED_COMMENT do { PRINT_LINE_COL_COMMENT; printf(": unterminated comment\n"); } while(0)
-    #define ERROR_ILLEGAL_CHARACTER(x) do { INCREASE_COL; PRINT_LINE_COL; printf(": illegal character ('%c')\n", x); } while(0)
+    #define ERROR_ILLEGAL_CHARACTER(x) do { PRINT_LINE_COL; printf(": illegal character ('%c')\n", x); INCREASE_COL; } while(0)
     #define START_MULTILINE_COMMENT { in_comment = 1; INCREASE_COL; comment_start_line = line; comment_start_col = col-2; BEGIN MULTI_LINE_COMMENT_S; }
     #define END_MULTILINE_COMMENT { in_comment = 0; INCREASE_COL; BEGIN 0; }
 

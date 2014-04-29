@@ -153,28 +153,30 @@ Expr -> OCURV Expr CCURV
 Expr -> PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
 Expr -> ID OCURV [ Args ] CCURV*/
 
-Expr: exprType1 %prec REDUCEEXPRESSON1
+/*Expr: exprType1 %prec REDUCEEXPRESSON1
 	| exprType1 OSQUARE Expr CSQUARE
 	| exprType2
+	| exprIndexable
 	;
+*/
 
-
-exprType1: Expr AND Expr                                                              
+Expr: Expr AND Expr
     | Expr OR Expr
     | Expr OP2 Expr
     | Expr OP3 Expr
     | Expr OP4 Expr
-    | Terminal     
-    | NOT Expr %prec UNARY_HIGHEST_VAL 
+    | NOT Expr %prec UNARY_HIGHEST_VAL
     | OP3 Expr %prec UNARY_HIGHEST_VAL
-    | Expr DOTLENGTH
-    | PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
-    | OCURV Expr CCURV     
+    | NEW Type_Type OSQUARE Expr CSQUARE 		/*Remember that Type_Type: INT | BOOL;*/
+    | exprIndexable
     ;
 
-exprType2:			 NEW Type_Type OSQUARE Expr CSQUARE				/*Remember that Type_Type: INT | BOOL;*/    
+exprIndexable: exprIndexable OSQUARE Expr CSQUARE
+	| Terminal
+	| OCURV Expr CCURV
+	| Expr DOTLENGTH
+	| PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
 	;
-
 
 Terminal:		ID
 	|			INTLIT
