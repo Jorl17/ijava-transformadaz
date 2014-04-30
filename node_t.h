@@ -54,6 +54,8 @@ typedef enum {
 
 typedef struct _node_t node_t;
 
+char* node_get_name(node_t* self);
+
 struct _node_t {
 
     /* Type of this node (Program, VarDecl, etc..) */

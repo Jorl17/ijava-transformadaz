@@ -37,3 +37,7 @@ char* node_names[] = {
     "NewBool",
     "ParseArgs"
 };
+
+char* node_get_name(node_t* self) {
+    return node_names[self->nodetype];
+}
