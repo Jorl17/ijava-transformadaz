@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "node_t.h"
+#include "sym_table.h"
 
 /*This file aims to create a dummy Sintax-Free Tree, to help the development of the Semantic Analisys, more specifically the creation of
 the symbol tables*/
@@ -55,11 +55,11 @@ int main(void)
 	char var_name2[3] = {'j', '\0'};
 	char var_name3[9] = {'a', 'b', 'r', 'a', 'h', 'a', 'm', '\0'};
 	char main_method_name[6] = {'m', 'a', 'i', 'n', '\0'};
+	char program_name[6] = {'T', 'e', 's', 't', '\0'};
 
 	int var_value = 2;
 
-	ast_root = NULL;/*This will be the root of our Sintax-Free Tree*/
-	declarations = NULL;/*This will have our variable declaration and our method declaration*/
+	symtab_t* class_table;
 
 
 /*
@@ -69,6 +69,7 @@ int main(void)
 	/*Create the variable declaration and append it to the list of declarations*/
 
 	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name);/*Create the terminal node for the "static int outsideInteger;" declaration*/
+	var_decl_temp->nodetype = NODE_VARDECL;
 	declarations = node_create_vardecl(TYPE_INT, var_decl_temp);
 	/*If we had more variable declarations then we would create them and append them to "var_declarations"*/
 
@@ -81,7 +82,7 @@ int main(void)
 
 	method_decl_temp = node_create(NODE_METHODDECL);/*Create the list of declarations for the parameters of the method*/
 
-	method_decl_temp->method_name = main_method_name;
+	method_decl_temp->node_name = main_method_name;
 
 	parameter_decl_temp = node_create_terminal(TYPE_UNKNOWN, param_name);/*String[] args*/
 	parameter_decl = node_create_vardecl(TYPE_STRINGARRAY, parameter_decl_temp);/*List of parameters declarations*/
@@ -157,6 +158,8 @@ int main(void)
 
 	ast_root = node_create_program(declarations);
 
+	ast_root->node_name = program_name;
+
 	/*Print the final result*/
 	printf("\nAST:\n");
 	print_ast(ast_root);
@@ -165,8 +168,7 @@ int main(void)
 
 
 	/*Create the symbol tables*/
-
-
+	class_table = analyse_ast(ast_root);
 
 	return 0;
 }

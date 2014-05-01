@@ -1,9 +1,13 @@
 #include "node_t.h"
 
+typedef struct _symtab_t symtab_t;
+
 typedef enum {
 	CLASS_TABLE,
 	METHOD_TABLE
 } ijava_table_type_t;
+
+symtab_t* analyse_ast(node_t* currentNode);
 
 
 struct _symtab_t{
