@@ -124,7 +124,7 @@ node_t* node_create_terminal_int(ijavatype_t type, int token_value) {
        so we can take care of it */
 
     if ( type == TYPE_VOID )
-        assert ( token == NULL );
+        /*assert ( token_value == NULL ); -- FIXME: Can not make this assertion because we can support -1 values, right?*/
     else {
         /* token might be null in case we just want to create a node which says "Int", "Bool", "IntArray", "BoolArray", etc.. */
         self->value = token_value;

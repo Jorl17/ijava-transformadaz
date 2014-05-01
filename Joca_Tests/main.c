@@ -43,8 +43,8 @@ int main(void)
 	node_t* method_body_list;
 	node_t* statement_temp;
 
-	note_t* destiny;
-	note_t* source;
+	node_t* destiny;
+	node_t* source;
 
 	char var_name[15] = {'o', 'u', 't', 's', 'i', 'd', 'e', 'I', 'n', 't', 'e', 'g', 'e', 'r', '\0'};
 	char param_name[6] = {'a', 'r', 'g', 's', '\0'};
