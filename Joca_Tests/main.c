@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include "node_t.h"
 
@@ -15,7 +16,8 @@ class Test
     public static void main(String []args)
     {
         int j, abraham;
-        abraham = 10;
+        abraham = 2;
+        //j = abraham + abraham; 
         //abraham = (new int[5])[2];
     }
 }
@@ -40,8 +42,10 @@ int main(void)
 	node_t* method_decl_temp;
 	node_t* method_declarations;
 
-	node_t* method_body_list;
 	node_t* statement_temp;
+	node_t* statements_list;
+
+	node_t* method_body_list;
 
 	node_t* destiny;
 	node_t* source;
@@ -75,20 +79,30 @@ int main(void)
 
 	method_decl_temp = node_create(NODE_METHODDECL);/*Create the list of declarations for the parameters of the method*/
 
-	parameter_decl_temp = node_create_terminal(TYPE_UNKNOWN, param_name);/*This node will be one declaration of one parameter*/
+	parameter_decl_temp = node_create_terminal(TYPE_UNKNOWN, param_name);/*String[] args*/
 	parameter_decl = node_create_vardecl(TYPE_STRINGARRAY, parameter_decl_temp);/*List of parameters declarations*/
 
 	method_decl_temp->n1 = parameter_decl;/*Points to the parameters declarations*/
 
 	/*Create the list of variable declarations*/
-	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name2);/*Create the terminal node for the "int j" declaration*/
+	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name2);/*int j*/
 	var_declarations = node_create_vardecl(TYPE_INT, var_decl_temp);/*Store it in a list of declarations*/
 
-	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name3);/*Create the terminal node for the "int abraham" declaration*/
+	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name3);/*int abraham*/
 	var_decl_temp2 = node_create_vardecl(TYPE_INT, var_decl_temp);/*Store it in a list of declarations*/
 
-	var_declarations = node_append(var_decl_temp, var_decl_temp2);/*Join the two declarations*/
+	var_declarations = node_append(var_declarations, var_decl_temp2);/*Join the two declarations*/
 
+	node_t* temp;
+
+	temp = var_declarations;
+	printf("VAR DECLARATIONS:\n");
+
+	while (temp != NULL)
+	{
+		printf("%s\n", temp->n2->id);
+		temp = temp->next;
+	}
 	
 	/*Create the list of statements. In this case it will only be "abraham = (new int[5])[2];"*/
 
@@ -98,11 +112,28 @@ int main(void)
 	destiny->type = TYPE_ID;
 
 	source = node_create_terminal_int(TYPE_INTLIT, var_value);/*2*/
+	source->type = TYPE_INTLIT;
 
 	statement_temp->n1 = destiny;/*Points to the destiny, where we store the stuff*/
 	statement_temp->n2 = source;/*Points to the source*/
+
+	statements_list = statement_temp;
+
+	printf("STATEMENTS_LIST:\n");
+
+	temp = statements_list;
+
+	while (temp != NULL)
+	{
+		printf("%s %d\n", temp->n1->id, temp->n2->value);
+		temp = temp->next;
+	}
 	
-	method_body_list = statement_temp;
+	/*Method Body will have var_declarations + statement_list*/
+	
+	method_body_list = var_declarations;
+
+	method_body_list = node_append(method_body_list, statements_list);
 
 	method_decl_temp->n2 = method_body_list;/*Points to a list of variable declarations and statements*/
 
@@ -123,6 +154,7 @@ int main(void)
 	ast_root = node_create_program(declarations);
 
 	/*Print the final result*/
+	printf("\nAST:\n");
 	print_ast(ast_root);
 
 	/*Note: During these tests I will not concern myself with free-ing the AST, I will let it to be done later*/
