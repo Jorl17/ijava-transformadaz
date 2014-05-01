@@ -643,8 +643,8 @@ char *yytext;
     int line=1, col=1, prev_line=1, prev_col=1;
 
     #define INCREASE_COL do {prev_line = line; prev_col = col; col += yyleng; } while (0)
-    #define PRINT_TOKEN(x)  {INCREASE_COL; /*printf("%s\n", #x);*/ return x;  }
-    #define PRINT_TOKEN_ARG(x)  {INCREASE_COL; /*printf("%s(%s)\n",#x,yytext);*/  return x;}
+    #define PRINT_TOKEN(x)  {yylval.token = strdup(yytext);INCREASE_COL; /*printf("%s\n", #x);*/ return x;  }
+    #define PRINT_TOKEN_ARG(x)  {yylval.token = strdup(yytext);INCREASE_COL; /*printf("%s(%s)\n",#x,yytext);*/  return x;}
     #define IGNORE {INCREASE_COL;}
     #define IGNORE_NEWLINE {prev_line = line++; prev_col = col; col=1;}
     #define PRINT_LINE_COL do { printf("Line %d, col %d", line, col); } while(0)

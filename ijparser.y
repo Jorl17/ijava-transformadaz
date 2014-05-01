@@ -1,9 +1,14 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include "node_t.h"
 
 extern int prev_col, prev_line;
 extern char* yytext;
+
+int had_error = 0;
+
+node_t* ast_root;
 
 /*
 Simbolos:
@@ -12,44 +17,55 @@ Simbolos:
 */
 %}
 
+%union
+{
+    char* token;    
+    struct _node_t* node;
+    int type; /* ijavatype_t */
+}
+
 %nonassoc THEN
 %nonassoc ELSE
 
 %nonassoc REDUCEEXPRESSON1
 
-%token CLASS
-%token ID
-%token OBRACE
-%token CBRACE
-%token STATIC
-%token PUBLIC
-%token VOID
-%token OCURV
-%token CCURV
-%token COMMA
-%token STRING
-%token SEMIC
-%token INT
-%token BOOL
-%token BOOLLIT
-%token PRINT
-%token INTLIT
-%token DOTLENGTH
-%token NOT
-%token PARSEINT
-%token NEW
-%token ASSIGN
-%token CSQUARE
-%token IF
-%token ELSE
-%token OP1
-%token OP2
-%token OP3
-%token OP4
-%token OSQUARE
-%token RETURN
-%token RESERVED
-%token WHILE
+%token <token> CLASS
+%token <token> ID
+%token <token> OBRACE
+%token <token> CBRACE
+%token <token> <token> STATIC
+%token <token> <token> PUBLIC
+%token <token> <token> VOID
+%token <token> OCURV
+%token <token> CCURV
+%token <token> COMMA
+%token <token> STRING
+%token <token> SEMIC
+%token <token> INT
+%token <token> BOOL
+%token <token> BOOLLIT
+%token <token> PRINT
+%token <token> INTLIT
+%token <token> DOTLENGTH
+%token <token> NOT
+%token <token> PARSEINT
+%token <token> NEW
+%token <token> ASSIGN
+%token <token> CSQUARE
+%token <token> IF
+%token <token> ELSE
+%token <token> OP1
+%token <token> OP2
+%token <token> OP3
+%token <token> OP4
+%token <token> OSQUARE
+%token <token> RETURN
+%token <token> RESERVED
+%token <token> WHILE
+
+/* FIXME: Probably IDs will need their one type, probably idlist_t */
+%type <node> Start Program Declarations FieldDecl MethodDecl MethodType Go_Statement FormalParams Go_Comma_Type VarDecl Statement Statement_Repeat OC_Square Expr exprIndexable Terminal Args Comma_Expression IDs VarDecls
+%type <type> Type
 
 %left OR
 %left AND
@@ -68,60 +84,65 @@ Simbolos:
 %% 
 
 /*Start -> Program*/
-Start:	Program
+Start:	Program                                                                   {ast_root = $$;}
 	;
 
 /*Program -> CLASS ID OBRACE { FieldDecl | MethodDecl } CBRACE*/
-Program:		CLASS ID OBRACE Declarations CBRACE
+Program:		CLASS ID OBRACE Declarations CBRACE                               {$$=node_create_program($4);}
+    |           CLASS ID OBRACE CBRACE                                            {$$=node_create_program(node_create_null());}
 	;
 
-Declarations:	Declarations FieldDecl
-	|			Declarations MethodDecl
-	|			;
+
+Declarations:	Declarations FieldDecl                                            {$$=node_append($1,$2);}
+	|			Declarations MethodDecl                                           {$$=node_append($1,$2);}
+    |           FieldDecl                                                         {$$=$1;}
+    |           MethodDecl                                                        {$$=$1;}
+    ;
 
 /*FieldDecl -> STATIC VarDecl*/
-FieldDecl:		STATIC VarDecl
+FieldDecl:		STATIC VarDecl                                                   {$$=$2;}
 	;
+
+VarDecls: VarDecl                                                                 {$$=$1;}
+    |     VarDecls VarDecl                                                        {$$=node_append($1,$2);}
 
 /*MethodDecl -> PUBLIC STATIC ( Type | VOID ) ID OCURV [ FormalParams ] CCURV OBRACE { VarDecl } { Statement } CBRACE*/
-MethodDecl:		PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE Go_VarDecl Go_Statement CBRACE
+MethodDecl:		PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE VarDecls Go_Statement CBRACE    {}
+    |           PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE Go_Statement CBRACE             {}
 	;
 
-MethodType:		Type
-	|			VOID
+MethodType:		Type                                                              {}
+	|			VOID                                                              {}
 	;
 
-Go_Statement:	Go_Statement Statement  						/*One or more repetitions*/
-	|			;		 										/*Zero Repetitions*/
-
-Go_VarDecl:		Go_VarDecl VarDecl 								/*One or more repetitions*/
-	|			; 												/*Zero repetitions*/
+Go_Statement:	Go_Statement Statement                                            {}
+	|			                                                                  {}
+    ;
 
 /*FormalParams -> Type ID { COMMA Type ID }
 FormalParams -> STRING OSQUARE CSQUARE ID*/
-FormalParams:	Type ID Go_Comma_Type							/*Zero or more repetitions*/
-	|			STRING OSQUARE CSQUARE ID
-	|			;												/*Nothing*/
+FormalParams:	Type ID Go_Comma_Type                                             {}
+	|			STRING OSQUARE CSQUARE ID                                         {}
+	|			                                                                  {}
+    ;
 
-Go_Comma_Type:	Go_Comma_Type COMMA Type ID 					/*More than one repetition*/
-	|			; 												/*Zero repetitions*/
+Go_Comma_Type:	Go_Comma_Type COMMA Type ID                                       {}
+	|			                                                                  {}
+    ;
 
 /*VarDecl -> Type ID { COMMA ID } SEMIC*/
-VarDecl:		Type ID Go_Comma_ID SEMIC						/*Zero or more repetitions*/
-	;
+VarDecl:		Type IDs SEMIC                                                    {$$=node_create_vardecl($1, $2);};
 
-Go_Comma_ID:	Go_Comma_ID COMMA ID 							/*One or more repetitions*/
-	|			;		 										/*Zero repetitions*/
+IDs:  ID                                                                          {$$=node_create_terminal(TYPE_UNKNOWN, $1);}
+    | IDs COMMA ID                                                                {$$=node_append($1, node_create_terminal(TYPE_UNKNOWN,$3));}
+    ;
 
 /*Type -> ( INT | BOOL ) [ OSQUARE CSQUARE ]*/
-Type:			Type_Type										/*No OSQUARE CSQUARE*/
-	|			Type_Type OSQUARE CSQUARE						/*With OSQUARE CSQUARE*/
+Type:			INT OSQUARE CSQUARE                                               {$$=TYPE_INTARRAY;}
+    |           BOOL OSQUARE CSQUARE                                              {$$=TYPE_BOOLARRAY;}
+    |           INT                                                               {$$=TYPE_INT;}
+	|			BOOL                                                              {$$=TYPE_BOOL;}
 	;
-
-
-Type_Type:		INT
-	|			BOOL
-	;	
 
 /*Statement → OBRACE { Statement } CBRACE
 Statement → IF OCURV Expr CCURV Statement [ ELSE Statement ]
@@ -129,77 +150,70 @@ Statement → WHILE OCURV Expr CCURV Statement
 Statement → PRINT OCURV Expr CCURV SEMIC
 Statement → ID [ OSQUARE Expr CSQUARE ] ASSIGN Expr SEMIC
 Statement → RETURN [ Expr ] SEMIC*/
-Statement:		OBRACE Statement_Repeat CBRACE 					/*With zero or more repetitions of Statement*/
-	|			IF OCURV Expr CCURV Statement %prec THEN		/*With no "ELSE Statement". The "%prec" is to solve the if-else conflict*/
-	|			IF OCURV Expr CCURV Statement ELSE Statement 	/*With "ELSE Statement"*/
-	|			WHILE OCURV Expr CCURV Statement
-	|			PRINT OCURV Expr CCURV SEMIC
-	|			ID OC_Square ASSIGN Expr SEMIC					/* Note that we include "ID = Expr ;" in here */
-	|			RETURN SEMIC									/*With no "Expr"*/
-	|			RETURN Expr SEMIC
+Statement:		OBRACE Statement_Repeat CBRACE                                   {}
+	|			IF OCURV Expr CCURV Statement %prec THEN                         {}
+	|			IF OCURV Expr CCURV Statement ELSE Statement                     {}
+	|			WHILE OCURV Expr CCURV Statement                                 {}
+	|			PRINT OCURV Expr CCURV SEMIC                                     {}
+	|			ID OC_Square ASSIGN Expr SEMIC                                   {}
+	|			RETURN SEMIC                                                     {}
+	|			RETURN Expr SEMIC                                                {}
 	;
 
-Statement_Repeat:	Statement_Repeat Statement
-	|			;
-
-OC_Square:		OSQUARE Expr CSQUARE
-	|			;
-
-/*Expr -> Expr ( OP1 | OP2 | OP3 | OP4 ) Expr
-Expr -> Expr OSQUARE Expr CSQUARE
-Expr -> ID | INTLIT | BOOLLIT
-Expr -> NEW ( INT | BOOL ) OSQUARE Expr CSQUARE
-Expr -> OCURV Expr CCURV
-Expr -> PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
-Expr -> ID OCURV [ Args ] CCURV*/
-
-/*Expr: exprType1 %prec REDUCEEXPRESSON1
-	| exprType1 OSQUARE Expr CSQUARE
-	| exprType2
-	| exprIndexable
-	;
-*/
-
-Expr: Expr AND Expr
-    | Expr OR Expr
-    | Expr OP2 Expr
-    | Expr OP3 Expr
-    | Expr OP4 Expr
-    | NOT Expr %prec UNARY_HIGHEST_VAL
-    | OP3 Expr %prec UNARY_HIGHEST_VAL
-    | NEW Type_Type OSQUARE Expr CSQUARE 		/*Remember that Type_Type: INT | BOOL;*/
-    | exprIndexable
+Statement_Repeat:	Statement_Repeat Statement                                   {}
+	|                                                                            {}			
     ;
 
-exprIndexable: exprIndexable OSQUARE Expr CSQUARE
-	| Terminal
-	| OCURV Expr CCURV
-	| Expr DOTLENGTH
-	| PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
+OC_Square:		OSQUARE Expr CSQUARE                                             {}
+	|                                                                            {}			
+    ;
+
+Expr: Expr AND Expr                                                              {}
+    | Expr OR Expr                                                               {}
+    | Expr OP2 Expr                                                              {}
+    | Expr OP3 Expr                                                              {}
+    | Expr OP4 Expr                                                              {}
+    | NOT Expr %prec UNARY_HIGHEST_VAL                                           {}
+    | OP3 Expr %prec UNARY_HIGHEST_VAL                                           {}
+    | NEW INT OSQUARE Expr CSQUARE                                               {}
+    | NEW BOOL OSQUARE Expr CSQUARE                                              {}
+    | exprIndexable                                                              {}
+    ;
+
+exprIndexable: exprIndexable OSQUARE Expr CSQUARE                                {}
+	| Terminal                                                                   {}
+	| OCURV Expr CCURV                                                           {}
+	| Expr DOTLENGTH                                                             {}
+	| PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV                               {}
 	;
 
-Terminal:		ID
-	|			INTLIT
-	|			BOOLLIT
-	|			ID OCURV Args CCURV								/*Zero or more repetitions of "Args"*/
+Terminal:		ID                                                               {$$=node_create_terminal(TYPE_ID, $1);}
+	|			INTLIT                                                           {$$=node_create_terminal(TYPE_INTLIT, $1);}
+	|			BOOLLIT                                                          {$$=node_create_terminal(TYPE_BOOLLIT, $1);}
+	|			ID OCURV Args CCURV                                              {}
 	;
 
 /*Args -> Expr { COMMA Expr }*/
-Args:			Expr Comma_Expression							/*Zero or more repetitions*/
-	|			;
+Args:			Expr Comma_Expression                                            {}
+	|			                                                                 {}
+    ;
 
-Comma_Expression:	COMMA Expr Comma_Expression 				/*Zero or more repetitions*/
-	|					;										/*No repetitions*/
-
+Comma_Expression:	COMMA Expr Comma_Expression                                  {}
+	|                                                                            {}
+    ;
 %%
 
 int main()
 {
 	yyparse();
+
+    if (!had_error)
+        print_ast(ast_root);
 	return 0;
 }
 
 int yyerror(char* s)
 {
+    had_error = 1;
 	printf("Line %d, col %d: %s: %s\n", prev_line, prev_col, s, yytext);
 }

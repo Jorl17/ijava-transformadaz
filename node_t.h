@@ -35,10 +35,10 @@ typedef enum {
               NODE_OPER_CALL,
               NODE_OPER_NEWINT,
               NODE_OPER_NEWBOOL,
-              NODE_OPER_PARSEARGS
+              NODE_OPER_PARSEARGS,
+              NODE_TYPE, /* Means it might be of type INTLIT, BOOLLIT, VOID, ID... It is defined by the 'type' property of the node */
+              NODE_NULL /* Very useful: the NULL node */
               } nodetype_t;
-
-extern char* node_names[];
 
 typedef enum {
     TYPE_INT,
@@ -49,13 +49,23 @@ typedef enum {
     TYPE_VOID,
     TYPE_ID, /* FIXME: Needs to go? */
     TYPE_INTLIT,
-    TYPE_BOOLLIT
+    TYPE_BOOLLIT,
+    TYPE_UNKNOWN /* Used internally */
 } ijavatype_t;
 
 typedef struct _node_t node_t;
 
 char* node_get_name(node_t* self);
-
+node_t* node_create(nodetype_t nodetype);
+void node_delete(node_t* self);
+node_t* node_create_terminal(ijavatype_t type, char* token);
+node_t* node_create_vardecl(ijavatype_t type, node_t* vars);
+node_t* node_fuse_vardecls_into_main_vardecl_node(node_t* vardeclares);
+node_t* node_create_null(void);
+node_t* node_create_program(node_t* declarations);
+node_t* node_append(node_t* meant_to_be_first, node_t* meant_to_be_last);
+node_t* node_move_next_to_n1(node_t* self);
+void print_ast(node_t* ast);
 struct _node_t {
 
     /* Type of this node (Program, VarDecl, etc..) */
@@ -81,6 +91,7 @@ struct _node_t {
     /* The id, used with some nodes, such as MethodDecl and ParamDecl.
        FIXME: We might need to create a special id node for this later on... */     
     char* id;
+     
 
     /* FIXME: More things to come */
 };

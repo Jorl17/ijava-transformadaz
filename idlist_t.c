@@ -56,25 +56,3 @@ void freeStuff(idlist_t  *list)
 		free(current);
 	}	
 }
-
-int main()
-{
-	idlist_t  *list;
-	char nome1[256] = {'a', '\0'};
-	char nome2[256] = {'b', '\0'};
-	char nome3[256] = {'c', '\0'};
-
-	/*Vamos inserir c, b, a e queremos imprimir a->b->c*/
-
-	list = NULL;
-
-	list = insere(list, nome3);
-	list = insere(list, nome2);
-	list = insere(list, nome1);
-
-	printStuff(list);
-
-	freeStuff(list);
-
-	return 0;
-}
