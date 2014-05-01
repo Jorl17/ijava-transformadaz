@@ -6,28 +6,29 @@
 
 /*FIXME: ADD Documentation*/
 
-idlist_t * insere(idlist_t   *list, char *nome)
+/*Function responsible for adding a new element to the list, taking into account the new node will be the top of the list*/
+idlist_t* insert_list(idlist_t   *list, char *node_name)
 {
-	idlist_t   *novo;
+	idlist_t *node;
 
-	novo = (idlist_t   *)malloc(sizeof(idlist_t  ));
+	node = (idlist_t *)malloc(sizeof(idlist_t));
 
-	if (novo != NULL)
+	if (node != NULL)
 	{
-		novo->name = (char *)malloc((strlen(nome)+1)*sizeof(char));
+		node->name = (char *)malloc((strlen(node_name)+1)*sizeof(char));
 
-		if (novo->name != NULL)
-			strcpy(novo->name, nome);
+		if (node->name != NULL)
+			strcpy(node->name, node_name);
 
 		if (list != NULL)
 		{
-			novo->next = list;
-			list = novo;
+			node->next = list;
+			list = node;
 		}
 
-		else/*list == NULL*/
+		else/*The list is empty*/
 		{
-			list = novo;
+			list = node;
 			list->next = NULL;
 		}
 	}
@@ -44,6 +45,7 @@ void printStuff(idlist_t  *list)
 	}
 }
 
+/*Function to free-up the list, cleaning all the memmory we allocate during the execution*/
 void freeStuff(idlist_t  *list)
 {
 	idlist_t  *current;
