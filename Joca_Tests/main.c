@@ -94,7 +94,7 @@ int main(void)
 	statement_temp = node_create(NODE_STATEMENT_STORE);
 
 	destiny = node_create_terminal(TYPE_INT, var_name3);/*abraham*/
-	source = node_create_terminal();/*2*/
+	source = node_create_terminal_int(TYPE_INT, 2);/*2*/
 
 	statement_temp->n1 = destiny;/*Points to the destiny, where we store the stuff*/
 	statement_temp->n2 = source;/*Points to the source*/
@@ -114,6 +114,8 @@ int main(void)
 
 
 	/*Append to "declarations" the declaration of the method*/
+
+	declarations = node_append(declarations,method_declarations);
 
 	ast_root = node_create_program(declarations);
 

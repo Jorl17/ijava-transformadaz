@@ -115,7 +115,7 @@ node_t* node_create_terminal(ijavatype_t type, char* token) {
     return self;
 }
 
-node_t* node_create_terminal(ijavatype_t type, int token_value) {
+node_t* node_create_terminal_int(ijavatype_t type, int token_value) {
     DEBUG_PRINT("[node_create_terminal] type='%d' ('%s'), token='%s'\n", type, node_type_names[type], token);
     node_t* self = node_create(NODE_TYPE);
     self->type = type;
