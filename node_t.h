@@ -64,6 +64,7 @@ char* node_get_name(node_t* self);
 node_t* node_create(nodetype_t nodetype);
 void node_delete(node_t* self);
 node_t* node_create_terminal(ijavatype_t type, char* token);
+node_t* node_create_terminal_int(ijavatype_t type, int token_value);
 node_t* node_create_vardecl(ijavatype_t type, node_t* vars);
 node_t* node_fuse_vardecls_into_main_vardecl_node(node_t* vardeclares);
 node_t* node_create_null(void);
