@@ -168,7 +168,7 @@ int main(void)
 
 
 	/*Create the symbol tables*/
-	class_table = analyse_ast(ast_root);
+	class_table = analyse_ast(ast_root->n1);
 
 	return 0;
 }
