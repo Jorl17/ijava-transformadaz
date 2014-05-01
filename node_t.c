@@ -115,6 +115,25 @@ node_t* node_create_terminal(ijavatype_t type, char* token) {
     return self;
 }
 
+node_t* node_create_terminal(ijavatype_t type, int token_value) {
+    DEBUG_PRINT("[node_create_terminal] type='%d' ('%s'), token='%s'\n", type, node_type_names[type], token);
+    node_t* self = node_create(NODE_TYPE);
+    self->type = type;
+
+    /* token is supposed to be given to us from a valid malloc() or strdup()
+       so we can take care of it */
+
+    if ( type == TYPE_VOID )
+        assert ( token == NULL );
+    else {
+        /* token might be null in case we just want to create a node which says "Int", "Bool", "IntArray", "BoolArray", etc.. */
+        self->value = token_value;
+    }
+
+    DEBUG_PRINT("[node_create_terminal]-->self = %p\n", self);
+    return self;
+}
+
 /* FIXME: We're not using this atm, and I hope we never have to */
 node_t* node_fuse_vardecls_into_main_vardecl_node(node_t* vardeclares) {
     assert(vardeclares);
