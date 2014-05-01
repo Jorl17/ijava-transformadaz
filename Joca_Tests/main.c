@@ -12,6 +12,7 @@ the symbol tables*/
 class Test
 {
     static int outsideInteger;
+    static int b;
 
     public static void main(String []args)
     {
@@ -54,6 +55,7 @@ int main(void)
 	char param_name[6] = {'a', 'r', 'g', 's', '\0'};
 	char var_name2[3] = {'j', '\0'};
 	char var_name3[9] = {'a', 'b', 'r', 'a', 'h', 'a', 'm', '\0'};
+	char var_name4[3] = {'b', '\0'};
 	char main_method_name[6] = {'m', 'a', 'i', 'n', '\0'};
 	char program_name[6] = {'T', 'e', 's', 't', '\0'};
 
@@ -69,8 +71,16 @@ int main(void)
 	/*Create the variable declaration and append it to the list of declarations*/
 
 	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name);/*Create the terminal node for the "static int outsideInteger;" declaration*/
-	var_decl_temp->nodetype = NODE_VARDECL;
 	declarations = node_create_vardecl(TYPE_INT, var_decl_temp);
+
+	printf("AQUI %d\n", declarations->type==TYPE_INT?1:-1);
+
+	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name4);/*Create the terminal node for the "static int b;" declaration*/
+	var_decl_temp2 = node_create_vardecl(TYPE_INT, var_decl_temp);
+
+	printf("AQUI %d\n", var_decl_temp2->type==TYPE_INT?1:-1);
+
+	declarations = node_append(declarations, var_decl_temp2);
 	/*If we had more variable declarations then we would create them and append them to "var_declarations"*/
 
 
@@ -168,7 +178,9 @@ int main(void)
 
 
 	/*Create the symbol tables*/
-	class_table = analyse_ast(ast_root->n1);
+	class_table = analyse_ast(ast_root);
+
+	printTable(class_table);
 
 	return 0;
 }

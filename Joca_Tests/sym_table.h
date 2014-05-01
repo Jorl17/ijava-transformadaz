@@ -4,17 +4,33 @@ typedef struct _symtab_t symtab_t;
 
 typedef enum {
 	CLASS_TABLE,
-	METHOD_TABLE
+	METHOD_TABLE,
+	VARIABLE,
+	METHOD
 } ijava_table_type_t;
 
 symtab_t* analyse_ast(node_t* currentNode);
-
 
 struct _symtab_t{
 
 	/*This will be the name of our symbol table*/
 	char* name;
 
-	/*This value tells us if this is a table for a method or for a class*/
-	ijava_table_type_t type;
+	/*Tells us if the current element is the table of a class, the table of a method, a variable, or a method*/
+	ijava_table_type_t node_type;
+
+	/*Name of the element (main, x, etc)*/
+	char* id;
+
+	/*The type of the element - String[]; int[]; etc*/
+	ijavatype_t type;
+
+	/*In case the current table corresponds to a method, then this field tells us if the element is a parameter or not*/
+	int is_parameter;
+
+	/*Points to the next item on the table*/
+	symtab_t* next;
+
+	/*In case we have a method point to the method symbolic table*/
+	symtab_t* table_method;
 };
