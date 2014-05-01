@@ -95,7 +95,9 @@ int main(void)
 	statement_temp = node_create(NODE_STATEMENT_STORE);
 
 	destiny = node_create_terminal(TYPE_INT, var_name3);/*abraham*/
-	source = node_create_terminal_int(TYPE_INT, var_value);/*2*/
+	destiny->type = TYPE_ID;
+
+	source = node_create_terminal_int(TYPE_INTLIT, var_value);/*2*/
 
 	statement_temp->n1 = destiny;/*Points to the destiny, where we store the stuff*/
 	statement_temp->n2 = source;/*Points to the source*/
