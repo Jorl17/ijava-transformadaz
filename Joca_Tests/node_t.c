@@ -142,7 +142,7 @@ node_t* node_create_vardecl(ijavatype_t type, node_t* vars) {
     node_t* self = node_create(NODE_VARDECL);
 
     /* n1 points to a node such as IntArray, Int, Bool, etc */
-    self->n1 = node_create_terminal(TYPE_INTARRAY,NULL);
+    self->n1 = node_create_terminal(type,NULL);
 
     /* n2 points to the first node belonging to this vardecl */
     self->n2 = vars;

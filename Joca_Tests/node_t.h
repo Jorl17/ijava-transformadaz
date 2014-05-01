@@ -55,6 +55,11 @@ typedef enum {
 
 typedef struct _node_t node_t;
 
+typedef int ijavavalue_t;
+
+#define IJAVA_TRUE 1
+#define IJAVA_FALSE 0
+
 char* node_get_name(node_t* self);
 node_t* node_create(nodetype_t nodetype);
 void node_delete(node_t* self);
@@ -91,7 +96,10 @@ struct _node_t {
     /* The id, used with some nodes, such as MethodDecl and ParamDecl.
        FIXME: We might need to create a special id node for this later on... */     
     char* id;
-     
+    
+    /*The value of the node, that is, if the node is an INT this field will contain
+      the value of the int variable*/
+    ijavavalue_t value; 
 
     /* FIXME: More things to come */
 };
