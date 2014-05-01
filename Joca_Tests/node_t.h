@@ -100,7 +100,10 @@ struct _node_t {
     
     /*The value of the node, that is, if the node is an INT this field will contain
       the value of the int variable*/
-    ijavavalue_t value; 
+    ijavavalue_t value;
+
+    /*In case this struct represents a method, then this field stores the method name*/
+    char* method_name;
 
     /* FIXME: More things to come */
 };

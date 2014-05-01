@@ -54,6 +54,8 @@ int main(void)
 	char param_name[6] = {'a', 'r', 'g', 's', '\0'};
 	char var_name2[3] = {'j', '\0'};
 	char var_name3[9] = {'a', 'b', 'r', 'a', 'h', 'a', 'm', '\0'};
+	char main_method_name[6] = {'m', 'a', 'i', 'n', '\0'};
+
 	int var_value = 2;
 
 	ast_root = NULL;/*This will be the root of our Sintax-Free Tree*/
@@ -78,6 +80,8 @@ int main(void)
 	/*Method will have TYPE; ID; PARAMETERS; BODY*/
 
 	method_decl_temp = node_create(NODE_METHODDECL);/*Create the list of declarations for the parameters of the method*/
+
+	method_decl_temp->method_name = main_method_name;
 
 	parameter_decl_temp = node_create_terminal(TYPE_UNKNOWN, param_name);/*String[] args*/
 	parameter_decl = node_create_vardecl(TYPE_STRINGARRAY, parameter_decl_temp);/*List of parameters declarations*/
@@ -158,6 +162,10 @@ int main(void)
 	print_ast(ast_root);
 
 	/*Note: During these tests I will not concern myself with free-ing the AST, I will let it to be done later*/
+
+
+	/*Create the symbol tables*/
+
 
 
 	return 0;
