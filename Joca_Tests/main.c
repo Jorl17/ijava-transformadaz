@@ -50,6 +50,7 @@ int main(void)
 	char param_name[6] = {'a', 'r', 'g', 's', '\0'};
 	char var_name2[3] = {'j', '\0'};
 	char var_name3[9] = {'a', 'b', 'r', 'a', 'h', 'a', 'm', '\0'};
+	int var_value = 2;
 
 	ast_root = NULL;/*This will be the root of our Sintax-Free Tree*/
 	declarations = NULL;/*This will have our variable declaration and our method declaration*/
@@ -94,7 +95,7 @@ int main(void)
 	statement_temp = node_create(NODE_STATEMENT_STORE);
 
 	destiny = node_create_terminal(TYPE_INT, var_name3);/*abraham*/
-	source = node_create_terminal_int(TYPE_INT, 2);/*2*/
+	source = node_create_terminal_int(TYPE_INT, var_value);/*2*/
 
 	statement_temp->n1 = destiny;/*Points to the destiny, where we store the stuff*/
 	statement_temp->n2 = source;/*Points to the source*/
