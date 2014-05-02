@@ -37,7 +37,7 @@ symtab_t* create_variable(char* var_name, int var_type)
 	return var;
 }
 
-/*Creates a new table element containing the declaration of a method*/
+/*Creates a new table element containing the declaration of a method, to include in the class' symbol table*/
 symtab_t* create_method(char* method_name)
 {
 	symtab_t* method;
@@ -116,6 +116,28 @@ void printTable(symtab_t* table)
 	}
 }
 
+symtab_t* create_method_table(node_t* methodNode)
+{
+	symtab_t* root;
+	symtab_t* temp;
+	char* return_string;/*Will contain the following string: "return"*/
+
+	root = create_table(methodNode->node_name, 0);/*Create method's symbol table*/
+
+	/*Add the method's return type*/
+	return_string = (char *)malloc(6*sizeof(char));
+	strcpy(return_string,"return");
+	temp = create_variable(return_string,methodNode->return_type);
+	/*and add it to the method's table*/
+	add_element_to_table(root,temp);
+
+	/*FIXME: Add Method's Arguments to the table*/
+
+	/*FIXME: Add Method's Declarations to the table*/
+
+	return root;
+}
+
 /*This function will go through the AST and create the necessary tables. This method returns the class table, with all the attributes
 and methods of the class. We do not need to return the other symbol tables because the class' symbol table stores a pointer for each
 method defined in there. So, if later we need to access a method's symbol table we just search it in the class' symbol table*/
@@ -139,7 +161,7 @@ symtab_t* analyse_ast(node_t* root)
 
 			while (current_var != NULL)
 			{
-				/*printf("Declarei variavel com o nome %s e tipo %d\n", current_var->id, currentNode->type);*/
+				printf("Declarei variavel com o nome %s e tipo %d\n", current_var->id, currentNode->type);
 
 				current = create_variable(current_var->id, currentNode->type);
 
@@ -156,13 +178,11 @@ symtab_t* analyse_ast(node_t* root)
 			/*Create a new entry in the class' symbol table with the method*/
 			current = create_method(currentNode->node_name);
 
-#if 0
 			/*Create the method's symbol table*/
-			method_symbol_table = 
+			method_symbol_table = create_method_table(currentNode);
 
 			/*Link the entry in the class' symbol table with the symbol table of the method*/
 			current->table_method = method_symbol_table;
-#endif
 
 			add_element_to_table(table, current);
 		}

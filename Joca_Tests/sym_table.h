@@ -12,6 +12,7 @@ typedef enum {
 symtab_t* create_table(char* table_name, int class);
 symtab_t* create_variable(char* var_name, int var_type);
 symtab_t* create_method(char* method_name);
+symtab_t* create_method_table(node_t* methodNode);
 void add_element_to_table(symtab_t* table, symtab_t* element);
 void print_element(symtab_t* element);
 void printTable(symtab_t* table);

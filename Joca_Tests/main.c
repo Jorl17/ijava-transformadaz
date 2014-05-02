@@ -49,7 +49,7 @@ int main(void)
 	node_t* method_body_list;
 
 	node_t* destiny;
-	node_t* source;
+	node_t* source;	
 
 	char var_name[15] = {'o', 'u', 't', 's', 'i', 'd', 'e', 'I', 'n', 't', 'e', 'g', 'e', 'r', '\0'};
 	char param_name[6] = {'a', 'r', 'g', 's', '\0'};
@@ -62,6 +62,7 @@ int main(void)
 	int var_value = 2;
 
 	symtab_t* class_table;
+	symtab_t* temp_node;
 
 
 /*
@@ -73,12 +74,12 @@ int main(void)
 	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name);/*Create the terminal node for the "static int outsideInteger;" declaration*/
 	declarations = node_create_vardecl(TYPE_INT, var_decl_temp);
 
-	printf("AQUI %d\n", declarations->type==TYPE_INT?1:-1);
+	/*printf("AQUI %d\n", declarations->type==TYPE_INT?1:-1);*/
 
 	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name4);/*Create the terminal node for the "static int b;" declaration*/
 	var_decl_temp2 = node_create_vardecl(TYPE_INT, var_decl_temp);
 
-	printf("AQUI %d\n", var_decl_temp2->type==TYPE_INT?1:-1);
+	/*printf("AQUI %d\n", var_decl_temp2->type==TYPE_INT?1:-1);*/
 
 	declarations = node_append(declarations, var_decl_temp2);
 	/*If we had more variable declarations then we would create them and append them to "var_declarations"*/
@@ -182,6 +183,21 @@ int main(void)
 	class_table = analyse_ast(ast_root);
 
 	printTable(class_table);
+
+	/*Print all the other tables*/
+
+	temp_node = class_table;
+
+	while (temp_node != NULL)
+	{
+		if (temp_node->node_type == METHOD)
+		{
+			printf("\n");
+			printTable(temp_node->table_method);
+		}
+
+		temp_node = temp_node->next;
+	}
 
 	return 0;
 }
