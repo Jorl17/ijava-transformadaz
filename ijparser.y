@@ -64,8 +64,8 @@ Simbolos:
 %token <token> WHILE
 
 /* FIXME: Probably IDs will need their one type, probably idlist_t */
-%type <node> Start Program Declarations FieldDecl MethodDecl MethodType Go_Statement FormalParams Go_Comma_Type VarDecl Statement Statement_Repeat OC_Square Expr exprIndexable Terminal Args Comma_Expression IDs VarDecls
-%type <type> Type
+%type <node> Start Program Declarations FieldDecl MethodDecl Statements FormalParams RealParams VarDecl Statement Statement_Repeat OC_Square Expr exprIndexable Terminal Args Comma_Expression IDs VarDecls
+%type <type> Type MethodType
 
 %left OR
 %left AND
@@ -107,27 +107,29 @@ VarDecls: VarDecl                                                               
     |     VarDecls VarDecl                                                        {$$=node_append($1,$2);}
 
 /*MethodDecl -> PUBLIC STATIC ( Type | VOID ) ID OCURV [ FormalParams ] CCURV OBRACE { VarDecl } { Statement } CBRACE*/
-MethodDecl:		PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE VarDecls Go_Statement CBRACE    {}
-    |           PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE Go_Statement CBRACE             {}
+MethodDecl:		PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE VarDecls Statements CBRACE    {$$=node_create_methoddecl($3,$4,node_create_methodparams($6),node_create_methodbody($9,$10));}
+    |           PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE VarDecls CBRACE               {$$=node_create_methoddecl($3,$4,node_create_methodparams($6),node_create_methodbody($9,NULL));}
+    |           PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE Statements CBRACE             {$$=node_create_methoddecl($3,$4,node_create_methodparams($6),node_create_methodbody(NULL,$9));}
+    |           PUBLIC STATIC MethodType ID OCURV FormalParams CCURV OBRACE CBRACE                        {$$=node_create_methoddecl($3,$4,node_create_methodparams($6),node_create_methodbody(NULL,NULL));}
 	;
 
-MethodType:		Type                                                              {}
-	|			VOID                                                              {}
+MethodType:		Type                                                              {$$=$1;}
+	|			VOID                                                              {$$=TYPE_VOID;}
 	;
 
-Go_Statement:	Go_Statement Statement                                            {}
-	|			                                                                  {}
+Statements:	Statement                                                             {$$=node_create_null(); /*FIXME: $$=$1 */}
+    |       Statement Statements                                                  {$$=node_append(node_create_null() /*FIXME: $1 */,$2);}
     ;
 
 /*FormalParams -> Type ID { COMMA Type ID }
 FormalParams -> STRING OSQUARE CSQUARE ID*/
-FormalParams:	Type ID Go_Comma_Type                                             {}
-	|			STRING OSQUARE CSQUARE ID                                         {}
-	|			                                                                  {}
-    ;
+FormalParams:	RealParams                                                        {$$=$1;}
+	|			STRING OSQUARE CSQUARE ID                                         {$$=node_create_paramdeclaration(TYPE_STRINGARRAY,$4);}
+	|			                                                                  {$$=node_create_null();}
+    ;                                                                             
 
-Go_Comma_Type:	Go_Comma_Type COMMA Type ID                                       {}
-	|			                                                                  {}
+RealParams:	  Type ID                                                             {$$=node_create_paramdeclaration($1,$2);}
+    |         Type ID COMMA RealParams                                            {$$=node_append(node_create_paramdeclaration($1,$2),$4);}
     ;
 
 /*VarDecl -> Type ID { COMMA ID } SEMIC*/

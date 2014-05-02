@@ -1,12 +1,12 @@
 #include "idlist_t.h"
 
+
 typedef enum {
               NODE_PROGRAM,
               NODE_VARDECL,
               NODE_METHODDECL, 
               NODE_METHODPARAMS,
               NODE_METHODBODY,
-              NODE_METHODVARDECL,
               NODE_PARAMDECLARATION,
               NODE_STATEMENT_COMPOUNDSTATEMENT,
               NODE_STATEMENT_IFELSE,
@@ -37,9 +37,9 @@ typedef enum {
               NODE_OPER_NEWINT,
               NODE_OPER_NEWBOOL,
               NODE_OPER_PARSEARGS,
-              NODE_TYPE, /* Means it might be of type INTLIT, BOOLLIT, VOID, ID... It is defined by the 'type' property of the node */
-              NODE_NULL /* Very useful: the NULL node */
-              } nodetype_t;
+              NODE_NULL, /* Very useful: the NULL node */              
+              NODE_TYPE /* Means it might be of type INTLIT, BOOLLIT, VOID, ID... It is defined by the 'type' property of the node */
+} nodetype_t;
 
 typedef enum {
     TYPE_INT,
@@ -66,7 +66,12 @@ node_t* node_create(nodetype_t nodetype);
 void node_delete(node_t* self);
 node_t* node_create_terminal(ijavatype_t type, char* token);
 node_t* node_create_terminal_int(ijavatype_t type, int token_value);
+node_t* node_create_type(ijavatype_t type);
 node_t* node_create_vardecl(ijavatype_t type, node_t* vars);
+node_t* node_create_paramdeclaration(ijavatype_t type, char* token);
+node_t* node_create_methodparams(node_t* params);
+node_t* node_create_methodbody(node_t* vardecls,node_t* statements);
+node_t* node_create_methoddecl(ijavatype_t type, char* token, node_t* method_params, node_t* method_body);
 node_t* node_fuse_vardecls_into_main_vardecl_node(node_t* vardeclares);
 node_t* node_create_null(void);
 node_t* node_create_program(node_t* declarations);
@@ -83,6 +88,7 @@ struct _node_t {
     node_t* n1;
     node_t* n2;
     node_t* n3;
+    node_t* n4;
 
     /* Used with VarDecl. In which case it points to linked list of strings which
        contain the ids to be declared */

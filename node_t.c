@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#if 0
+#if 1
 #define DEBUG
 #else
 #define NDEBUG
@@ -69,6 +69,8 @@ char* node_type_names[] = {
 };
 
 char* node_get_name(node_t* self) {
+    assert(self);
+/*    DEBUG_PRINT("[node_get_name] self=%p, self->nodetype='%d' ('%s')\n", self, self->nodetype, node_names[self->nodetype]);*/
     if ( self->nodetype == NODE_TYPE )
         return node_type_names[self->type];
     else
@@ -79,8 +81,9 @@ node_t* node_create(nodetype_t nodetype) {
     node_t* self = (node_t*) malloc(sizeof(node_t));
     memset(self,0,sizeof (node_t) );
     self->nodetype = nodetype;
+    self->type = TYPE_UNKNOWN;
     self->next = NULL;
-    self->n1 = self->n2 = self->n3 = NULL;
+    self->n1 = self->n2 = self->n3 = self->n4 = NULL;
     return self;
 }
 
@@ -155,6 +158,10 @@ node_t* node_fuse_vardecls_into_main_vardecl_node(node_t* vardeclares) {
     return final;
 }
 
+node_t* node_create_type(ijavatype_t type) {
+    return node_create_terminal(type,NULL);
+}
+
 /* FIXME: We will probably change this to use Joca's string functions... but for now this will probably suffice */
 node_t* node_create_vardecl(ijavatype_t type, node_t* vars) {
     DEBUG_PRINT("[node_create_vardecl] type='%d' ('%s'), vars='%p'\n", type, node_type_names[type], vars);
@@ -162,7 +169,7 @@ node_t* node_create_vardecl(ijavatype_t type, node_t* vars) {
     node_t* self = node_create(NODE_VARDECL);
 
     /* n1 points to a node such as IntArray, Int, Bool, etc */
-    self->n1 = node_create_terminal(type,NULL);
+    self->n1 = node_create_type(type);
 
     /* n2 points to the first node belonging to this vardecl */
     self->n2 = vars;
@@ -182,11 +189,66 @@ node_t* node_create_vardecl(ijavatype_t type, node_t* vars) {
     return self;
 }
 
+node_t* node_create_paramdeclaration(ijavatype_t type, char* token) {
+    assert(token != NULL);
+    DEBUG_PRINT("[node_create_paramdeclaration] type='%d' ('%s'), token='%s'\n", type, node_type_names[type], token);
+    node_t* self = node_create(NODE_PARAMDECLARATION);
+
+    /* The type node */
+    self->n1 = node_create_type(type);
+
+    /* The node with the Id, and the token */
+    self->n2 = node_create_terminal(TYPE_ID, token);
+
+    return self;
+}
+
+node_t* node_create_methodparams(node_t* params) {    
+    assert(params != NULL);
+    DEBUG_PRINT("[node_create_methodparams] params=%p\n", params);
+    node_t* self = node_create(NODE_METHODPARAMS);
+
+    /* The first child is the node whose path we must follow to get to other nodes */
+    self->n1 = params;
+
+    return self; 
+}
+
+node_t* node_create_methodbody(node_t* vardecls,node_t* statements) {
+    node_t* self = node_create(NODE_METHODBODY);
+    node_t** ptrs[] = {&self->n1, &self->n2, &self->n3, &self->n4};
+    int currChild = 0;
+    
+    if ( vardecls != NULL ) *ptrs[currChild++] = vardecls;
+
+    if ( statements != NULL ) *ptrs[currChild++] = statements;
+
+    return self;
+}
+
+node_t* node_create_methoddecl(ijavatype_t type, char* token, node_t* method_params, node_t* method_body) {
+    node_t* self = node_create(NODE_METHODDECL);
+
+    /* First child is the type */
+    self->n1 = node_create_type(type);
+
+    /* Second child is the ID */
+    self->n2 = node_create_terminal(TYPE_ID, token);
+
+    /* Third child is MethodParams */
+    self->n3 = method_params;
+
+    /* Fourth child is MethodBody */
+    self->n4 = method_body;
+
+    return self;
+}
+
 node_t* node_create_program(node_t* declarations) {
     node_t* self = node_create(NODE_PROGRAM);
     self->n1 = declarations;
-    if ( self->n1 != NULL)
-        assert(self->n1->nodetype == NODE_VARDECL || self->n1->nodetype == NODE_METHODDECL || self->n1->nodetype == NODE_NULL );
+    /*if ( self->n1 != NULL)
+        assert(self->n1->nodetype == NODE_VARDECL || self->n1->nodetype == NODE_METHODDECL || self->n1->nodetype == NODE_NULL );*/
     return self;
 }
 
@@ -233,12 +295,14 @@ void print_sub_tree(node_t* node, int depth) {
         print_sub_tree(node->n2, depth+1);
     if (node->n3)
         print_sub_tree(node->n3, depth+1);
+    if (node->n4)
+        print_sub_tree(node->n4, depth+1);
 
     if ( node->next ) print_sub_tree(node->next, depth);
 }
 
 
 void print_ast(node_t* ast) {
-    assert ( ast->type == NODE_PROGRAM );
+    assert ( ast->nodetype == NODE_PROGRAM );
     print_sub_tree(ast, 0);
 }
