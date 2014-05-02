@@ -105,5 +105,8 @@ struct _node_t {
     /*In case this struct represents a method or a class, then this field stores the method name or the class name*/
     char* node_name;
 
+    /*If this struct represents a method, then this field represents its return type*/
+    ijavavalue_t return_type;
+
     /* FIXME: More things to come */
 };

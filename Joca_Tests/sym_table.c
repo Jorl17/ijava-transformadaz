@@ -5,6 +5,7 @@
 
 #include "sym_table.h"
 
+/*Creates a new symbol table*/
 symtab_t* create_table(char* table_name, int class)
 {
 	symtab_t* table;
@@ -21,7 +22,7 @@ symtab_t* create_table(char* table_name, int class)
 	return table;
 }
 
-/*Creates a new element containing the declaration of a variable*/
+/*Creates a new table element containing the declaration of a variable*/
 symtab_t* create_variable(char* var_name, int var_type)
 {
 	symtab_t* var;
@@ -34,6 +35,20 @@ symtab_t* create_variable(char* var_name, int var_type)
 	var->node_type = VARIABLE;
 
 	return var;
+}
+
+/*Creates a new table element containing the declaration of a method*/
+symtab_t* create_method(char* method_name)
+{
+	symtab_t* method;
+
+	method = (symtab_t*)malloc(sizeof(symtab_t));
+	memset(method,0,sizeof(symtab_t));
+
+	method->id = method_name;
+	method->node_type = METHOD;
+
+	return method;
 }
 
 /*Adds a previously created element to the specified symbol table*/
@@ -109,6 +124,7 @@ symtab_t* analyse_ast(node_t* root)
 	node_t* currentNode;
 	node_t* current_var;
 	symtab_t* current;
+	symtab_t* method_symbol_table;
 	symtab_t* table;
 
 	table = create_table(root->node_name,1);
@@ -123,7 +139,7 @@ symtab_t* analyse_ast(node_t* root)
 
 			while (current_var != NULL)
 			{
-				printf("Declarei variavel com o nome %s e tipo %d\n", current_var->id, currentNode->type);
+				/*printf("Declarei variavel com o nome %s e tipo %d\n", current_var->id, currentNode->type);*/
 
 				current = create_variable(current_var->id, currentNode->type);
 
@@ -135,7 +151,20 @@ symtab_t* analyse_ast(node_t* root)
 
 		else if (currentNode->nodetype == NODE_METHODDECL)
 		{
-			printf("Declarei metodo\n");
+			printf("Declarei metodo com o nome %s e tipo de retorno %d\n", currentNode->node_name, currentNode->return_type);
+
+			/*Create a new entry in the class' symbol table with the method*/
+			current = create_method(currentNode->node_name);
+
+#if 0
+			/*Create the method's symbol table*/
+			method_symbol_table = 
+
+			/*Link the entry in the class' symbol table with the symbol table of the method*/
+			current->table_method = method_symbol_table;
+#endif
+
+			add_element_to_table(table, current);
 		}
 
 		currentNode = currentNode->next;

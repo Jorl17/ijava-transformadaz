@@ -9,7 +9,13 @@ typedef enum {
 	METHOD
 } ijava_table_type_t;
 
-symtab_t* analyse_ast(node_t* currentNode);
+symtab_t* create_table(char* table_name, int class);
+symtab_t* create_variable(char* var_name, int var_type);
+symtab_t* create_method(char* method_name);
+void add_element_to_table(symtab_t* table, symtab_t* element);
+void print_element(symtab_t* element);
+void printTable(symtab_t* table);
+symtab_t* analyse_ast(node_t* root);
 
 struct _symtab_t{
 

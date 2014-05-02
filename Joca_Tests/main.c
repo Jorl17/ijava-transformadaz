@@ -93,6 +93,7 @@ int main(void)
 	method_decl_temp = node_create(NODE_METHODDECL);/*Create the list of declarations for the parameters of the method*/
 
 	method_decl_temp->node_name = main_method_name;
+	method_decl_temp->return_type = TYPE_VOID;
 
 	parameter_decl_temp = node_create_terminal(TYPE_UNKNOWN, param_name);/*String[] args*/
 	parameter_decl = node_create_vardecl(TYPE_STRINGARRAY, parameter_decl_temp);/*List of parameters declarations*/
