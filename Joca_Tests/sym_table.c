@@ -167,6 +167,7 @@ symtab_t* create_method_table(node_t* methodNode)
 	symtab_t* root;
 	symtab_t* temp;
 	char* return_string;/*Will contain the following string: "return"*/
+	char string[8] = {'r', 'e', 't', 'u', 'r', 'n', '\0'};
 	int return_string_len;
 
 	/*Method will have TYPE; ID; PARAMETERS; BODY
@@ -177,13 +178,15 @@ symtab_t* create_method_table(node_t* methodNode)
 	M->n2 will give us a list of the declarations of variables inside the method
 	M->n3 will give us a list of the statements in the method*/
 
-	return_string_len = 6;
+	return_string_len = 8;
 
 	root = create_table(methodNode->node_name, 0);/*Create method's symbol table*/
 
 	/*Add the method's return type...*/
 	return_string = (char *)malloc(return_string_len*sizeof(char));
-	strcpy(return_string,"return");
+	
+	strcpy(return_string,string);
+	
 	temp = create_variable(return_string,methodNode->return_type);
 	/*...and add it to the method's table*/
 	add_element_to_table(root,temp);
