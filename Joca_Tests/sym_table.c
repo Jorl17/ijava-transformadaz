@@ -123,13 +123,13 @@ void add_parameters_declarations(symtab_t* root, node_t* var_decl)
 	node_t* current;
 	symtab_t* temp;
 
-	current = var_decl->n2;
+	current = var_decl->n1;
 
 	while (current != NULL)
 	{
-		/*printf("NODE %s %d\n", current->id, current->type);*/
+		printf("PARAM_DECL %s %d\n", current->n2->id, current->n1->type);
 
-		temp = create_variable(current->id, var_decl->n1->type);
+		temp = create_variable(current->n2->id, current->n1->type);
 		temp->is_parameter = 1;
 
 		add_element_to_table(root,temp);
@@ -142,28 +142,18 @@ void add_parameters_declarations(symtab_t* root, node_t* var_decl)
 void add_variables_declarations(symtab_t* root, node_t* var_decl)
 {
 	node_t* current;
-	node_t* current_var;
 	symtab_t* temp;
 
-	current = var_decl;
+	current = var_decl->n1;
 
 	/*FIXME: THERE IS A PROBLEM IN THIS FUNCTION. FOR SOME REASON WE HAVE ONE MORE DECLARATION OF VARIABLES IN THE METHOD
 	WILL TRY TO FIGURE IT OUT TOMOROW BUT FOR NOW THE BUG IS CORRECTED -- LETS HOPE THE BUG IS IN THE "CREATION" OF THE AST...*/
 
 	while (current != NULL)
 	{
-		current_var = current->n2;
-		if (current_var->id == NULL)
-		{
-			current = current->next;
-			continue;
-		}
+		printf("VAR_DECL %s %d\n", current->n2->id, current->type);
 
-		/*assert(current_var->id != NULL)*/
-
-		printf("NODE %s %d %d %d\n", current_var->id, current_var->type, current_var->nodetype==NODE_TYPE?1:-1, current_var->type);
-
-		temp = create_variable(current_var->id, var_decl->n1->type);
+		temp = create_variable(current->n2->id, current->type);
 
 		add_element_to_table(root,temp);
 
@@ -171,12 +161,21 @@ void add_variables_declarations(symtab_t* root, node_t* var_decl)
 	}
 }
 
+/*Function responsible for creating a symbol table for a method*/
 symtab_t* create_method_table(node_t* methodNode)
 {
 	symtab_t* root;
 	symtab_t* temp;
 	char* return_string;/*Will contain the following string: "return"*/
 	int return_string_len;
+
+	/*Method will have TYPE; ID; PARAMETERS; BODY
+
+	Let's consider that the node "method_decl_temp" has a given method M.
+	Then, M->return_type will give us the type of return of the method
+	Also, M->n1 will give us a list of declarations of the parameters/arguments of the method
+	M->n2 will give us a list of the declarations of variables inside the method
+	M->n3 will give us a list of the statements in the method*/
 
 	return_string_len = 6;
 

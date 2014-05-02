@@ -36,9 +36,14 @@ int main(void)
 	node_t* var_declarations;
 	node_t* var_decl_temp;
 	node_t* var_decl_temp2;
+	node_t* var_decl_temp3;
+	node_t* var_decl_temp4;
 	
 	node_t* parameter_decl;
 	node_t* parameter_decl_temp;
+	node_t* parameter_decl_temp2;
+	node_t* parameter_decl_temp3;
+	node_t* parameter_decl_temp4;
 
 	node_t* method_decl_temp;
 	node_t* method_declarations;
@@ -92,7 +97,13 @@ int main(void)
 ------------------------------Method Declarations----------------------------------------------------
 */
 
-	/*Method will have TYPE; ID; PARAMETERS; BODY*/
+	/*Method will have TYPE; ID; PARAMETERS; BODY
+
+	Let's consider that the node "method_decl_temp" has a given method M.
+	Then, M->return_type will give us the type of return of the method
+	Also, M->n1 will give us a list of declarations of the parameters/arguments of the method
+	M->n2 will give us a list of the declarations of variables inside the method
+	M->n3 will give us a list of the statements in the method*/
 
 	method_decl_temp = node_create(NODE_METHODDECL);/*Create the list of declarations for the parameters of the method*/
 
@@ -100,29 +111,46 @@ int main(void)
 	method_decl_temp->return_type = TYPE_VOID;
 
 	parameter_decl_temp = node_create_terminal(TYPE_UNKNOWN, param_name);/*String[] args*/
-	parameter_decl = node_create_vardecl(TYPE_STRINGARRAY, parameter_decl_temp);/*List of parameters declarations*/
+	parameter_decl_temp2 = node_create_vardecl(TYPE_STRINGARRAY, parameter_decl_temp);/*List of parameters declarations*/
+
+	parameter_decl = node_create(NODE_METHODPARAMS);/*FIXME: SHOULD BE NODE_PARAMDECLARATION??*/
+	parameter_decl->n1 = parameter_decl_temp2;
 
 	method_decl_temp->n1 = parameter_decl;/*Points to the parameters declarations*/
 
-	/*printf("PARAMETRO %s %d\n", parameter_decl->n2->id, parameter_decl->n1->type);*/
+	/*NOTE: WE ACCES THE TYPE OF THE PARAMETER DECLARATIONS BY: parameter_decl->n1->n1->type*/
+
+	printf("PARAMETER DECLARATION:\n");
+	temp = parameter_decl->n1;
+
+	while (temp != NULL)
+	{
+		printf("%s %d\n", temp->n2->id, temp->n1->type);
+		temp = temp->next;
+	}
 
 	/*Create the list of variable declarations*/
 	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name2);/*int j*/
-	var_declarations = node_create_vardecl(TYPE_INT, var_decl_temp);/*Store it in a list of declarations*/
-
-	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name3);/*int abraham*/
 	var_decl_temp2 = node_create_vardecl(TYPE_INT, var_decl_temp);/*Store it in a list of declarations*/
 
-	var_declarations = node_append(var_declarations, var_decl_temp2);/*Join the two declarations*/
+	var_decl_temp3 = node_create_terminal(TYPE_UNKNOWN, var_name3);/*int abraham*/
+	var_decl_temp4 = node_create_vardecl(TYPE_INT, var_decl_temp3);/*Store it in a list of declarations*/
 
-	temp = var_declarations;
+	/*Declaration of variables in the method*/
+	var_declarations = node_create(NODE_METHODVARDECL);
+	var_declarations->n1 = node_append(var_decl_temp2, var_decl_temp4);/*Join the two declarations*/
+
+	temp = var_declarations->n1;
 	printf("VAR DECLARATIONS:\n");
 
 	while (temp != NULL)
 	{
-		printf("%s %d\n", temp->n2->id, temp->n2->type);
+		printf("%s %d\n", temp->n2->id, temp->type);
 		temp = temp->next;
 	}
+
+	/*Store method's variable declarations*/
+	method_decl_temp->n2 = var_declarations;
 	
 	/*Create the list of statements. In this case it will only be "abraham = (new int[5])[2];"*/
 
@@ -137,26 +165,22 @@ int main(void)
 	statement_temp->n1 = destiny;/*Points to the destiny, where we store the stuff*/
 	statement_temp->n2 = source;/*Points to the source*/
 
-	statements_list = statement_temp;
+	statements_list = node_create(NODE_METHODBODY);
+	statements_list->n1 = statement_temp;
 
-	printf("STATEMENTS_LIST:\n");
+	/*printf("STATEMENTS_LIST:\n");
 
-	temp2 = statements_list;
+	temp2 = statements_list->n1;
 
 	while (temp2 != NULL)
 	{
 		printf("%s %d\n", temp2->n1->id, temp2->n2->value);
 		temp2 = temp2->next;
-	}
+	}*/
 	
-	/*Method Body will have var_declarations + statement_list*/
-	
-	method_body_list = var_declarations;
+	/*Method Body will have statement_list*/
 
-	method_body_list = node_append(method_body_list, statements_list);
-
-	method_decl_temp->n2 = method_body_list;/*Points to a list of variable declarations and statements*/
-
+	method_decl_temp->n3 = statements_list;/*Points to a list of variable declarations and statements*/
 
 	/*Append the declaration of this method to the list of declarations of methods*/
 	method_declarations = method_decl_temp;/*Since we only have one method we can do just this*/
