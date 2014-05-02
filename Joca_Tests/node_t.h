@@ -6,6 +6,7 @@ typedef enum {
               NODE_METHODDECL, 
               NODE_METHODPARAMS,
               NODE_METHODBODY,
+              NODE_METHODVARDECL,
               NODE_PARAMDECLARATION,
               NODE_STATEMENT_COMPOUNDSTATEMENT,
               NODE_STATEMENT_IFELSE,
