@@ -64,6 +64,7 @@ void add_element_to_table(symtab_t* table, symtab_t* element)
 	current->next = element;
 }
 
+/*Prints an element in a symbol table*/
 void print_element(symtab_t* element)
 {
 	int type;
@@ -96,7 +97,7 @@ void print_element(symtab_t* element)
 		printf("\tmethod\n");
 }
 
-/*Prints the table*/
+/*Prints a symbol table*/
 void printTable(symtab_t* table)
 {
 	symtab_t* current;
@@ -116,6 +117,7 @@ void printTable(symtab_t* table)
 	}
 }
 
+/*Adds all the declarations of parameters to a given method's symbol table*/
 void add_parameters_declarations(symtab_t* root, node_t* var_decl)
 {
 	node_t* current;
@@ -125,9 +127,43 @@ void add_parameters_declarations(symtab_t* root, node_t* var_decl)
 
 	while (current != NULL)
 	{
-		printf("NODE %s %d\n", current->id, current->type);
+		/*printf("NODE %s %d\n", current->id, current->type);*/
 
 		temp = create_variable(current->id, var_decl->n1->type);
+		temp->is_parameter = 1;
+
+		add_element_to_table(root,temp);
+
+		current = current->next;
+	}
+}
+
+/*Adds all the declarations of variables to a given method's symbol table*/
+void add_variables_declarations(symtab_t* root, node_t* var_decl)
+{
+	node_t* current;
+	node_t* current_var;
+	symtab_t* temp;
+
+	current = var_decl;
+
+	/*FIXME: THERE IS A PROBLEM IN THIS FUNCTION. FOR SOME REASON WE HAVE ONE MORE DECLARATION OF VARIABLES IN THE METHOD
+	WILL TRY TO FIGURE IT OUT TOMOROW BUT FOR NOW THE BUG IS CORRECTED -- LETS HOPE THE BUG IS IN THE "CREATION" OF THE AST...*/
+
+	while (current != NULL)
+	{
+		current_var = current->n2;
+		if (current_var->id == NULL)
+		{
+			current = current->next;
+			continue;
+		}
+
+		/*assert(current_var->id != NULL)*/
+
+		printf("NODE %s %d %d %d\n", current_var->id, current_var->type, current_var->nodetype==NODE_TYPE?1:-1, current_var->type);
+
+		temp = create_variable(current_var->id, var_decl->n1->type);
 
 		add_element_to_table(root,temp);
 
@@ -153,15 +189,14 @@ symtab_t* create_method_table(node_t* methodNode)
 	/*...and add it to the method's table*/
 	add_element_to_table(root,temp);
 
-	/*FIXME: Add Method's Arguments to the table*/
-
-	/*If we go to methodNode->n1 we reach the list of parameters declarations
-	  Then is just a matter of going through all of them and add them to the table*/
+	/*Add Method's Arguments to the table
+	If we go to methodNode->n1 we reach the list of parameters declarations
+	Then is just a matter of going through all of them and add them to the table*/
 	add_parameters_declarations(root,methodNode->n1);
 
-	/*FIXME: Add Method's Declarations to the table*/
-
-	/*Same but with methodNode->n2*/
+	/*FIXME: Add Method's Declarations to the table
+	Same but with methodNode->n2*/
+	add_variables_declarations(root,methodNode->n2);
 
 	return root;
 }

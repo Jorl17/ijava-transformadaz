@@ -49,7 +49,10 @@ int main(void)
 	node_t* method_body_list;
 
 	node_t* destiny;
-	node_t* source;	
+	node_t* source;
+
+	node_t* temp;
+	node_t* temp2;
 
 	char var_name[15] = {'o', 'u', 't', 's', 'i', 'd', 'e', 'I', 'n', 't', 'e', 'g', 'e', 'r', '\0'};
 	char param_name[6] = {'a', 'r', 'g', 's', '\0'};
@@ -112,14 +115,12 @@ int main(void)
 
 	var_declarations = node_append(var_declarations, var_decl_temp2);/*Join the two declarations*/
 
-	node_t* temp;
-
 	temp = var_declarations;
 	printf("VAR DECLARATIONS:\n");
 
 	while (temp != NULL)
 	{
-		printf("%s\n", temp->n2->id);
+		printf("%s %d\n", temp->n2->id, temp->n2->type);
 		temp = temp->next;
 	}
 	
@@ -140,12 +141,12 @@ int main(void)
 
 	printf("STATEMENTS_LIST:\n");
 
-	temp = statements_list;
+	temp2 = statements_list;
 
-	while (temp != NULL)
+	while (temp2 != NULL)
 	{
-		printf("%s %d\n", temp->n1->id, temp->n2->value);
-		temp = temp->next;
+		printf("%s %d\n", temp2->n1->id, temp2->n2->value);
+		temp2 = temp2->next;
 	}
 	
 	/*Method Body will have var_declarations + statement_list*/
