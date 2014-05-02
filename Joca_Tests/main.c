@@ -101,6 +101,8 @@ int main(void)
 
 	method_decl_temp->n1 = parameter_decl;/*Points to the parameters declarations*/
 
+	/*printf("PARAMETRO %s %d\n", parameter_decl->n2->id, parameter_decl->n1->type);*/
+
 	/*Create the list of variable declarations*/
 	var_decl_temp = node_create_terminal(TYPE_UNKNOWN, var_name2);/*int j*/
 	var_declarations = node_create_vardecl(TYPE_INT, var_decl_temp);/*Store it in a list of declarations*/

@@ -116,24 +116,52 @@ void printTable(symtab_t* table)
 	}
 }
 
+void add_parameters_declarations(symtab_t* root, node_t* var_decl)
+{
+	node_t* current;
+	symtab_t* temp;
+
+	current = var_decl->n2;
+
+	while (current != NULL)
+	{
+		printf("NODE %s %d\n", current->id, current->type);
+
+		temp = create_variable(current->id, var_decl->n1->type);
+
+		add_element_to_table(root,temp);
+
+		current = current->next;
+	}
+}
+
 symtab_t* create_method_table(node_t* methodNode)
 {
 	symtab_t* root;
 	symtab_t* temp;
 	char* return_string;/*Will contain the following string: "return"*/
+	int return_string_len;
+
+	return_string_len = 6;
 
 	root = create_table(methodNode->node_name, 0);/*Create method's symbol table*/
 
-	/*Add the method's return type*/
-	return_string = (char *)malloc(6*sizeof(char));
+	/*Add the method's return type...*/
+	return_string = (char *)malloc(return_string_len*sizeof(char));
 	strcpy(return_string,"return");
 	temp = create_variable(return_string,methodNode->return_type);
-	/*and add it to the method's table*/
+	/*...and add it to the method's table*/
 	add_element_to_table(root,temp);
 
 	/*FIXME: Add Method's Arguments to the table*/
 
+	/*If we go to methodNode->n1 we reach the list of parameters declarations
+	  Then is just a matter of going through all of them and add them to the table*/
+	add_parameters_declarations(root,methodNode->n1);
+
 	/*FIXME: Add Method's Declarations to the table*/
+
+	/*Same but with methodNode->n2*/
 
 	return root;
 }
