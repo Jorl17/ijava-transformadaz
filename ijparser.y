@@ -78,9 +78,6 @@ Simbolos:
 %right ASSIGN
 %left OBRACE
 %right UNARY_HIGHEST_VAL
-
-%nonassoc EXPRREDUCE
-
 %left OSQUARE DOTLENGTH
 
 
@@ -170,10 +167,11 @@ Statement:		OBRACE CBRACE                                                    {$$
 
 Expr: NEW INT OSQUARE Expr CSQUARE                                               {$$=node_create_oper_newint($4);}
     | NEW BOOL OSQUARE Expr CSQUARE                                              {$$=node_create_oper_newbool($4);}
-    | exprIndexable %prec EXPRREDUCE                                                             {$$=$1;}
+    | exprIndexable %prec REDUCEEXPRESSON1                                                             {$$=$1;}
     ;
 
-exprIndexable: Expr AND Expr                                                              {$$=node_create_oper_and($1,$3);}
+exprIndexable: exprIndexable OSQUARE Expr CSQUARE                                {$$=node_create_oper_loadarray($1,$3);}
+    | Expr AND Expr                                                              {$$=node_create_oper_and($1,$3);}
     | Expr OR Expr                                                               {$$=node_create_oper_or($1,$3);}
     | Expr LE Expr                                                               {$$=node_create_oper_lt($1,$3);}
     | Expr GE Expr                                                               {$$=node_create_oper_gt($1,$3);}
@@ -188,8 +186,7 @@ exprIndexable: Expr AND Expr                                                    
     | Expr MOD Expr                                                              {$$=node_create_oper_mod($1,$3);}
     | NOT Expr %prec UNARY_HIGHEST_VAL                                           {$$=node_create_oper_not($2);}
     | PLUS Expr %prec UNARY_HIGHEST_VAL                                          {$$=node_create_oper_plus($2);}
-    | MINUS Expr %prec UNARY_HIGHEST_VAL                                         {$$=node_create_oper_minus($2);}    
-    | exprIndexable OSQUARE Expr CSQUARE                                {$$=node_create_oper_loadarray($1,$3);}
+    | MINUS Expr %prec UNARY_HIGHEST_VAL                                         {$$=node_create_oper_minus($2);}
 	| Terminal                                                                   {$$=$1;}
 	| OCURV Expr CCURV                                                           {$$=$2;}
 	| Expr DOTLENGTH                                                             {$$=node_create_oper_dotlength($1);}
