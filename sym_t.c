@@ -7,35 +7,61 @@
 
 #define DEBUG 0
 
+char* sym_type_names[] = {
+    "int",
+    "boolean",
+    "int[]",
+    "boolean[]",
+    "String[]",
+    "void",
+    "Id",
+    "IntLit",
+    "BoolLit",
+    "BoolArray",
+    "Unknown" /* Used internally */
+};
+
+sym_t* create_node(ijava_table_type_t nodeType)
+{
+	sym_t* node;
+
+	node = (sym_t*) malloc(sizeof(sym_t));
+	
+	memset(node,0,sizeof(sym_t));
+
+	node->type = TYPE_UNKNOWN;
+	node->is_parameter = 0;
+	node->id = NULL;
+	node->next = NULL;
+	node->table_method = NULL;
+	node->node_type = nodeType;
+
+	return node;
+}
+
 /*Creates a new symbol table*/
-sym_t* create_table(char* table_name, int class)
+sym_t* create_table(char* table_name, ijava_table_type_t class)
 {
 	sym_t* table;
 
-	table = (sym_t*) malloc(sizeof(sym_t));
-	memset(table,0,sizeof(sym_t));
+	assert(table_name);
+	assert(class == CLASS_TABLE || class == METHOD_TABLE);
 
+	table = create_node(class);
 	table->id = table_name;
-
-	if (class == 1)
-		table->node_type = CLASS_TABLE;
-	else
-		table->node_type = METHOD_TABLE;
 
 	return table;
 }
 
 /*Creates a new table element containing the declaration of a variable*/
-sym_t* create_variable(char* var_name, int var_type)
+sym_t* create_variable(char* var_name, ijavatype_t var_type)
 {
 	sym_t* var;
 
-	var = (sym_t*)malloc(sizeof(sym_t));
-	memset(var,0,sizeof(sym_t));
+	var = create_node(VARIABLE);
 
 	var->id = var_name;
 	var->type = var_type;
-	var->node_type = VARIABLE;
 
 	return var;
 }
@@ -45,11 +71,10 @@ sym_t* create_method(char* method_name)
 {
 	sym_t* method;
 
-	method = (sym_t*)malloc(sizeof(sym_t));
-	memset(method,0,sizeof(sym_t));
+	assert(method_name);
 
+	method = create_node(METHOD);
 	method->id = method_name;
-	method->node_type = METHOD;
 
 	return method;
 }
@@ -58,6 +83,9 @@ sym_t* create_method(char* method_name)
 void add_element_to_table(sym_t* table, sym_t* element)
 {
 	sym_t* current;
+
+	assert(table);
+	assert(element);
 
 	current = table;
 
@@ -72,12 +100,16 @@ void print_element(sym_t* element)
 {
 	int type;
 
-	printf("%s", element->id);/*Print the element name*/
+	assert(element);
+
+	/*Print the element name*/
+	printf("%s", element->id);
 
 	type = element->type;
 
 	if (element->node_type == VARIABLE)
 	{
+		/*
 		if (type == TYPE_INT)
 			printf("\tint");
 		else if (type == TYPE_BOOL)
@@ -90,9 +122,13 @@ void print_element(sym_t* element)
 			printf("\tString[]");
 		else if (type == TYPE_VOID)
 			printf("\tvoid");
+		*/
+
+		printf("\t%s", sym_type_names[type]);
 
 		if (element->is_parameter == 1)
 			printf("\tparam");
+
 		printf("\n");
 	}
 
@@ -105,13 +141,16 @@ void printTable(sym_t* table)
 {
 	sym_t* current;
 
+	assert(table);
+	assert(table->node_type == CLASS_TABLE || table->node_type == METHOD_TABLE);
+
 	if (table->node_type == CLASS_TABLE)
 		printf("===== Class %s Symbol Table =====\n", table->id);
 	else if (table->node_type == METHOD_TABLE)
 		printf("===== Method %s Symbol Table =====\n", table->id);
 
-
-	current = table->next;/*Jump the first element, which will tell us that the it is a table for a class/method*/
+	/*Jump the first element, which will tell us that the it is a table for a class/method*/
+	current = table->next;
 
 	while (current != NULL)
 	{
@@ -207,7 +246,7 @@ sym_t* create_method_table(node_t* methodNode)
 	return_string_len = 8;
 
 	/*Create method's symbol table*/
-	root = create_table(methodNode->n2->id, 0);
+	root = create_table(methodNode->n2->id, METHOD_TABLE);
 
 	/*Add the method's return type...*/
 	return_string = (char *)malloc(return_string_len*sizeof(char));
@@ -238,7 +277,7 @@ sym_t* analyse_ast(node_t* root)
 	sym_t* method_symbol_table;
 	sym_t* table;
 
-	table = create_table(root->n1->id,1);
+	table = create_table(root->n1->id,CLASS_TABLE);
 
 	currentNode = root->n2;
 
@@ -253,7 +292,7 @@ sym_t* analyse_ast(node_t* root)
 			while (current_var != NULL)
 			{
 				#if DEBUG
-				printf("Declarei variavel com o nome %s e tipo %d\n", current_var->id, currentNode->n1->type);
+				printf("Declarei variavel com o nome |%s| e tipo %d\n", current_var->id, currentNode->n1->type);
 				#endif
 
 				/*Check if variable is already defined*/
@@ -303,7 +342,10 @@ int checkSymbol(sym_t* table, char* id)
 	current = table;
 	return_value = 0;
 
-	while (current->next != NULL)
+	if (id == NULL)
+		return return_value;
+
+	while (current != NULL)
 	{
 		if (strcmp(id, current->id) == 0)
 		{

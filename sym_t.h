@@ -33,8 +33,8 @@ struct _sym_t{
 	sym_t* table_method;
 };
 
-sym_t* create_table(char* table_name, int class);
-sym_t* create_variable(char* var_name, int var_type);
+sym_t* create_table(char* table_name, ijava_table_type_t class);
+sym_t* create_variable(char* var_name, ijavatype_t var_type);
 sym_t* create_method(char* method_name);
 void add_element_to_table(sym_t* table, sym_t* element);
 void print_element(sym_t* element);

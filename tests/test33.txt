@@ -1,5 +1,8 @@
 class Test
 {
+	static int b, r;
+	static int[] gay, gay2, maxi_es_gay;
+
     public static void main()
     {
         int j, c;
