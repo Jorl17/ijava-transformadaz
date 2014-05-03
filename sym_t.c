@@ -5,6 +5,8 @@
 
 #include "sym_t.h"
 
+#define DEBUG 0
+
 /*Creates a new symbol table*/
 sym_t* create_table(char* table_name, int class)
 {
@@ -130,7 +132,9 @@ void add_parameters_declarations(sym_t* root, node_t* var_decl)
 
 	while (current != NULL)
 	{
+		#if DEBUG
 		printf("PARAM_DECL %s %d\n", current->n2->id, current->n1->type);
+		#endif
 
 		temp = create_variable(current->n2->id, current->n1->type);
 		temp->is_parameter = 1;
@@ -152,7 +156,9 @@ void add_variables_declarations(sym_t* root, node_t* var_decl)
 
 	while (current != NULL)
 	{
+		#if DEBUG
 		printf("VAR_DECL %s %d\n", current->n2->id, current->n1->type);
+		#endif
 		
 		temp = create_variable(current->n2->id, current->type);
 
@@ -220,7 +226,9 @@ sym_t* analyse_ast(node_t* root)
 
 			while (current_var != NULL)
 			{
+				#if DEBUG
 				printf("Declarei variavel com o nome %s e tipo %d\n", current_var->id, currentNode->n1->type);
+				#endif
 
 				current = create_variable(current_var->id, currentNode->n1->type);
 
@@ -232,7 +240,9 @@ sym_t* analyse_ast(node_t* root)
 
 		else if (currentNode->nodetype == NODE_METHODDECL)
 		{
+			#if DEBUG
 			printf("Declarei metodo com o nome %s e tipo de retorno %d\n", currentNode->n2->id, currentNode->n1->type);
+			#endif
 
 			/*Create a new entry in the class' symbol table with the method*/
 			current = create_method(currentNode->n2->id);

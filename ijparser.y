@@ -12,6 +12,7 @@ int had_error = 0;
 
 node_t* ast_root;
 int show_ast = 1;
+int show_tables = 1;
 sym_t* class_table;/*Class' symbol table*/
 
 /*
@@ -215,6 +216,8 @@ int main()
 {
 	yyparse();
 
+    show_ast = 0;
+
     if (show_ast && !had_error)
         print_ast(ast_root);
 
@@ -222,23 +225,25 @@ int main()
     class_table = analyse_ast(ast_root);
 
     /*FIXME: CHECK IF WE HAVE TO PRINT THE SYMBOL TABLES*/
-
-    /*Print the class symbol table*/
-    printTable(class_table);
-
-    /*Print the other tables*/
-    sym_t* temp_node;
-    temp_node = class_table;
-
-    while (temp_node != NULL)
+    if (show_tables)
     {
-        if (temp_node->node_type == METHOD)
-        {
-            printf("\n");
-            printTable(temp_node->table_method);
-        }
+        /*Print the class symbol table*/
+        printTable(class_table);
 
-        temp_node = temp_node->next;
+        /*Print the other tables*/
+        sym_t* temp_node;
+        temp_node = class_table;
+
+        while (temp_node != NULL)
+        {
+            if (temp_node->node_type == METHOD)
+            {
+                printf("\n");
+                printTable(temp_node->table_method);
+            }
+
+            temp_node = temp_node->next;
+        }
     }
 
 	return 0;
