@@ -1,0 +1,11 @@
+class Test
+{
+    static int outsideInteger;
+    static int b;
+    static int a,c;
+
+    public static void main(String []args)
+    {
+        int j, abraham;
+    }
+}

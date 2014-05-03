@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "node_t.h"
+#include "sym_t.h"
 
 extern int prev_col, prev_line;
 extern char* yytext;
@@ -11,6 +12,7 @@ int had_error = 0;
 
 node_t* ast_root;
 int show_ast = 1;
+sym_t* class_table;/*Class' symbol table*/
 
 /*
 Simbolos:
@@ -215,6 +217,15 @@ int main()
 
     if (show_ast && !had_error)
         print_ast(ast_root);
+
+    /*Create the symbol tables*/
+    class_table = analyse_ast(ast_root);
+
+    /*FIXME: CHECK IF WE HAVE TO PRINT THE SYMBOL TABLES*/
+
+    /*Print the class symbol table*/
+    printTable(class_table);
+
 	return 0;
 }
 

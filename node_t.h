@@ -143,9 +143,6 @@ struct _node_t {
       the value of the int variable*/
     ijavavalue_t value;
 
-    /*In case this struct represents a method or a class, then this field stores the method name or the class name*/
-    char* node_name;
-
     /* FIXME: More things to come */
 };
 
