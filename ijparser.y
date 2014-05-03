@@ -216,7 +216,8 @@ int main()
 {
 	yyparse();
 
-    show_ast = 0;
+    show_ast = 0;/*FIXME*/
+    show_tables = 1;/*FIXME*/
 
     if (show_ast && !had_error)
         print_ast(ast_root);

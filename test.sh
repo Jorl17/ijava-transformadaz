@@ -1,7 +1,7 @@
 #!/bin/bash
 ./compile.sh
 
-NUM_TESTS=31
+NUM_TESTS=32
 
 for i in $(eval echo "{1..$NUM_TESTS}") ; do
     echo "Running test $i"
