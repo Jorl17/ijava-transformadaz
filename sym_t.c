@@ -149,20 +149,32 @@ void add_parameters_declarations(sym_t* root, node_t* var_decl)
 void add_variables_declarations(sym_t* root, node_t* var_decl)
 {
 	node_t* current;
+	node_t* current_var;
 	sym_t* temp;
+	int var_type;
 
-
+	/*Get the list of variable declarations. Each element of this list corresponds to a list of declarations per line*/
 	current = var_decl->n1;
 
-	while (current != NULL)
+	while (current != NULL)/*Go through all the declarations of variables in each line*/
 	{
-		#if DEBUG
-		printf("VAR_DECL %s %d\n", current->n2->id, current->n1->type);
-		#endif
-		
-		temp = create_variable(current->n2->id, current->type);
+		current_var = current->n2;
+		var_type = current->n1->type;
 
-		add_element_to_table(root,temp);
+		/*We can have more than one declaration of variables in one line, so let's check it*/
+		
+		while (current_var != NULL)
+		{
+			#if DEBUG
+			printf("VARIABLE %s OF TYPE %d\n", current_var->id, var_type);
+			#endif
+
+			temp = create_variable(current_var->id, var_type);
+
+			add_element_to_table(root,temp);
+
+			current_var = current_var->next;
+		}
 
 		current = current->next;
 	}
