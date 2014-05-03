@@ -33,6 +33,16 @@ struct _sym_t{
 	sym_t* table_method;
 };
 
+sym_t* create_table(char* table_name, int class);
+sym_t* create_variable(char* var_name, int var_type);
+sym_t* create_method(char* method_name);
+void add_element_to_table(sym_t* table, sym_t* element);
+void print_element(sym_t* element);
+void printTable(sym_t* table);
+void add_parameters_declarations(sym_t* root, node_t* var_decl);
+void add_variables_declarations(sym_t* root, node_t* var_decl);
+sym_t* create_method_table(node_t* methodNode);
 sym_t* analyse_ast(node_t* root);
+int checkSymbol(sym_t* table, char* id);
 
 #endif

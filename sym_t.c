@@ -136,6 +136,13 @@ void add_parameters_declarations(sym_t* root, node_t* var_decl)
 		printf("PARAM_DECL %s %d\n", current->n2->id, current->n1->type);
 		#endif
 
+		/*Check if variable is already defined*/
+		if (checkSymbol(root, current->n2->id) == 1)
+		{
+			printf("Symbol %s already defined\n", current->n2->id);
+			exit(-1);
+		}
+
 		temp = create_variable(current->n2->id, current->n1->type);
 		temp->is_parameter = 1;
 
@@ -168,6 +175,13 @@ void add_variables_declarations(sym_t* root, node_t* var_decl)
 			#if DEBUG
 			printf("VARIABLE %s OF TYPE %d\n", current_var->id, var_type);
 			#endif
+
+			/*Check if variable is already defined*/
+			if (checkSymbol(root, current_var->id) == 1)
+			{
+				printf("Symbol %s already defined\n", current_var->id);
+				exit(-1);
+			}
 
 			temp = create_variable(current_var->id, var_type);
 
@@ -242,6 +256,13 @@ sym_t* analyse_ast(node_t* root)
 				printf("Declarei variavel com o nome %s e tipo %d\n", current_var->id, currentNode->n1->type);
 				#endif
 
+				/*Check if variable is already defined*/
+				if (checkSymbol(table, current_var->id) == 1)
+				{
+					printf("Symbol %s already defined\n", current_var->id);
+					exit(-1);
+				}
+
 				current = create_variable(current_var->id, currentNode->n1->type);
 
 				add_element_to_table(table,current);
@@ -272,4 +293,26 @@ sym_t* analyse_ast(node_t* root)
 	}
 
 	return table;
+}
+
+int checkSymbol(sym_t* table, char* id)
+{
+	int return_value;
+	sym_t* current;
+
+	current = table;
+	return_value = 0;
+
+	while (current->next != NULL)
+	{
+		if (strcmp(id, current->id) == 0)
+		{
+			return_value = 1;
+			break;
+		}
+
+		current = current->next;
+	}
+
+	return return_value;
 }
