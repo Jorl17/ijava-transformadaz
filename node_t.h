@@ -1,5 +1,5 @@
-#include "idlist_t.h"
-
+#ifndef NODE_T_H
+#define NODE_T_H 1
 
 typedef enum {
               NODE_PROGRAM,
@@ -61,8 +61,12 @@ typedef int ijavavalue_t;
 #define IJAVA_TRUE 1
 #define IJAVA_FALSE 0
 
+#define OP_DECLAR(___op)
+#define BINARY_OP_DECLR(___op) node_t* node_create_oper_##___op(node_t* lhs, node_t* rhs)
+#define UNARY_OP_DECLR(___op) node_t* node_create_oper_##___op(node_t* unary)
+
 char* node_get_name(node_t* self);
-node_t* node_create(nodetype_t nodetype);
+node_t* node_create_program(char* token, node_t* declarations);
 void node_delete(node_t* self);
 node_t* node_create_terminal(ijavatype_t type, char* token);
 node_t* node_create_terminal_int(ijavatype_t type, int token_value);
@@ -72,11 +76,45 @@ node_t* node_create_paramdeclaration(ijavatype_t type, char* token);
 node_t* node_create_methodparams(node_t* params);
 node_t* node_create_methodbody(node_t* vardecls,node_t* statements);
 node_t* node_create_methoddecl(ijavatype_t type, char* token, node_t* method_params, node_t* method_body);
+node_t* node_statement_append_statement(node_t* first_statement, node_t* second_statement);
 node_t* node_fuse_vardecls_into_main_vardecl_node(node_t* vardeclares);
 node_t* node_create_null(void);
-node_t* node_create_program(node_t* declarations);
 node_t* node_append(node_t* meant_to_be_first, node_t* meant_to_be_last);
 node_t* node_move_next_to_n1(node_t* self);
+BINARY_OP_DECLR(or);
+BINARY_OP_DECLR(and);
+BINARY_OP_DECLR(eq);
+BINARY_OP_DECLR(neq);
+BINARY_OP_DECLR(lt);
+BINARY_OP_DECLR(gt);
+BINARY_OP_DECLR(leq);
+BINARY_OP_DECLR(geq);
+BINARY_OP_DECLR(add);
+BINARY_OP_DECLR(sub);
+BINARY_OP_DECLR(mul);
+BINARY_OP_DECLR(div);
+BINARY_OP_DECLR(mod);
+
+BINARY_OP_DECLR(loadarray);
+BINARY_OP_DECLR(parseargs);
+
+UNARY_OP_DECLR(not);
+UNARY_OP_DECLR(plus);
+UNARY_OP_DECLR(minus);
+UNARY_OP_DECLR(dotlength);
+UNARY_OP_DECLR(newint);
+UNARY_OP_DECLR(newbool);
+
+node_t* node_create_oper_call(char* token, node_t* args);
+
+node_t* node_create_statement_storearray(char* token, node_t* index, node_t* rval );
+node_t* node_create_statement_store(char* token, node_t* rval);
+node_t* node_create_statement_return(node_t* expr);
+node_t* node_create_statement_print(node_t* expr);
+node_t* node_create_statement_while(node_t* expr, node_t* statement);
+node_t* node_create_statement_ifelse(node_t* cond, node_t* ifstatement, node_t* elsestatement);
+node_t* node_create_statement_potential_compoundstatement(node_t* statements);
+
 void print_ast(node_t* ast);
 struct _node_t {
 
@@ -89,10 +127,6 @@ struct _node_t {
     node_t* n2;
     node_t* n3;
     node_t* n4;
-
-    /* Used with VarDecl. In which case it points to linked list of strings which
-       contain the ids to be declared */
-    idlist_t* ids;
 
     /* Pointer to the next node, in case this node is part of a linked-list */
     node_t* next;
@@ -114,3 +148,5 @@ struct _node_t {
 
     /* FIXME: More things to come */
 };
+
+#endif

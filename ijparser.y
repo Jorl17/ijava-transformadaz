@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "node_t.h"
 
 extern int prev_col, prev_line;
@@ -9,6 +10,7 @@ extern char* yytext;
 int had_error = 0;
 
 node_t* ast_root;
+int show_ast = 1;
 
 /*
 Simbolos:
@@ -55,29 +57,31 @@ Simbolos:
 %token <token> IF
 %token <token> ELSE
 %token <token> OP1
-%token <token> OP2
-%token <token> OP3
-%token <token> OP4
+%token <token> LE GE EQ NEQ LEQ GEQ
+%token <token> PLUS MINUS
+%token <token> MULT DIV MOD
 %token <token> OSQUARE
 %token <token> RETURN
 %token <token> RESERVED
 %token <token> WHILE
 
 /* FIXME: Probably IDs will need their one type, probably idlist_t */
-%type <node> Start Program Declarations FieldDecl MethodDecl Statements FormalParams RealParams VarDecl Statement Statement_Repeat OC_Square Expr exprIndexable Terminal Args Comma_Expression IDs VarDecls
+%type <node> Start Program Declarations FieldDecl MethodDecl Statements FormalParams RealParams VarDecl Statement Expr exprIndexable Terminal Args RealArguments IDs VarDecls
 %type <type> Type MethodType
 
 %left OR
 %left AND
-%left OP2
-%left OP3
-%left OP4
+%left EQ NEQ
+%left LE GE LEQ GEQ
+%left PLUS MINUS
+%left MULT DIV MOD
 %right ASSIGN
-%left OSQUARE
 %left OBRACE
-%left NOT
-%left DOTLENGTH
 %right UNARY_HIGHEST_VAL
+
+%nonassoc EXPRREDUCE
+
+%left OSQUARE DOTLENGTH
 
 
 
@@ -88,8 +92,8 @@ Start:	Program                                                                  
 	;
 
 /*Program -> CLASS ID OBRACE { FieldDecl | MethodDecl } CBRACE*/
-Program:		CLASS ID OBRACE Declarations CBRACE                               {$$=node_create_program($4);}
-    |           CLASS ID OBRACE CBRACE                                            {$$=node_create_program(node_create_null());}
+Program:		CLASS ID OBRACE Declarations CBRACE                               {$$=node_create_program($2,$4);}
+    |           CLASS ID OBRACE CBRACE                                            {$$=node_create_program($2,NULL);}
 	;
 
 
@@ -117,15 +121,15 @@ MethodType:		Type                                                              {
 	|			VOID                                                              {$$=TYPE_VOID;}
 	;
 
-Statements:	Statement                                                             {$$=node_create_null(); /*FIXME: $$=$1 */}
-    |       Statement Statements                                                  {$$=node_append(node_create_null() /*FIXME: $1 */,$2);}
+Statements:	Statement                                                             {$$=$1;}
+    |       Statement Statements                                                  {$$=node_statement_append_statement($1,$2);}
     ;
 
 /*FormalParams -> Type ID { COMMA Type ID }
 FormalParams -> STRING OSQUARE CSQUARE ID*/
 FormalParams:	RealParams                                                        {$$=$1;}
 	|			STRING OSQUARE CSQUARE ID                                         {$$=node_create_paramdeclaration(TYPE_STRINGARRAY,$4);}
-	|			                                                                  {$$=node_create_null();}
+	|			                                                                  {$$=NULL;}
     ;                                                                             
 
 RealParams:	  Type ID                                                             {$$=node_create_paramdeclaration($1,$2);}
@@ -152,56 +156,59 @@ Statement → WHILE OCURV Expr CCURV Statement
 Statement → PRINT OCURV Expr CCURV SEMIC
 Statement → ID [ OSQUARE Expr CSQUARE ] ASSIGN Expr SEMIC
 Statement → RETURN [ Expr ] SEMIC*/
-Statement:		OBRACE Statement_Repeat CBRACE                                   {}
-	|			IF OCURV Expr CCURV Statement %prec THEN                         {}
-	|			IF OCURV Expr CCURV Statement ELSE Statement                     {}
-	|			WHILE OCURV Expr CCURV Statement                                 {}
-	|			PRINT OCURV Expr CCURV SEMIC                                     {}
-	|			ID OC_Square ASSIGN Expr SEMIC                                   {}
-	|			RETURN SEMIC                                                     {}
-	|			RETURN Expr SEMIC                                                {}
+Statement:		OBRACE CBRACE                                                    {$$=NULL;}
+    |           OBRACE Statements CBRACE                                         {$$=node_create_statement_potential_compoundstatement($2);}
+	|			IF OCURV Expr CCURV Statement %prec THEN                         {$$=node_create_statement_ifelse($3,$5,node_create_null());}
+	|			IF OCURV Expr CCURV Statement ELSE Statement                     {$$=node_create_statement_ifelse($3, $5, $7);}
+	|			WHILE OCURV Expr CCURV Statement                                 {$$=node_create_statement_while($3, $5);}
+	|			PRINT OCURV Expr CCURV SEMIC                                     {$$=node_create_statement_print($3);}
+    |           ID ASSIGN Expr SEMIC                                             {$$=node_create_statement_store($1, $3);}
+	|			ID OSQUARE Expr CSQUARE ASSIGN Expr SEMIC                        {$$=node_create_statement_storearray($1, $3,$6);}
+	|			RETURN SEMIC                                                     {$$=node_create_statement_return(NULL);}
+	|			RETURN Expr SEMIC                                                {$$=node_create_statement_return($2);}
 	;
 
-Statement_Repeat:	Statement_Repeat Statement                                   {}
-	|                                                                            {}			
+Expr: NEW INT OSQUARE Expr CSQUARE                                               {$$=node_create_oper_newint($4);}
+    | NEW BOOL OSQUARE Expr CSQUARE                                              {$$=node_create_oper_newbool($4);}
+    | exprIndexable %prec EXPRREDUCE                                                             {$$=$1;}
     ;
 
-OC_Square:		OSQUARE Expr CSQUARE                                             {}
-	|                                                                            {}			
-    ;
-
-Expr: Expr AND Expr                                                              {}
-    | Expr OR Expr                                                               {}
-    | Expr OP2 Expr                                                              {}
-    | Expr OP3 Expr                                                              {}
-    | Expr OP4 Expr                                                              {}
-    | NOT Expr %prec UNARY_HIGHEST_VAL                                           {}
-    | OP3 Expr %prec UNARY_HIGHEST_VAL                                           {}
-    | NEW INT OSQUARE Expr CSQUARE                                               {}
-    | NEW BOOL OSQUARE Expr CSQUARE                                              {}
-    | exprIndexable                                                              {}
-    ;
-
-exprIndexable: exprIndexable OSQUARE Expr CSQUARE                                {}
-	| Terminal                                                                   {}
-	| OCURV Expr CCURV                                                           {}
-	| Expr DOTLENGTH                                                             {}
-	| PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV                               {}
+exprIndexable: Expr AND Expr                                                              {$$=node_create_oper_and($1,$3);}
+    | Expr OR Expr                                                               {$$=node_create_oper_or($1,$3);}
+    | Expr LE Expr                                                               {$$=node_create_oper_lt($1,$3);}
+    | Expr GE Expr                                                               {$$=node_create_oper_gt($1,$3);}
+    | Expr EQ Expr                                                               {$$=node_create_oper_eq($1,$3);}
+    | Expr NEQ Expr                                                              {$$=node_create_oper_neq($1,$3);}
+    | Expr GEQ Expr                                                              {$$=node_create_oper_geq($1,$3);}
+    | Expr LEQ Expr                                                              {$$=node_create_oper_leq($1,$3);}
+    | Expr PLUS Expr                                                             {$$=node_create_oper_add($1,$3);}
+    | Expr MINUS Expr                                                            {$$=node_create_oper_sub($1,$3);}
+    | Expr MULT Expr                                                             {$$=node_create_oper_mul($1,$3);}
+    | Expr DIV Expr                                                              {$$=node_create_oper_div($1,$3);}
+    | Expr MOD Expr                                                              {$$=node_create_oper_mod($1,$3);}
+    | NOT Expr %prec UNARY_HIGHEST_VAL                                           {$$=node_create_oper_not($2);}
+    | PLUS Expr %prec UNARY_HIGHEST_VAL                                          {$$=node_create_oper_plus($2);}
+    | MINUS Expr %prec UNARY_HIGHEST_VAL                                         {$$=node_create_oper_minus($2);}    
+    | exprIndexable OSQUARE Expr CSQUARE                                {$$=node_create_oper_loadarray($1,$3);}
+	| Terminal                                                                   {$$=$1;}
+	| OCURV Expr CCURV                                                           {$$=$2;}
+	| Expr DOTLENGTH                                                             {$$=node_create_oper_dotlength($1);}
+	| PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV                               {$$=node_create_oper_parseargs(node_create_terminal(TYPE_ID,$3),$5);}
 	;
 
 Terminal:		ID                                                               {$$=node_create_terminal(TYPE_ID, $1);}
 	|			INTLIT                                                           {$$=node_create_terminal(TYPE_INTLIT, $1);}
 	|			BOOLLIT                                                          {$$=node_create_terminal(TYPE_BOOLLIT, $1);}
-	|			ID OCURV Args CCURV                                              {}
+	|			ID OCURV Args CCURV                                              {$$=node_create_oper_call($1,$3);}
+    |           ID OCURV CCURV                                                   {$$=node_create_oper_call($1,NULL);}
 	;
 
 /*Args -> Expr { COMMA Expr }*/
-Args:			Expr Comma_Expression                                            {}
-	|			                                                                 {}
+Args:			RealArguments                                                    {$$=$1;}
     ;
 
-Comma_Expression:	COMMA Expr Comma_Expression                                  {}
-	|                                                                            {}
+RealArguments:	Expr                                                             {$$=$1;}
+	|           Expr COMMA RealArguments                                         {$$=node_append($1,$3);}
     ;
 %%
 
@@ -209,7 +216,7 @@ int main()
 {
 	yyparse();
 
-    if (!had_error)
+    if (show_ast && !had_error)
         print_ast(ast_root);
 	return 0;
 }

@@ -1,0 +1,5 @@
+class gcd
+{
+    static int a;
+    static int a;
+}

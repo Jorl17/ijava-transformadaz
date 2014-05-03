@@ -4,7 +4,10 @@
 #include <assert.h>
 #include <stdio.h>
 
-#if 1
+#define BINARY_OP_IMPL(___op, ___nodetype) node_t* node_create_oper_##___op (node_t* lhs, node_t* rhs) { return node_create_binary_oper(___nodetype, lhs, rhs); }
+#define UNARY_OP_IMPL(___op, ___nodetype) node_t* node_create_oper_##___op (node_t* expr) { return node_create_unary_oper(___nodetype, expr); }
+
+#if 0
 #define DEBUG
 #else
 #define NDEBUG
@@ -64,6 +67,7 @@ char* node_type_names[] = {
     "Void",
     "Id",
     "IntLit",
+    "BoolLit",
     "BoolArray",
     "Unknown" /* Used internally */
 };
@@ -98,6 +102,7 @@ node_t* node_append(node_t* meant_to_be_first, node_t* meant_to_be_last) {
     iter->next = meant_to_be_last;
     return meant_to_be_first;
 }
+
 
 node_t* node_create_terminal(ijavatype_t type, char* token) {
     DEBUG_PRINT("[node_create_terminal] type='%d' ('%s'), token='%s'\n", type, node_type_names[type], token);
@@ -204,11 +209,11 @@ node_t* node_create_paramdeclaration(ijavatype_t type, char* token) {
 }
 
 node_t* node_create_methodparams(node_t* params) {    
-    assert(params != NULL);
+    
     DEBUG_PRINT("[node_create_methodparams] params=%p\n", params);
     node_t* self = node_create(NODE_METHODPARAMS);
 
-    /* The first child is the node whose path we must follow to get to other nodes */
+    /* The first child is the node whose path we must follow to get to other nodes. Might be NULL! */
     self->n1 = params;
 
     return self; 
@@ -224,6 +229,165 @@ node_t* node_create_methodbody(node_t* vardecls,node_t* statements) {
     if ( statements != NULL ) *ptrs[currChild++] = statements;
 
     return self;
+}
+
+node_t* node_create_binary_oper(nodetype_t nodetype, node_t* lhs, node_t* rhs) {
+    node_t* self = node_create(nodetype);
+
+    self->n1 = lhs;
+    self->n2 = rhs;
+
+    return self;
+}
+
+BINARY_OP_IMPL(or, NODE_OPER_OR);
+BINARY_OP_IMPL(and, NODE_OPER_AND);
+BINARY_OP_IMPL(eq, NODE_OPER_EQ);
+BINARY_OP_IMPL(neq, NODE_OPER_NEQ);
+BINARY_OP_IMPL(lt, NODE_OPER_LT);
+BINARY_OP_IMPL(gt, NODE_OPER_GT);
+BINARY_OP_IMPL(leq, NODE_OPER_LEQ);
+BINARY_OP_IMPL(geq, NODE_OPER_GEQ);
+BINARY_OP_IMPL(add, NODE_OPER_ADD);
+BINARY_OP_IMPL(sub, NODE_OPER_SUB);
+BINARY_OP_IMPL(mul, NODE_OPER_MUL);
+BINARY_OP_IMPL(div, NODE_OPER_DIV);
+BINARY_OP_IMPL(mod, NODE_OPER_MOD);
+
+BINARY_OP_IMPL(loadarray, NODE_OPER_LOADARRAY);
+BINARY_OP_IMPL(parseargs, NODE_OPER_PARSEARGS);
+
+node_t* node_create_unary_oper(nodetype_t nodetype, node_t* expr) {
+    node_t* self = node_create(nodetype);
+
+    self->n1 = expr;
+
+    return self;
+}
+
+UNARY_OP_IMPL(not, NODE_OPER_NOT);
+UNARY_OP_IMPL(plus, NODE_OPER_PLUS);
+UNARY_OP_IMPL(minus, NODE_OPER_MINUS);
+UNARY_OP_IMPL(dotlength, NODE_OPER_LENGTH);
+UNARY_OP_IMPL(newint, NODE_OPER_NEWINT);
+UNARY_OP_IMPL(newbool, NODE_OPER_NEWBOOL);
+
+node_t* node_create_oper_call(char* token, node_t* args) {
+    node_t* self = node_create(NODE_OPER_CALL);
+
+    /* First node: ID */
+    self->n1 = node_create_terminal(TYPE_ID, token);
+
+    /* Second Node: Arguments, chained. Might be NULL! */
+    self->n2 = args;
+
+    return self;
+}
+
+node_t* node_statement_append_statement(node_t* first_statement, node_t* second_statement) {
+    if ( first_statement == NULL )
+        return second_statement;
+    return node_append(first_statement, second_statement);
+}
+
+node_t* node_create_statement_return(node_t* expr) {
+    node_t* self = node_create(NODE_STATEMENT_RETURN);
+
+    /* expr might be NULL, in which case it is okay to still assign */
+    self->n1 = expr;
+
+    return self;
+}
+
+node_t* node_create_statement_print(node_t* expr) {
+    node_t* self = node_create(NODE_STATEMENT_PRINT);
+
+    assert(expr);
+    self->n1 = expr;
+
+    return self; 
+}
+
+node_t* node_create_statement_storearray(char* token, node_t* index, node_t* rval ) {
+    node_t* self = node_create(NODE_STATEMENT_STOREARRAY);
+
+    /* First node: ID */
+    self->n1 = node_create_terminal(TYPE_ID, token);
+
+    /* Second node: Index */
+    self->n2 = index;
+
+    /* Third node: Rval */
+    self->n3 = rval;
+
+    return self;
+}
+
+node_t* node_create_statement_store(char* token, node_t* rval) {
+    node_t* self = node_create(NODE_STATEMENT_STORE);
+
+    /* First node: ID */
+    self->n1 = node_create_terminal(TYPE_ID, token);
+
+    /* Second node: Rval */
+    self->n2 = rval;
+
+    return self;
+}
+
+node_t* node_create_statement_while(node_t* expr, node_t* statement) {
+    if ( !statement ) statement = node_create_null();
+    node_t* self = node_create(NODE_STATEMENT_WHILE);
+
+    /* First node: expr */
+    self->n1 = expr;
+
+    /* Second node: statement */    
+    self->n2 = statement;
+
+    return self;
+}
+
+node_t* node_create_statement_ifelse(node_t* cond, node_t* ifstatement, node_t* elsestatement) {
+    assert(cond);
+    if ( ifstatement == NULL ) ifstatement = node_create_null();
+    if ( elsestatement == NULL ) elsestatement = node_create_null();
+    node_t* self = node_create(NODE_STATEMENT_IFELSE);
+
+    /* First node: cond */
+    self->n1 = cond;
+
+    /* Second node: ifexpr */
+    self->n2 = ifstatement;
+
+    /* Third node: elseexpr */
+    self->n3 = elsestatement;
+
+    return self;
+}
+
+int count_nodes_in_list(node_t* list) {
+    int c = 0;
+    while ( list != NULL ) { c++; list = list->next; } ;
+
+    return c;
+}
+
+/* This potentially creates a CompundStatement (if there are 2 or more statements) */
+node_t* node_create_statement_potential_compoundstatement(node_t* statements) {
+    /* Statements might be NULL if, for instance, the user just inserts {}, in which case
+       we wish to carry with it being NULL. Note also that NULL statements are filtered out
+       of the list because of the way we built node_steatement_append_statement() (go check it out)
+    */
+    if ( statements == NULL ) return NULL;
+    int num_statements = count_nodes_in_list(statements);
+
+    if ( num_statements < 2) return statements;
+    else {
+        node_t* self = node_create(NODE_STATEMENT_COMPOUNDSTATEMENT);
+        self->n1 = statements;
+        return self;
+    }
 }
 
 node_t* node_create_methoddecl(ijavatype_t type, char* token, node_t* method_params, node_t* method_body) {
@@ -244,9 +408,12 @@ node_t* node_create_methoddecl(ijavatype_t type, char* token, node_t* method_par
     return self;
 }
 
-node_t* node_create_program(node_t* declarations) {
+node_t* node_create_program(char* token, node_t* declarations) {
     node_t* self = node_create(NODE_PROGRAM);
-    self->n1 = declarations;
+
+    self->n1 = node_create_terminal(TYPE_ID, token);
+
+    self->n2 = declarations;
     /*if ( self->n1 != NULL)
         assert(self->n1->nodetype == NODE_VARDECL || self->n1->nodetype == NODE_METHODDECL || self->n1->nodetype == NODE_NULL );*/
     return self;
@@ -266,12 +433,12 @@ node_t* node_move_next_to_n1(node_t* self) {
 void print_tabs(int n) {
     int i;
     for ( i = 0; i < n; i++)
-        printf("\t");    
+        printf("  ");    
 }
 
 /* We need the depth because some of our nodes are in fact "double" nodes, which contain more info */
 void print_node(node_t* node) {
-    if ( node->nodetype != NODE_TYPE || node->type != TYPE_ID ) {
+    if ( node->nodetype != NODE_TYPE || (node->type != TYPE_ID && node->type != TYPE_INTLIT && node->type != TYPE_BOOLLIT) ) {
 
         printf("%s", node_get_name(node));
     } else {

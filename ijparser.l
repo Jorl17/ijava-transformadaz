@@ -1,5 +1,6 @@
 %{
     #include "y.tab.h"
+    #include <string.h>
     int in_comment = 0, comment_start_line = 0, comment_start_col = 0;
     int line=1, col=1, prev_line=1, prev_col=1;
 
@@ -47,9 +48,17 @@ OSQUARE "["
 CSQUARE "]"
 OR "||"
 AND "&&"
-OP2 "<"|">"|"=="|"!="|"<="|">="
-OP3 "+"|"-"
-OP4 "*"|"/"|"%"
+LE "<"
+GE ">"
+EQ "=="
+NEQ "!="
+LEQ "<="
+GEQ ">="
+PLUS "+"
+MINUS "-"
+MULT "*"
+DIV "/"
+MOD "%"
 NOT "!"
 ASSIGN "="
 SEMIC ";"
@@ -93,9 +102,17 @@ NEWLINE "\n"
 {CSQUARE}                               {PRINT_TOKEN(CSQUARE); }
 {OR}                                    {PRINT_TOKEN_ARG(OR); }
 {AND}                                   {PRINT_TOKEN_ARG(AND); }
-{OP2}                                   {PRINT_TOKEN_ARG(OP2); }
-{OP3}                                   {PRINT_TOKEN_ARG(OP3); }
-{OP4}                                   {PRINT_TOKEN_ARG(OP4); }
+{LE}                                    {PRINT_TOKEN_ARG(LE); }
+{GE}                                    {PRINT_TOKEN_ARG(GE); }
+{EQ}                                    {PRINT_TOKEN_ARG(EQ); }
+{NEQ}                                   {PRINT_TOKEN_ARG(NEQ); }
+{LEQ}                                   {PRINT_TOKEN_ARG(LEQ); }
+{GEQ}                                   {PRINT_TOKEN_ARG(GEQ); }
+{PLUS}                                  {PRINT_TOKEN_ARG(PLUS); }
+{MINUS}                                 {PRINT_TOKEN_ARG(MINUS); }
+{MULT}                                  {PRINT_TOKEN_ARG(MULT); }
+{DIV}                                   {PRINT_TOKEN_ARG(DIV); }
+{MOD}                                   {PRINT_TOKEN_ARG(MOD); }
 {NOT}                                   {PRINT_TOKEN(NOT); }
 {ASSIGN}                                {PRINT_TOKEN(ASSIGN); }
 {SEMIC}                                 {PRINT_TOKEN(SEMIC); }
