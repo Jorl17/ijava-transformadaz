@@ -81,11 +81,11 @@ void print_element(sym_t* element)
 		if (type == TYPE_INT)
 			printf("\tint");
 		else if (type == TYPE_BOOL)
-			printf("\tbool");
+			printf("\tboolean");
 		else if (type == TYPE_INTARRAY)
 			printf("\tint[]");
 		else if (type == TYPE_BOOLARRAY)
-			printf("\tbool[]");
+			printf("\tboolean[]");
 		else if (type == TYPE_STRINGARRAY)
 			printf("\tString[]");
 		else if (type == TYPE_VOID)
