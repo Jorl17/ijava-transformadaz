@@ -1,9 +1,9 @@
 #!/bin/bash
 
-NUM_TESTS=31
+NUM_TESTS=33
 
 for i in $(eval echo "{1..$NUM_TESTS}") ; do
     echo "Running test $i"
-    ./ijparser.jn -t < tests/test$i.txt
+    ./ijparser.jn -s < tests/test$i.txt
 done
 

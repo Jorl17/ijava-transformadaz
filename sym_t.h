@@ -44,5 +44,9 @@ void add_variables_declarations(sym_t* root, node_t* var_decl);
 sym_t* create_method_table(node_t* methodNode);
 sym_t* analyse_ast(node_t* root);
 int checkSymbol(sym_t* table, char* id);
+void errorIfDuplicates(sym_t* table, char* id);
+sym_t* lookup_method(sym_t* class_table, char* method_name);
+ijavatype_t get_return_type(sym_t* table);
+ijavatype_t lookup_return_type(sym_t* class_table, char* method_name);
 
 #endif

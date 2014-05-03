@@ -21,9 +21,11 @@ char* sym_type_names[] = {
     "Unknown" /* Used internally */
 };
 
-sym_t* create_node(ijava_table_type_t nodeType)
+sym_t* create_node(ijava_table_type_t nodeType, char* name)
 {
 	sym_t* node;
+
+	assert(name);
 
 	node = (sym_t*) malloc(sizeof(sym_t));
 	
@@ -31,7 +33,7 @@ sym_t* create_node(ijava_table_type_t nodeType)
 
 	node->type = TYPE_UNKNOWN;
 	node->is_parameter = 0;
-	node->id = NULL;
+	node->id = name;
 	node->next = NULL;
 	node->table_method = NULL;
 	node->node_type = nodeType;
@@ -47,8 +49,7 @@ sym_t* create_table(char* table_name, ijava_table_type_t class)
 	assert(table_name);
 	assert(class == CLASS_TABLE || class == METHOD_TABLE);
 
-	table = create_node(class);
-	table->id = table_name;
+	table = create_node(class, table_name);
 
 	return table;
 }
@@ -58,9 +59,8 @@ sym_t* create_variable(char* var_name, ijavatype_t var_type)
 {
 	sym_t* var;
 
-	var = create_node(VARIABLE);
+	var = create_node(VARIABLE, var_name);
 
-	var->id = var_name;
 	var->type = var_type;
 
 	return var;
@@ -73,8 +73,7 @@ sym_t* create_method(char* method_name)
 
 	assert(method_name);
 
-	method = create_node(METHOD);
-	method->id = method_name;
+	method = create_node(METHOD, method_name);
 
 	return method;
 }
@@ -98,7 +97,7 @@ void add_element_to_table(sym_t* table, sym_t* element)
 /*Prints an element in a symbol table*/
 void print_element(sym_t* element)
 {
-	int type;
+	ijavatype_t type;
 
 	assert(element);
 
@@ -176,11 +175,7 @@ void add_parameters_declarations(sym_t* root, node_t* var_decl)
 		#endif
 
 		/*Check if variable is already defined*/
-		if (checkSymbol(root, current->n2->id) == 1)
-		{
-			printf("Symbol %s already defined\n", current->n2->id);
-			exit(-1);
-		}
+		errorIfDuplicates(root, current->n2->id);
 
 		temp = create_variable(current->n2->id, current->n1->type);
 		temp->is_parameter = 1;
@@ -197,13 +192,17 @@ void add_variables_declarations(sym_t* root, node_t* var_decl)
 	node_t* current;
 	node_t* current_var;
 	sym_t* temp;
-	int var_type;
+	ijavatype_t var_type;
+
+	assert(var_decl->nodetype == NODE_METHODBODY);
 
 	/*Get the list of variable declarations. Each element of this list corresponds to a list of declarations per line*/
 	current = var_decl->n1;
 
 	while (current != NULL)/*Go through all the declarations of variables in each line*/
 	{
+		assert(current->nodetype == NODE_VARDECL);
+
 		current_var = current->n2;
 		var_type = current->n1->type;
 
@@ -216,11 +215,7 @@ void add_variables_declarations(sym_t* root, node_t* var_decl)
 			#endif
 
 			/*Check if variable is already defined*/
-			if (checkSymbol(root, current_var->id) == 1)
-			{
-				printf("Symbol %s already defined\n", current_var->id);
-				exit(-1);
-			}
+			errorIfDuplicates(root, current_var->id);
 
 			temp = create_variable(current_var->id, var_type);
 
@@ -233,6 +228,67 @@ void add_variables_declarations(sym_t* root, node_t* var_decl)
 	}
 }
 
+/*Looks up a given method's symbol table in the class' symbol table
+FIXME: If this function returns NULL then we probably will have a semantic's error*/
+sym_t* lookup_method(sym_t* class_table, char* method_name)
+{
+	sym_t* current;
+	sym_t* return_var;
+
+	assert(class_table);
+	assert(method_name);
+
+	current = class_table->next;
+	return_var = NULL;
+
+	while (current != NULL)
+	{
+		if (strcmp(method_name, current->id) == 0)
+		{
+			if (current->node_type == METHOD)
+			{
+				return_var = current->table_method;
+				break;
+			}
+		}
+
+		current = current->next;
+	}
+
+	return return_var;
+}
+
+/*Returns the return type of a method, specified by its symbol table (in "table")*/
+ijavatype_t get_return_type(sym_t* table)
+{
+	assert(table->node_type == METHOD_TABLE);
+
+	assert(table->next);
+
+	return table->next->type;
+}
+
+/*Get a method's return type*/
+ijavatype_t lookup_return_type(sym_t* class_table, char* method_name)
+{
+	ijavatype_t type;
+	sym_t* method_table;
+
+	assert(class_table->node_type == CLASS_TABLE);
+
+	method_table = lookup_method(class_table, method_name);
+
+	if (method_table == NULL)
+	{
+		/*FIXME: PRINT ERROR AND EXIT*/
+		return TYPE_UNKNOWN;
+	}
+
+	type = get_return_type(method_table);
+
+	return type;
+}
+
 /*Function responsible for creating a symbol table for a method*/
 sym_t* create_method_table(node_t* methodNode)
 {
@@ -240,16 +296,15 @@ sym_t* create_method_table(node_t* methodNode)
 	sym_t* root;
 	sym_t* temp;
 	char* return_string;/*Will contain the following string: "return"*/
-	char string[8] = {'r', 'e', 't', 'u', 'r', 'n', '\0'};
-	int return_string_len;
+	char string[] = "return";
 
-	return_string_len = 8;
+	assert(methodNode->nodetype == NODE_METHODDECL);
 
 	/*Create method's symbol table*/
 	root = create_table(methodNode->n2->id, METHOD_TABLE);
 
 	/*Add the method's return type...*/
-	return_string = (char *)malloc(return_string_len*sizeof(char));
+	return_string = (char *)malloc( (strlen(string) + 1)*sizeof(char));
 	strcpy(return_string,string);
 	temp = create_variable(return_string,methodNode->n1->type);
 
@@ -275,9 +330,9 @@ sym_t* analyse_ast(node_t* root)
 	node_t* current_var;
 	sym_t* current;
 	sym_t* method_symbol_table;
-	sym_t* table;
+	sym_t* main_table;
 
-	table = create_table(root->n1->id,CLASS_TABLE);
+	main_table = create_table(root->n1->id,CLASS_TABLE);
 
 	currentNode = root->n2;
 
@@ -296,15 +351,11 @@ sym_t* analyse_ast(node_t* root)
 				#endif
 
 				/*Check if variable is already defined*/
-				if (checkSymbol(table, current_var->id) == 1)
-				{
-					printf("Symbol %s already defined\n", current_var->id);
-					exit(-1);
-				}
+				errorIfDuplicates(main_table, current_var->id);
 
 				current = create_variable(current_var->id, currentNode->n1->type);
 
-				add_element_to_table(table,current);
+				add_element_to_table(main_table,current);
 
 				current_var = current_var->next;
 			}
@@ -316,6 +367,9 @@ sym_t* analyse_ast(node_t* root)
 			printf("Declarei metodo com o nome %s e tipo de retorno %d\n", currentNode->n2->id, currentNode->n1->type);
 			#endif
 
+			/*Check duplicate method*/
+			errorIfDuplicates(main_table, currentNode->n2->id);
+
 			/*Create a new entry in the class' symbol table with the method*/
 			current = create_method(currentNode->n2->id);
 
@@ -325,13 +379,24 @@ sym_t* analyse_ast(node_t* root)
 			/*Link the entry in the class' symbol table with the symbol table of the method*/
 			current->table_method = method_symbol_table;
 
-			add_element_to_table(table, current);
+			add_element_to_table(main_table, current);
 		}
 
 		currentNode = currentNode->next;
 	}
 
-	return table;
+	return main_table;
+}
+
+/*Checks if there is a symbol defined in table with the name stored in id. Note that this table can be the class' symbol table
+or a method's table*/
+void errorIfDuplicates(sym_t* table, char* id)
+{
+	if (checkSymbol(table, id) == 1)
+	{
+		printf("Symbol %s already defined\n", id);
+		exit(-1);
+	}
 }
 
 int checkSymbol(sym_t* table, char* id)
@@ -342,8 +407,7 @@ int checkSymbol(sym_t* table, char* id)
 	current = table;
 	return_value = 0;
 
-	if (id == NULL)
-		return return_value;
+	assert(id);
 
 	while (current != NULL)
 	{
