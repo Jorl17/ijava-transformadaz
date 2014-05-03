@@ -124,6 +124,8 @@ void add_parameters_declarations(sym_t* root, node_t* var_decl)
 	node_t* current;
 	sym_t* temp;
 
+	/*Remember that var_decl = methodNode->n3. Since the list of declarations is in methodNode->n3->n1 we need to make
+	current = var_decl->n1 and then iterate through the list*/
 	current = var_decl->n1;
 
 	while (current != NULL)
@@ -145,15 +147,13 @@ void add_variables_declarations(sym_t* root, node_t* var_decl)
 	node_t* current;
 	sym_t* temp;
 
-	current = var_decl->n1;
 
-	/*FIXME: THERE IS A PROBLEM IN THIS FUNCTION. FOR SOME REASON WE HAVE ONE MORE DECLARATION OF VARIABLES IN THE METHOD
-	WILL TRY TO FIGURE IT OUT TOMOROW BUT FOR NOW THE BUG IS CORRECTED -- LETS HOPE THE BUG IS IN THE "CREATION" OF THE AST...*/
+	current = var_decl->n1;
 
 	while (current != NULL)
 	{
-		printf("VAR_DECL %s %d\n", current->n2->id, current->type);
-
+		printf("VAR_DECL %s %d\n", current->n2->id, current->n1->type);
+		
 		temp = create_variable(current->n2->id, current->type);
 
 		add_element_to_table(root,temp);
@@ -172,37 +172,25 @@ sym_t* create_method_table(node_t* methodNode)
 	char string[8] = {'r', 'e', 't', 'u', 'r', 'n', '\0'};
 	int return_string_len;
 
-	/*Method will have TYPE; ID; PARAMETERS; BODY
-
-	Let's consider that the node "method_decl_temp" has a given method M.
-	Then, M->return_type will give us the type of return of the method
-	Also, M->n1 will give us a list of declarations of the parameters/arguments of the method
-	M->n2 will give us a list of the declarations of variables inside the method
-	M->n3 will give us a list of the statements in the method*/
-
 	return_string_len = 8;
 
-	root = create_table(methodNode->id, 0);/*Create method's symbol table*/
+	/*Create method's symbol table*/
+	root = create_table(methodNode->n2->id, 0);
 
-#if 0
 	/*Add the method's return type...*/
 	return_string = (char *)malloc(return_string_len*sizeof(char));
-	
 	strcpy(return_string,string);
-	
-	temp = create_variable(return_string,methodNode->return_type);
+	temp = create_variable(return_string,methodNode->n1->type);
+
 	/*...and add it to the method's table*/
 	add_element_to_table(root,temp);
-#endif
 
 	/*Add Method's Arguments to the table
-	If we go to methodNode->n1 we reach the list of parameters declarations
-	Then is just a matter of going through all of them and add them to the table*/
-	add_parameters_declarations(root,methodNode->n1);
+	We can reach the list of arguments of the method with: methodNode->n3*/
+	add_parameters_declarations(root,methodNode->n3);
 
-	/*FIXME: Add Method's Declarations to the table
-	Same but with methodNode->n2*/
-	add_variables_declarations(root,methodNode->n2);
+	/*Add Method's Variable Declarations to the table*/
+	add_variables_declarations(root,methodNode->n4);
 
 	return root;
 }
@@ -244,14 +232,10 @@ sym_t* analyse_ast(node_t* root)
 
 		else if (currentNode->nodetype == NODE_METHODDECL)
 		{
-			printf("Declarei metodo\n");
-
-			#if 0
-
-			printf("Declarei metodo com o nome %s e tipo de retorno %d\n", currentNode->id, currentNode->return_type);
+			printf("Declarei metodo com o nome %s e tipo de retorno %d\n", currentNode->n2->id, currentNode->n1->type);
 
 			/*Create a new entry in the class' symbol table with the method*/
-			current = create_method(currentNode->node_name);
+			current = create_method(currentNode->n2->id);
 
 			/*Create the method's symbol table*/
 			method_symbol_table = create_method_table(currentNode);
@@ -260,7 +244,6 @@ sym_t* analyse_ast(node_t* root)
 			current->table_method = method_symbol_table;
 
 			add_element_to_table(table, current);
-			#endif
 		}
 
 		currentNode = currentNode->next;

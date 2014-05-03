@@ -226,6 +226,21 @@ int main()
     /*Print the class symbol table*/
     printTable(class_table);
 
+    /*Print the other tables*/
+    sym_t* temp_node;
+    temp_node = class_table;
+
+    while (temp_node != NULL)
+    {
+        if (temp_node->node_type == METHOD)
+        {
+            printf("\n");
+            printTable(temp_node->table_method);
+        }
+
+        temp_node = temp_node->next;
+    }
+
 	return 0;
 }
 
