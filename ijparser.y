@@ -230,7 +230,6 @@ int main(int argc, char* argv[])
     if (show_ast && !had_error)
         print_ast(ast_root);
 
-    /*FIXME: CHECK IF WE HAVE TO PRINT THE SYMBOL TABLES*/
     if (show_tables && !had_error)
     {
         /*Create the symbol tables*/
