@@ -11,8 +11,8 @@ extern char* yytext;
 int had_error = 0;
 
 node_t* ast_root;
-int show_ast = 1;
-int show_tables = 0;
+int show_ast = 0;
+int show_tables = 1;
 sym_t* class_table;/*Class' symbol table*/
 
 /*
@@ -219,12 +219,12 @@ int main()
     if (show_ast && !had_error)
         print_ast(ast_root);
 
-    /*Create the symbol tables*/
-    class_table = analyse_ast(ast_root);
-
     /*FIXME: CHECK IF WE HAVE TO PRINT THE SYMBOL TABLES*/
-    if (show_tables)
+    if (show_tables && !had_error)
     {
+        /*Create the symbol tables*/
+        class_table = analyse_ast(ast_root);
+
         /*Print the class symbol table*/
         printTable(class_table);
 
