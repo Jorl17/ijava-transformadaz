@@ -12,7 +12,7 @@ int had_error = 0;
 
 node_t* ast_root;
 int show_ast = 1;
-int show_tables = 1;
+int show_tables = 0;
 sym_t* class_table;/*Class' symbol table*/
 
 /*
@@ -215,9 +215,6 @@ RealArguments:	Expr                                                             
 int main()
 {
 	yyparse();
-
-    show_ast = 0;/*FIXME*/
-    show_tables = 1;/*FIXME*/
 
     if (show_ast && !had_error)
         print_ast(ast_root);

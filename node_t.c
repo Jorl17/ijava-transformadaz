@@ -221,12 +221,10 @@ node_t* node_create_methodparams(node_t* params) {
 
 node_t* node_create_methodbody(node_t* vardecls,node_t* statements) {
     node_t* self = node_create(NODE_METHODBODY);
-    node_t** ptrs[] = {&self->n1, &self->n2, &self->n3, &self->n4};
     int currChild = 0;
     
-    if ( vardecls != NULL ) *ptrs[currChild++] = vardecls;
-
-    if ( statements != NULL ) *ptrs[currChild++] = statements;
+    if ( vardecls != NULL ) self->n1 = vardecls;
+    if ( statements != NULL ) self->n2 = statements;
 
     return self;
 }
