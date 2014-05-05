@@ -230,15 +230,15 @@ int main(int argc, char* argv[])
     if (show_ast && !had_error)
         print_ast(ast_root);
 
+    /*Create the symbol tables*/
+    class_table = analyse_ast(ast_root);
+
+    /*Print the class symbol table*/
+    if ( class_table )
+        printTable(class_table);
+
     if (show_tables && !had_error)
     {
-        /*Create the symbol tables*/
-        class_table = analyse_ast(ast_root);
-
-        /*Print the class symbol table*/
-        if ( class_table )
-            printTable(class_table);
-
         /*Print the other tables*/
         sym_t* temp_node;
         temp_node = class_table;
