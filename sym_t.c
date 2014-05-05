@@ -411,7 +411,7 @@ int checkSymbol(sym_t* table, char* id)
 
 	while (current != NULL)
 	{
-		if (strcmp(id, current->id) == 0)
+		if (current->node_type != CLASS_TABLE && strcmp(id, current->id) == 0)
 		{
 			return_value = 1;
 			break;
