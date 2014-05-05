@@ -2,4 +2,7 @@ class gcd
 {
     static int a;
     static int a;
+    public static int main() {
+         a = f(c,d);
+    }
 }

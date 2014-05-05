@@ -1,11 +1,11 @@
 class Test
 {
-	static int b, r;
-	static int[] gay, gay2, maxi_es_gay;
+	static int a,b, Test;
+    static boolean[] c,d;
 
-    public static void main()
+    public static void main(String[] a)
     {
-        int j, c;
-        int k;
+        int c,a;
     }
+    
 }
