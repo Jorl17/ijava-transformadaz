@@ -395,7 +395,7 @@ void errorIfDuplicates(sym_t* table, char* id)
 	if (checkSymbol(table, id) == 1)
 	{
 		printf("Symbol %s already defined\n", id);
-		exit(-1);
+		exit(0);
 	}
 }
 
