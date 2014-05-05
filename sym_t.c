@@ -332,6 +332,7 @@ sym_t* analyse_ast(node_t* root)
 	sym_t* method_symbol_table;
 	sym_t* main_table;
 
+	if ( !root ) return NULL;
 	main_table = create_table(root->n1->id,CLASS_TABLE);
 
 	currentNode = root->n2;

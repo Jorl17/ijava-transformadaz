@@ -236,7 +236,8 @@ int main(int argc, char* argv[])
         class_table = analyse_ast(ast_root);
 
         /*Print the class symbol table*/
-        printTable(class_table);
+        if ( class_table )
+            printTable(class_table);
 
         /*Print the other tables*/
         sym_t* temp_node;
