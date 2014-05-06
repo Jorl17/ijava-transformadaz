@@ -593,8 +593,9 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 			return TYPE_BOOLARRAY;
 		 else if ( type == NODE_OPER_NEWINT)
 			return TYPE_INTARRAY;
-		else if ( type == NODE_OPER_LENGTH)
-			return expr_type == TYPE_INTARRAY ? TYPE_INT : TYPE_BOOL;
+		else if ( type == NODE_OPER_LENGTH) {
+			return TYPE_INT;
+		}
 
 		return expr_type;
 	} else if (is_binary_oper(type)) {
