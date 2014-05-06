@@ -515,8 +515,12 @@ int node_is_statement(node_t* self) {
 
 ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 
-void check_intlit(char* literal) {
-	/* FIXME: Joca, do this thing and error out if needed */
+/*Function to check if the string stored in "literal" corresponds to a valid literal, given the 3 different "types" of literals
+we support: Decimal, Hexadecimal and Octal.
+FIXME FIXME FIXME: CONFIRM THAT WE JUST AND ONLY JUST SUPPORT DECIMAL, HEXADECIMAL AND OCTAL!!!!!
+*/
+void check_intlit(char* literal)
+{
 	char* endptr;
 	size_t len;
 	int number;
