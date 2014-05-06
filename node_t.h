@@ -38,8 +38,13 @@ typedef enum {
               NODE_OPER_NEWBOOL,
               NODE_OPER_PARSEARGS,
               NODE_NULL, /* Very useful: the NULL node */              
-              NODE_TYPE /* Means it might be of type INTLIT, BOOLLIT, VOID, ID... It is defined by the 'type' property of the node */
+              NODE_TYPE, /* Means it might be of type INTLIT, BOOLLIT, VOID, ID... It is defined by the 'type' property of the node */
+              NODE_LAST_NODE_TYPE /* Used internally to signify the end of a table of node types */
 } nodetype_t;
+
+extern nodetype_t statements[];
+extern nodetype_t binary_operators[];
+extern nodetype_t unary_operators[];
 
 typedef enum {
     TYPE_INT,
@@ -48,7 +53,7 @@ typedef enum {
     TYPE_BOOLARRAY,
     TYPE_STRINGARRAY,
     TYPE_VOID,
-    TYPE_ID, /* FIXME: Needs to go? */
+    TYPE_ID,
     TYPE_INTLIT,
     TYPE_BOOLLIT,
     TYPE_UNKNOWN /* Used internally */
@@ -66,6 +71,7 @@ typedef int ijavavalue_t;
 #define UNARY_OP_DECLR(___op) node_t* node_create_oper_##___op(node_t* unary)
 
 char* node_get_name(node_t* self);
+char* node_get_oper_written_form(node_t* self);
 node_t* node_create_program(char* token, node_t* declarations);
 void node_delete(node_t* self);
 node_t* node_create_terminal(ijavatype_t type, char* token);
@@ -115,14 +121,15 @@ node_t* node_create_statement_while(node_t* expr, node_t* statement);
 node_t* node_create_statement_ifelse(node_t* cond, node_t* ifstatement, node_t* elsestatement);
 node_t* node_create_statement_potential_compoundstatement(node_t* statements);
 
+int is_nodetype_in_table(nodetype_t nodetype, nodetype_t* table);
+
 void print_ast(node_t* ast);
 struct _node_t {
 
     /* Type of this node (Program, VarDecl, etc..) */
     nodetype_t nodetype;
 
-    /* Fixed children used in Statements / Operators. The only ones that use
-       all three of them are IfElse and  StoreArray */
+    /* Fixed children used in Statements / Operators. */
     node_t* n1;
     node_t* n2;
     node_t* n3;

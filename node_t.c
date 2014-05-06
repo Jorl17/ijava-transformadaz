@@ -72,6 +72,91 @@ char* node_type_names[] = {
     "Unknown" /* Used internally */
 };
 
+char* node_oper_written_forms[] = {
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    "||",
+    "&&",
+    "==",
+    "!=",
+    "<",
+    ">",
+    "<=",
+    ">=",
+    "+",
+    "-",
+    "*",
+    "/",
+    "%",
+    "!",
+    "-",
+    "+",
+    ".length",
+    "[ ",
+    "Call",
+    "new int",
+    "new boolean",
+    "Integer.parseInt",
+    NULL
+};
+
+nodetype_t statements[] = {
+  NODE_STATEMENT_COMPOUNDSTATEMENT,
+  NODE_STATEMENT_IFELSE,
+  NODE_STATEMENT_PRINT,
+  NODE_STATEMENT_STORE,
+  NODE_STATEMENT_STOREARRAY,
+  NODE_STATEMENT_WHILE,
+  NODE_STATEMENT_RETURN,
+  NODE_LAST_NODE_TYPE /* Indicates end of table */
+};
+
+
+nodetype_t binary_operators[] = {
+  NODE_OPER_OR,
+  NODE_OPER_EQ,
+  NODE_OPER_NEQ,
+  NODE_OPER_GT,
+  NODE_OPER_LT,
+  NODE_OPER_GEQ,
+  NODE_OPER_LEQ,
+  NODE_OPER_ADD,
+  NODE_OPER_SUB,
+  NODE_OPER_MUL,
+  NODE_OPER_DIV,
+  NODE_OPER_MOD,
+  NODE_OPER_LOADARRAY,
+  NODE_OPER_PARSEARGS,
+  NODE_LAST_NODE_TYPE /* Indicates end of table */
+};
+
+nodetype_t unary_operators[] = {
+  NODE_OPER_NOT,
+  NODE_OPER_MINUS,
+  NODE_OPER_PLUS,
+  NODE_OPER_LENGTH,
+  NODE_OPER_NEWINT,
+  NODE_OPER_NEWBOOL,
+  NODE_LAST_NODE_TYPE /* Indicates end of table */
+};
+
+char* node_get_oper_written_form(node_t* self) {
+    assert(self);
+    assert ( node_oper_written_forms[self->nodetype] );
+    return node_oper_written_forms[self->nodetype];
+}
+
 char* node_get_name(node_t* self) {
     assert(self);
 /*    DEBUG_PRINT("[node_get_name] self=%p, self->nodetype='%d' ('%s')\n", self, self->nodetype, node_names[self->nodetype]);*/
@@ -415,6 +500,14 @@ node_t* node_create_program(char* token, node_t* declarations) {
     /*if ( self->n1 != NULL)
         assert(self->n1->nodetype == NODE_VARDECL || self->n1->nodetype == NODE_METHODDECL || self->n1->nodetype == NODE_NULL );*/
     return self;
+}
+
+int is_nodetype_in_table(nodetype_t nodetype, nodetype_t* table) {
+    assert(table);
+    while ( *table != NODE_LAST_NODE_TYPE )
+        if ( *table++ == nodetype)
+            return 1;
+    return 0;
 }
 
 void node_delete(node_t* self) {
