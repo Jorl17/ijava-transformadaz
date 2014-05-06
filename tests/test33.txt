@@ -7,6 +7,8 @@ class Test
         a = !(true && c[2]);
         System.out.println(c[2]);
         return (new int[2]);
+
+        if ( a ) {} else return new int[to_int(!a && !false)];
     }
 
     public static int to_int(boolean unused) { return 2; }
@@ -26,7 +28,7 @@ class Test
             if ( !(new boolean[2])[0] )
                 System.out.println(d);
         } else {
-            while(true && 2) c = 2;
+            while(true && false) c = 2;
             return ;
         }
 

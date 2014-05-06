@@ -683,7 +683,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 	DEBUG_PRINT("[recurse_down] node=%p, class_table=%p, method_table=%p\n", node, class_table, curr_method_table);
 	node_t* iter = node;
 	while ( iter != NULL ) {
-		DEBUG_PRINT("[recurse_down]-->Looped\n");
+		DEBUG_PRINT("[recurse_down]-->Looped: node_type = %s\n", node_get_name(iter));
 
 		assert( node_is_statement(iter) );
 
@@ -783,7 +783,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 			if ( iter->n2->nodetype != NODE_NULL)
 				recurse_down(iter->n2, class_table, curr_method_table);
 			if ( iter->n3->nodetype != NODE_NULL)
-				recurse_down(iter->n2, class_table, curr_method_table);
+				recurse_down(iter->n3, class_table, curr_method_table);
 
 		} else if ( iter->nodetype == NODE_STATEMENT_WHILE ) {
 			ijavatype_t expr_type = TYPE_VOID;
