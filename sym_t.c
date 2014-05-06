@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "sym_t.h"
 
@@ -516,6 +517,61 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 
 void check_intlit(char* literal) {
 	/* FIXME: Joca, do this thing and error out if needed */
+	char* endptr;
+	size_t len;
+	int number;
+
+	/*We are supporting 3 types of literals: Decimal, Hexadecimal and Octal*/
+
+	len = strlen(literal);
+
+	if (len > 1)
+	{
+		if (literal[0] == '0')/*Check to see if the number is hexadecimal or octal*/
+		{		
+			if (literal[1] == 'x' || literal[1] == 'X')/*Number is hexadecimal*/
+			{
+				number = strtol(literal, &endptr, 16);
+				DEBUG_PRINT("[DEBUG]Converting from Hexadecimal\n");
+			}
+			
+			else /*Number is octal*/
+			{
+				number = strtol(literal, &endptr, 8);
+				DEBUG_PRINT("[DEBUG]Converting from Octal\n");
+			}
+		}
+
+		else/*Number is decimal*/
+		{
+			number = strtol(literal, &endptr, 10);
+			DEBUG_PRINT("[DEBUG]Converting from Decimal\n");
+		}
+	}
+
+	else if (len == 1)/*(len > 0) and !(len > 1) -- Can only be decimal -- FIXME: NEED TO CHECK IF LEN == 1?*/
+		number = strtol(literal, &endptr, 10);
+
+	else
+	{
+		printf("FIXME FIXME FIXME: AM I SUPPOSED TO GET HERE?? GOING TO ASSERT\n");
+		assert(0);
+	}
+
+	/*After the call to strtol*/
+	if (*endptr == '\0')
+	{
+		DEBUG_PRINT("[DEBUG]The entire string was converted to value %d\n", number);
+		return ;
+	}
+
+	else
+	{
+		/*FIXME FIXME FIXME: NEED TO KILL THE PROGRAM??*/
+		DEBUG_PRINT("[DEBUG]Could not convert the string\n");
+		printf("Invalid literal %s\n", literal);
+		exit(0);
+	}
 }
 
 ijavatype_t get_tree_type(node_t* self, sym_t* class_table, sym_t* curr_method_table) {
