@@ -329,8 +329,9 @@ ijavatype_t lookup_return_type(sym_t* class_table, char* method_name)
 
 	if (method_table == NULL)
 	{
-		/*FIXME: PRINT ERROR AND EXIT*/
-		return TYPE_UNKNOWN;
+		/* FIXME!! */
+		printf("Cannot find symbol %s\n", method_name);
+		exit(0);
 	}
 
 	type = get_return_type(method_table);
@@ -619,8 +620,54 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 
 
 		return expr_type2; /* Or expr_type2 */
+	} else if (type == NODE_OPER_CALL) {
+		/* FIXME: Check basically all of this */
+		assert(node->n1);
+		assert(node->n1->id);
+		char* fnc_name = node->n1->id;
+		node_t* args = node->n2;
+		sym_t* method_table = lookup_method(class_table, fnc_name);
+		if ( !method_table ) {
+			/* FIXME! */
+			printf("Cannot find symbol %s", fnc_name);			
+			/* FIXME: What if we found it, but it's not a method? */
+			exit(0);
+		}
+
+		assert(method_table->next);
+		sym_t* iter = method_table->next;
+		ijavatype_t return_type = iter->type;
+		iter = iter->next;
+
+		int argCount = 0;
+		while (iter) {
+			if ( args ) {
+				ijavatype_t this_arg_type = get_tree_type ( args, class_table, curr_method_table);
+				if ( iter->type != this_arg_type ) {
+					printf("Incompatible type of argument %d in call to method %s (got %s, required %s)\n",
+							argCount, fnc_name, sym_type_names[this_arg_type], sym_type_names[iter->type]);
+					exit(0);
+				}
+			} else {
+					printf("Incompatible type of argument %d in call to method %s (got void, required %s)\n",
+							argCount, fnc_name, sym_type_names[iter->type]);
+					exit(0);
+			}
+			iter = iter->next; argCount++; args = args->next;
+		}
+
+		if ( args ) {
+			ijavatype_t this_arg_type = get_tree_type ( args, class_table, curr_method_table);
+			printf("Incompatible type of argument %d in call to method %s (got %s, required void)\n",
+							argCount, fnc_name, sym_type_names[this_arg_type]);
+					exit(0);
+		}
+
+		return return_type;
+
 	} else {
-		/* FIXME: Cover function calls here */
+		printf("SHOULD NEVER GET HERE! Forcing assert!\n");
+		assert(0);
 	}
 }
 
