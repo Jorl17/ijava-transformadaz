@@ -31,11 +31,16 @@ struct _sym_t{
 
 	/*In case we have a method point to the method symbolic table*/
 	sym_t* table_method;
+
+	/* Pointer to the node which contains the first statements of this method,
+	this is used later on for error checking, and might be used later on for code generation.
+	It should thus point to a MethodBody node, or NULL */
+	node_t* method_start;
 };
 
 sym_t* create_table(char* table_name, ijava_table_type_t class);
 sym_t* create_variable(char* var_name, ijavatype_t var_type);
-sym_t* create_method(char* method_name);
+sym_t* create_method(char* method_name, node_t* methoddecl);
 void add_element_to_table(sym_t* table, sym_t* element);
 void print_element(sym_t* element);
 void printTable(sym_t* table);
@@ -48,5 +53,7 @@ void errorIfDuplicates(sym_t* table, char* id);
 sym_t* lookup_method(sym_t* class_table, char* method_name);
 ijavatype_t get_return_type(sym_t* table);
 ijavatype_t lookup_return_type(sym_t* class_table, char* method_name);
+
+void check_ast_for_semantic_errors(node_t* root, sym_t* class_table);
 
 #endif
