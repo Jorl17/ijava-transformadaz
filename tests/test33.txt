@@ -30,6 +30,8 @@ class Test
 
         f = (false) || (!!!!false) && false;
 
+        a[3] = Integer.parseInt(a[2]);
+
     }
     
 }

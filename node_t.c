@@ -69,6 +69,7 @@ char* node_type_names[] = {
     "IntLit",
     "BoolLit",
     "BoolArray",
+    "String",
     "Unknown" /* Used internally */
 };
 

@@ -6,7 +6,7 @@
 #include "sym_t.h"
 
 /*#define DEBUG*/
-
+#undef DEBUG
 #ifdef DEBUG
 #define DEBUG_PRINT(...) do{ fprintf( stderr, __VA_ARGS__ ); } while( 0 )
 #else
@@ -23,7 +23,7 @@ char* sym_type_names[] = {
     "Id",
     "IntLit",
     "BoolLit",
-    "BoolArray",
+    "String",
     "Unknown" /* Used internally */
 };
 
@@ -463,6 +463,7 @@ int is_binary_operator_allowed(nodetype_t oper, ijavatype_t lhstype, ijavatype_t
    	 
    	ALLOW_BIN_OPER(NODE_OPER_LOADARRAY, TYPE_INTARRAY, TYPE_INT);
     ALLOW_BIN_OPER(NODE_OPER_LOADARRAY, TYPE_BOOLARRAY, TYPE_INT);
+    ALLOW_BIN_OPER(NODE_OPER_LOADARRAY, TYPE_STRINGARRAY, TYPE_INT);
 
 
     ALLOW_BIN_OPER(NODE_OPER_PARSEARGS, TYPE_STRINGARRAY, TYPE_INT);
@@ -607,11 +608,13 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 
 		/* FIXME: This here is super fugly! Turn array accesses into indexes! */
 		if ( type == NODE_OPER_LOADARRAY ) {
-			assert(expr_type1 == TYPE_BOOLARRAY || expr_type1 == TYPE_INTARRAY);
+			assert(expr_type1 == TYPE_BOOLARRAY || expr_type1 == TYPE_INTARRAY || TYPE_STRINGARRAY);
 			if ( expr_type1 == TYPE_INTARRAY )
 				return TYPE_INT;
 			else if ( expr_type1 == TYPE_BOOLARRAY )
 				return TYPE_BOOL;
+			else if ( expr_type1 == TYPE_STRINGARRAY )
+				return TYPE_STRING;
 		} /* FIXME: Same thing for ParseArgs */
 
 
@@ -652,6 +655,38 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 			on expressions */				
 				assert(iter->n1->id);
 				invalid_store_error_out(iter->n1->id, type_rhs, type_lhs);
+				/* !!! PROGRAM FLOW ENDS !!! */
+			}
+		} else if ( iter->nodetype == NODE_STATEMENT_STOREARRAY ) {
+			assert(iter->n1);
+			assert(iter->n2);
+			assert(iter->n3);
+			ijavatype_t type_lhs = get_tree_type(iter->n1, class_table, curr_method_table);
+			ijavatype_t type_index = get_tree_type(iter->n2, class_table, curr_method_table);
+			ijavatype_t type_rhs = get_tree_type(iter->n3, class_table, curr_method_table);
+
+			if ( type_index != TYPE_INT || (type_lhs != TYPE_INTARRAY && type_lhs != TYPE_BOOLARRAY && type_lhs != TYPE_STRINGARRAY) ) {	
+				assert(iter->n1->id);
+				char* type1_str = sym_type_names[type_lhs];
+				char* type2_str = sym_type_names[type_index];
+				printf("Operator [ cannot be applied to types %s, %s\n", type1_str, type2_str);
+				exit(0);
+				/* !!! PROGRAM FLOW ENDS !!! */
+			} else {
+				if ( type_lhs == TYPE_STRINGARRAY ) type_lhs = TYPE_STRING;
+				else if ( type_lhs == TYPE_INTARRAY )  type_lhs = TYPE_INT;
+				else if ( type_lhs == TYPE_BOOLARRAY )  type_lhs = TYPE_BOOL;
+				else assert(0);
+			}
+
+			if ( type_lhs != type_rhs ) {
+			/* The id should be stored in iter->n1, because stores will always be made on ids, and never
+			on expressions */				
+				assert(iter->n1->id);
+				char* type1_str = sym_type_names[type_rhs];
+				char* type2_str = sym_type_names[type_lhs];
+				printf("Incompatible type in assignment to %s[] (got %s, required %s)\n", iter->n1->id, type1_str, type2_str);
+				exit(0);
 				/* !!! PROGRAM FLOW ENDS !!! */
 			}
 		} else if ( iter->nodetype == NODE_STATEMENT_RETURN ) {
