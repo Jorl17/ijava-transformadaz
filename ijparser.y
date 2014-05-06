@@ -239,7 +239,7 @@ int main(int argc, char* argv[])
         /*Print the class symbol table*/
         if ( class_table )
             printTable(class_table);
-
+        
         /*Print the other tables*/
         sym_t* temp_node;
         temp_node = class_table;
