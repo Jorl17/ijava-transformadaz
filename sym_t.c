@@ -547,11 +547,6 @@ ijavatype_t get_tree_type(node_t* self, sym_t* class_table, sym_t* curr_method_t
 	}
 }
 
-int node_is_statement_allowed(node_t* node) {
-	nodetype_t type = node->nodetype;
-	assert(node_is_statement(node));
-}
-
 void unary_operator_error_out(node_t* oper, ijavatype_t type) {
 	printf("Operator %s cannot be applied to type %s\n", node_get_oper_written_form(oper), sym_type_names[type]);
 

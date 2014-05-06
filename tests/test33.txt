@@ -34,10 +34,17 @@ class Test
 
 
         f = (false) || (!!!!false) && false;
+        e = new int[e.length];
+
+        if ( a.length > e[3]) { a[2] = a[3];} else if ( to_bool(3) == true && 3 != 2 && false && 3 < 2 && 5 >= 2) {}
 
         e[2] = to_int( (new boolean[banana(true,2,banana(true,0,0)[1] )[2]]) [2] ) / 2 + 3 * to_int(to_bool( e[2]) && true);
         /*c = banana(true,2,3);*/
 
+    }
+
+    public static void atoutaleur(String[] wut) {
+        while( true ) {a = main(wut);}
     }
     
 }
