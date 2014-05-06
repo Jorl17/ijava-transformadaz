@@ -576,6 +576,18 @@ void binary_operator_error_out(node_t* oper, ijavatype_t type1, ijavatype_t type
 	exit(0);
 }
 
+int is_binary_op_boolean(nodetype_t type) {
+	return type == NODE_OPER_OR  ||
+		   type == NODE_OPER_AND ||
+		   type == NODE_OPER_EQ  ||
+		   type == NODE_OPER_NEQ ||
+		   type == NODE_OPER_LT  ||
+		   type == NODE_OPER_GT  ||
+		   type == NODE_OPER_LEQ ||
+		   type == NODE_OPER_GEQ
+   ;	
+}
+
 /* FIXME: This is unimplemented, we need to cover function calls */
 ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 	nodetype_t type = node->nodetype;
@@ -617,6 +629,8 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 				return TYPE_BOOL;
 			else if ( expr_type1 == TYPE_STRINGARRAY )
 				return TYPE_STRING;
+		} else if ( is_binary_op_boolean(type) ) {
+			return TYPE_BOOL;
 		} /* FIXME: Same thing for ParseArgs */
 
 
@@ -630,7 +644,7 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 		sym_t* method_table = lookup_method(class_table, fnc_name);
 		if ( !method_table ) {
 			/* FIXME! */
-			printf("Cannot find symbol %s", fnc_name);			
+			printf("Cannot find symbol %s\n", fnc_name);			
 			/* FIXME: What if we found it, but it's not a method? */
 			exit(0);
 		}
