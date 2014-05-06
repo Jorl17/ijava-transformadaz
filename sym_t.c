@@ -711,7 +711,7 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 		iter = iter->next;
 
 		int argCount = 0;
-		while (iter) {
+		while (iter && iter->is_parameter) {
 			if ( args ) {
 				ijavatype_t this_arg_type = get_tree_type ( args, class_table, curr_method_table);
 				if ( iter->type != this_arg_type ) {
@@ -724,6 +724,7 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 							argCount, fnc_name, sym_type_names[iter->type]);
 					exit(0);
 			}
+
 			iter = iter->next; argCount++; args = args->next;
 		}
 
