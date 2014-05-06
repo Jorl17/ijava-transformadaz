@@ -5,7 +5,12 @@ class Test
 
     public static void main(String []args)
     {
-        int j, abraham;
-        abraham = 2;
+        int a, j, k;
+
+        j = 07;
+
+        a = 2;
+
+        k = 0x8;
     }
 }
