@@ -103,7 +103,7 @@ char* node_oper_written_forms[] = {
     "-",
     "+",
     ".length",
-    "[ ",
+    "[",
     "Call",
     "new int",
     "new boolean",
@@ -125,6 +125,7 @@ nodetype_t statements[] = {
 
 nodetype_t binary_operators[] = {
   NODE_OPER_OR,
+  NODE_OPER_AND,
   NODE_OPER_EQ,
   NODE_OPER_NEQ,
   NODE_OPER_GT,

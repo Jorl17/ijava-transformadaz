@@ -265,7 +265,7 @@ ijavatype_t lookup_symbol_type_from_table(sym_t* table, char* symbol)
 	return return_var->type;
 }
 ijavatype_t lookup_symbol_type(sym_t* class_table, sym_t* method_table, char* name) {
-	ijavatype_t type = lookup_symbol_type_from_table(method_table, name);
+	ijavatype_t type = method_table ? lookup_symbol_type_from_table(method_table, name) : TYPE_UNKNOWN;
 	if ( type == TYPE_UNKNOWN ) {
 		type = lookup_symbol_type_from_table(class_table, name);
 			if ( type != TYPE_UNKNOWN )
@@ -464,6 +464,7 @@ int is_binary_operator_allowed(nodetype_t oper, ijavatype_t lhstype, ijavatype_t
    	ALLOW_BIN_OPER(NODE_OPER_LOADARRAY, TYPE_INTARRAY, TYPE_INT);
     ALLOW_BIN_OPER(NODE_OPER_LOADARRAY, TYPE_BOOLARRAY, TYPE_INT);
 
+
     ALLOW_BIN_OPER(NODE_OPER_PARSEARGS, TYPE_STRINGARRAY, TYPE_INT);
              
 
@@ -510,6 +511,11 @@ int node_is_statement(node_t* self) {
 }
 
 ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_method_table);
+
+void check_intlit(char* literal) {
+	/* FIXME: Joca, do this thing and error out if needed */
+}
+
 ijavatype_t get_tree_type(node_t* self, sym_t* class_table, sym_t* curr_method_table) {
 	assert(self);
 
@@ -520,8 +526,13 @@ ijavatype_t get_tree_type(node_t* self, sym_t* class_table, sym_t* curr_method_t
 		assert(self->type == TYPE_ID || self->type == TYPE_INTLIT || self->type == TYPE_BOOLLIT); 
 		if ( self->type == TYPE_ID )
 			return lookup_symbol_type(class_table, curr_method_table, self->id); /* FIXME FIXME: In here we should lookup the type's type using semantic stuff */
-		else
-			return self->type == TYPE_INTLIT ? TYPE_INT : TYPE_BOOL;
+		else {
+			if ( self->type == TYPE_INTLIT ) {
+				check_intlit(self->id);
+				return TYPE_INT;
+			} else
+				return TYPE_BOOL;
+		}
 	}
 
 	else if ( node_is_oper(self) ) {
@@ -529,7 +540,7 @@ ijavatype_t get_tree_type(node_t* self, sym_t* class_table, sym_t* curr_method_t
 	}
 
 	else {
-		fprintf(stderr,"This was not meant to happen! Triggering assert\n");
+		fprintf(stderr,"This was not meant to happen! Triggering assert: %s\n", node_get_name(self));
 		assert(0);
 	}
 }
@@ -549,13 +560,15 @@ void unary_operator_error_out(node_t* oper, ijavatype_t type) {
 void binary_operator_error_out(node_t* oper, ijavatype_t type1, ijavatype_t type2) {	
 	char* type1_str = sym_type_names[type1];
 	char* type2_str = sym_type_names[type2];
-	printf("Operator %s cannot be applied to types ", node_get_oper_written_form(oper));
+	printf("Operator %s cannot be applied to types %s, %s\n", node_get_oper_written_form(oper), type1_str, type2_str);
 
 	/* Print them alphabetically ordered */ 
+	/*
 	if ( strcmp(type1_str, type2_str) < 0)
 		printf("%s, %s\n", type1_str, type2_str);
 	else
 		printf("%s, %s\n", type2_str, type1_str);
+	*/
 
 	/* Exit the application */
 	exit(0);
@@ -567,9 +580,9 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 	assert(node_is_oper(node));
 	if (is_unary_oper(type)) {
 		/* In the first child we have the subtree (might just be an Id) that gives us the type */
-		ijavatype_t oper_type =  get_tree_type(node->n1, class_table, curr_method_table);
-		if ( !is_unary_operator_allowed(type, oper_type ) ) {
-			unary_operator_error_out(node,oper_type);
+		ijavatype_t expr_type =  get_tree_type(node->n1, class_table, curr_method_table);
+		if ( !is_unary_operator_allowed(type, expr_type ) ) {
+			unary_operator_error_out(node,expr_type);
 			/* !!! PROGRAM FLOW ENDS !!! */
 		}
 
@@ -578,29 +591,31 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 			return TYPE_BOOLARRAY;
 		 else if ( type == NODE_OPER_NEWINT)
 			return TYPE_INTARRAY;
+		else if ( type == NODE_OPER_LENGTH)
+			return expr_type == TYPE_INTARRAY ? TYPE_INT : TYPE_BOOL;
 
-		return oper_type;
+		return expr_type;
 	} else if (is_binary_oper(type)) {
 		/* In the first child we have the first subtree (might just be an Id) that gives us the type */
-		ijavatype_t oper_type1 =  get_tree_type(node->n1, class_table, curr_method_table);
+		ijavatype_t expr_type1 =  get_tree_type(node->n1, class_table, curr_method_table);
 		/* In the second child we have the second subtree (might just be an Id) that gives us the type */
-		ijavatype_t oper_type2 =  get_tree_type(node->n2, class_table, curr_method_table);
-		if ( !is_binary_operator_allowed(type, oper_type1, oper_type2) ) {
-			binary_operator_error_out(node,oper_type1, oper_type2);
+		ijavatype_t expr_type2 =  get_tree_type(node->n2, class_table, curr_method_table);
+		if ( !is_binary_operator_allowed(type, expr_type1, expr_type2) ) {
+			binary_operator_error_out(node,expr_type1, expr_type2);
 			/* !!! PROGRAM FLOW ENDS !!! */
 		}
 
 		/* FIXME: This here is super fugly! Turn array accesses into indexes! */
 		if ( type == NODE_OPER_LOADARRAY ) {
-			assert(oper_type1 == TYPE_BOOLARRAY || oper_type1 == TYPE_INTARRAY);
-			if ( oper_type1 == TYPE_INTARRAY )
+			assert(expr_type1 == TYPE_BOOLARRAY || expr_type1 == TYPE_INTARRAY);
+			if ( expr_type1 == TYPE_INTARRAY )
 				return TYPE_INT;
-			else if ( oper_type1 == TYPE_BOOLARRAY )
+			else if ( expr_type1 == TYPE_BOOLARRAY )
 				return TYPE_BOOL;
-		}
+		} /* FIXME: Same thing for ParseArgs */
 
 
-		return oper_type1;
+		return expr_type2; /* Or expr_type2 */
 	} else {
 		/* FIXME: Cover function calls here */
 	}
@@ -623,7 +638,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 		assert( node_is_statement(iter) );
 
 		if ( iter->nodetype == NODE_STATEMENT_COMPOUNDSTATEMENT) {
-			recurse_down(iter, class_table, curr_method_table); /* FIXME: Is this right? */
+			recurse_down(iter->n1, class_table, curr_method_table); /* FIXME: Is this right? */
 		}
 
 		else if ( iter->nodetype == NODE_STATEMENT_STORE ) {
@@ -639,6 +654,74 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 				invalid_store_error_out(iter->n1->id, type_rhs, type_lhs);
 				/* !!! PROGRAM FLOW ENDS !!! */
 			}
+		} else if ( iter->nodetype == NODE_STATEMENT_RETURN ) {
+			ijavatype_t expr_type = TYPE_VOID;
+			if ( iter->n1 )
+				expr_type = get_tree_type(iter->n1, class_table, curr_method_table);
+
+			ijavatype_t expected_return_type = get_return_type(curr_method_table);
+
+			if ( expr_type != expected_return_type ) {
+				/* FIXME: MAYBE CHANGE THIS */
+				char* type1_str = sym_type_names[expr_type];
+				char* type2_str = sym_type_names[expected_return_type];
+				printf("Incompatible type in return statement (got %s, required %s)\n", type1_str, type2_str);
+				exit(0);
+				/* !!! PROGRAM FLOW ENDS !!! */
+			}
+		}  else if ( iter->nodetype == NODE_STATEMENT_PRINT ) {
+			ijavatype_t expr_type = TYPE_VOID;
+			if ( iter->n1 )
+				expr_type = get_tree_type(iter->n1, class_table, curr_method_table);
+
+			if ( expr_type == TYPE_STRINGARRAY || expr_type == TYPE_INTARRAY || expr_type == TYPE_BOOLARRAY ) {
+				/* FIXME: MAYBE CHANGE THIS */
+				char* type1_str = sym_type_names[expr_type];
+				printf("Incompatible type in print statement (got %s, required boolean or int)\n", type1_str);
+				exit(0);
+				/* !!! PROGRAM FLOW ENDS !!! */
+			}
+		} else if ( iter->nodetype == NODE_STATEMENT_IFELSE ) {
+			ijavatype_t expr_type = TYPE_VOID;
+			if ( iter->n1->nodetype == NODE_NULL ) {
+				/* FIXME: Is it right? FIXME? */
+				printf("Incompatible type in if statement (got void, required boolean)\n");
+				exit(0);
+				/* !!! PROGRAM FLOW ENDS !!! */
+			}
+
+			expr_type = get_tree_type(iter->n1, class_table, curr_method_table);
+			if ( expr_type != TYPE_BOOL ) {
+				char* type1_str = sym_type_names[expr_type];
+				printf("Incompatible type in if statement (got %s, required boolean)\n", type1_str);
+				exit(0);
+				/* !!! PROGRAM FLOW ENDS !!! */				
+			}
+
+			if ( iter->n2->nodetype != NODE_NULL)
+				recurse_down(iter->n2, class_table, curr_method_table);
+			if ( iter->n3->nodetype != NODE_NULL)
+				recurse_down(iter->n2, class_table, curr_method_table);
+
+		} else if ( iter->nodetype == NODE_STATEMENT_WHILE ) {
+			ijavatype_t expr_type = TYPE_VOID;
+			if ( iter->n1->nodetype == NODE_NULL ) {
+				/* FIXME: Is it right? FIXME? */
+				printf("Incompatible type in while statement (got void, required boolean)\n");
+				exit(0);
+				/* !!! PROGRAM FLOW ENDS !!! */
+			}
+
+			expr_type = get_tree_type(iter->n1, class_table, curr_method_table);
+			if ( expr_type != TYPE_BOOL ) {
+				char* type1_str = sym_type_names[expr_type];
+				printf("Incompatible type in while statement (got %s, required boolean)\n", type1_str);
+				exit(0);
+				/* !!! PROGRAM FLOW ENDS !!! */				
+			}
+
+			if ( iter->n2->nodetype != NODE_NULL)
+				recurse_down(iter->n2, class_table, curr_method_table);			
 		}
 
 		iter = iter->next;

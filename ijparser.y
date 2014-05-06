@@ -230,12 +230,10 @@ int main(int argc, char* argv[])
     if (show_ast && !had_error)
         print_ast(ast_root);
 
-    /*Create the symbol tables*/
-    class_table = analyse_ast(ast_root);
-
     if (show_tables && !had_error)
     {
-
+        /*Create the symbol tables*/
+        class_table = analyse_ast(ast_root);
         /*Print the class symbol table*/
         if ( class_table )
             printTable(class_table);
@@ -254,9 +252,9 @@ int main(int argc, char* argv[])
 
             temp_node = temp_node->next;
         }
-
         check_ast_for_semantic_errors(ast_root, class_table);
     }
+
 
 	return 0;
 }
