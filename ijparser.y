@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
         class_table = analyse_ast(ast_root);
 
     if ( !had_error)
-        check_ast_for_semantic_errors(ast_root, class_table);
+        check_ast_for_semantic_errors(ast_root, class_table);/*If error quits program*/
 
     if (show_tables && !had_error)
     {
