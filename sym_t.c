@@ -257,13 +257,13 @@ ijavatype_t lookup_symbol_type_from_table(sym_t* table, char* symbol)
 
 	while (current != NULL)
 	{
-		if ( current->node_type == METHOD) {
+		/*if ( current->node_type == METHOD) {
 			if (strcmp(symbol, current->table_method->id) == 0) {
-				/* FIXME: Seems like mooshak doesn't test this sob */
+				/* FIXME: Seems like mooshak doesn't test this sob *//*
 				return TYPE_METHOD;
 			}	
 		}
-		else if (strcmp(symbol, current->id) == 0)
+		else*/ if (strcmp(symbol, current->id) == 0)
 		{
 			return current->type; /* FIXME: We need a type for functions!! */
 		}
@@ -474,7 +474,6 @@ int is_binary_operator_allowed(nodetype_t oper, ijavatype_t lhstype, ijavatype_t
    	 
    	ALLOW_BIN_OPER(NODE_OPER_LOADARRAY, TYPE_INTARRAY, TYPE_INT);
     ALLOW_BIN_OPER(NODE_OPER_LOADARRAY, TYPE_BOOLARRAY, TYPE_INT);
-    ALLOW_BIN_OPER(NODE_OPER_LOADARRAY, TYPE_STRINGARRAY, TYPE_INT);
 
 
     ALLOW_BIN_OPER(NODE_OPER_PARSEARGS, TYPE_STRINGARRAY, TYPE_INT);
@@ -792,7 +791,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 			ijavatype_t type_index = get_tree_type(iter->n2, class_table, curr_method_table);
 			ijavatype_t type_rhs = get_tree_type(iter->n3, class_table, curr_method_table);
 
-			if ( type_index != TYPE_INT || (type_lhs != TYPE_INTARRAY && type_lhs != TYPE_BOOLARRAY && type_lhs != TYPE_STRINGARRAY) ) {	
+			if ( type_index != TYPE_INT || (type_lhs != TYPE_INTARRAY && type_lhs != TYPE_BOOLARRAY) ) {	
 				assert(iter->n1->id);
 				char* type1_str = sym_type_names[type_lhs];
 				char* type2_str = sym_type_names[type_index];
@@ -839,7 +838,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 				char* type2_str = sym_type_names[expected_return_type];
 				printf("Incompatible type in return statement (got %s, required %s)\n", type1_str, type2_str);
 				exit(0);
-				
+
 			}
 		}  else if ( iter->nodetype == NODE_STATEMENT_PRINT ) {
 			ijavatype_t expr_type = TYPE_VOID;
@@ -849,7 +848,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 			if ( expr_type == TYPE_STRINGARRAY || expr_type == TYPE_INTARRAY || expr_type == TYPE_BOOLARRAY || expr_type == TYPE_VOID || expr_type == TYPE_METHOD ) {
 				/* FIXME: MAYBE CHANGE THIS */
 				char* type1_str = sym_type_names[expr_type];
-				printf("Incompatible type in print statement (got %s, required boolean or int)\n", type1_str);
+				printf("Incompatible type in System.out.println statement (got %s, required boolean or int)\n", type1_str);
 				exit(0);
 				/* !!! PROGRAM FLOW ENDS !!! */
 			}
@@ -933,7 +932,7 @@ int checkSymbol(sym_t* table, char* id)
 	int return_value;
 	sym_t* current;
 
-	current = table;
+	current = table->next; /* We jump to next to skip over the method's own name and class' own name */
 	return_value = 0;
 
 	assert(id);
