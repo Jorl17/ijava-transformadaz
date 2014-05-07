@@ -839,6 +839,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 				char* type2_str = sym_type_names[expected_return_type];
 				printf("Incompatible type in return statement (got %s, required %s)\n", type1_str, type2_str);
 				exit(0);
+				
 			}
 		}  else if ( iter->nodetype == NODE_STATEMENT_PRINT ) {
 			ijavatype_t expr_type = TYPE_VOID;
