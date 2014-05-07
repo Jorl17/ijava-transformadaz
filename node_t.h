@@ -57,6 +57,7 @@ typedef enum {
     TYPE_INTLIT,
     TYPE_BOOLLIT,
     TYPE_STRING,
+    TYPE_METHOD,
     TYPE_UNKNOWN /* Used internally */
 } ijavatype_t;
 

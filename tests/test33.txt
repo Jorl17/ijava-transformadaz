@@ -4,11 +4,13 @@ class Test
     static boolean[] c,d;
 
     public static int[] banana(boolean a, int b, int c2) {        
+        int wtf;
         a = !(true && c[2]);
         System.out.println(c[2]);
         return (new int[2]);
 
         if ( a ) {} else return new int[to_int(!a && !false)];
+
     }
 
     public static int to_int(boolean unused) { return 2; }
@@ -18,11 +20,16 @@ class Test
     {
         int c,d;
         int[] e;
+        int wtf;
         boolean f;
+        wtf = Integer.parseInt(a[1 + 2]);
         c = e[3] + e.length;
         c = 2+3+4/(5+2) + (new int[2])[0] % -e[3] + e.length;
         c = b + 2;
         c = d % 3 + c / 3;
+        c = 3;
+
+        if ( a != a ) {}
 
         if ( true ) {
             if ( !(new boolean[2])[0] )
@@ -43,8 +50,14 @@ class Test
 
     }
 
+    public static int[] get_intarray(int[] a, int[] b) {
+        return new int[a.length + b[2]];
+    }
+
+    public static void main2() {}
+
     public static void atoutaleur(String[] wut) {
-        while( true ) {a = main(wut);}
+        while( true ) { a = get_intarray(new int[5], new int[10])[2]; wut[2] = 2; }
     }
     
 }

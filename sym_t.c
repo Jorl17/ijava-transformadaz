@@ -3,11 +3,12 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 
 #include "sym_t.h"
-
-/*#define DEBUG*/
-#undef DEBUG
+/*
+#define DEBUG 
+*/
 #ifdef DEBUG
 #define DEBUG_PRINT(...) do{ fprintf( stderr, __VA_ARGS__ ); } while( 0 )
 #else
@@ -25,6 +26,7 @@ char* sym_type_names[] = {
     "IntLit",
     "BoolLit",
     "String",
+    "method",
     "Unknown" /* Used internally */
 };
 
@@ -243,6 +245,7 @@ void add_variables_declarations(sym_t* root, node_t* var_decl)
 FIXME: If this function returns NULL then we probably will have a semantic's error*/
 ijavatype_t lookup_symbol_type_from_table(sym_t* table, char* symbol)
 {
+	DEBUG_PRINT("[lookup_symbol_type_from_table] table=%p, symbol=%s\n", table, symbol);
 	sym_t* current;
 	sym_t* return_var;
 
@@ -254,7 +257,13 @@ ijavatype_t lookup_symbol_type_from_table(sym_t* table, char* symbol)
 
 	while (current != NULL)
 	{
-		if (strcmp(symbol, current->id) == 0)
+		if ( current->node_type == METHOD) {
+			if (strcmp(symbol, current->table_method->id) == 0) {
+				/* FIXME: Seems like mooshak doesn't test this sob */
+				return TYPE_METHOD;
+			}	
+		}
+		else if (strcmp(symbol, current->id) == 0)
 		{
 			return current->type; /* FIXME: We need a type for functions!! */
 		}
@@ -444,7 +453,7 @@ sym_t* analyse_ast(node_t* root)
 #define ALLOW_BIN_OPER_SAMETYPE_BOOL(___op) ALLOW_BIN_OPER_SAMETYPE(___op, TYPE_BOOL)
 #define ALLOW_BIN_OPER_SAMETYPE_BOOLARRAY(___op) ALLOW_BIN_OPER_SAMETYPE(___op, TYPE_BOOLARRAY)
 #define ALLOW_BIN_OPER_SAMETYPE_INT_AND_BOOL(___op) do { ALLOW_BIN_OPER_SAMETYPE_INT(___op); ALLOW_BIN_OPER_SAMETYPE_BOOL(___op); } while(0)
-#define ALLOW_BIN_OPER_SAMETYPE_ALL(___op) do { ALLOW_BIN_OPER_SAMETYPE_INT_AND_BOOL(___op); ALLOW_BIN_OPER_SAMETYPE_INTARRAY(___op); ALLOW_BIN_OPER_SAMETYPE_BOOLARRAY(___op); } while(0)
+#define ALLOW_BIN_OPER_SAMETYPE_ALL(___op) do { ALLOW_BIN_OPER_SAMETYPE_INT_AND_BOOL(___op); ALLOW_BIN_OPER_SAMETYPE_INTARRAY(___op); ALLOW_BIN_OPER_SAMETYPE_BOOLARRAY(___op); ALLOW_BIN_OPER_SAMETYPE(___op, TYPE_STRINGARRAY);} while(0)
 
 int is_binary_operator_allowed(nodetype_t oper, ijavatype_t lhstype, ijavatype_t rhstype) {
     ALLOW_BIN_OPER_SAMETYPE_BOOL(NODE_OPER_AND);
@@ -516,10 +525,11 @@ int node_is_statement(node_t* self) {
 ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 
 void check_intlit(char* literal) {
+	DEBUG_PRINT("[check_intlit] literal=%s\n", literal);
 	/* FIXME: Joca, do this thing and error out if needed */
 	char* endptr;
 	size_t len;
-	int number;
+	long number;
 
 	/*We are supporting 3 types of literals: Decimal, Hexadecimal and Octal*/
 
@@ -532,20 +542,20 @@ void check_intlit(char* literal) {
 			if (literal[1] == 'x' || literal[1] == 'X')/*Number is hexadecimal*/
 			{
 				number = strtol(literal, &endptr, 16);
-				DEBUG_PRINT("[DEBUG]Converting from Hexadecimal\n");
+				DEBUG_PRINT("[DEBUG]Converting %s from Hexadecimal\n", literal);
 			}
 			
 			else /*Number is octal*/
 			{
 				number = strtol(literal, &endptr, 8);
-				DEBUG_PRINT("[DEBUG]Converting from Octal\n");
+				DEBUG_PRINT("[DEBUG]Converting %s from Octal\n", literal);
 			}
 		}
 
 		else/*Number is decimal*/
 		{
 			number = strtol(literal, &endptr, 10);
-			DEBUG_PRINT("[DEBUG]Converting from Decimal\n");
+			DEBUG_PRINT("[DEBUG]Converting %s from Decimal\n", literal);
 		}
 	}
 
@@ -559,31 +569,34 @@ void check_intlit(char* literal) {
 	}
 
 	/*After the call to strtol*/
-	if (*endptr == '\0')
-	{
-		DEBUG_PRINT("[DEBUG]The entire string was converted to value %d\n", number);
-		return ;
-	}
-
-	else
+	if (literal == endptr  || ((number == LONG_MAX || number == LONG_MIN) && errno == ERANGE) || *endptr!='\0' )
 	{
 		/*FIXME FIXME FIXME: NEED TO KILL THE PROGRAM??*/
 		DEBUG_PRINT("[DEBUG]Could not convert the string\n");
 		printf("Invalid literal %s\n", literal);
-		exit(0);
+		exit(0);		
+	}
+
+	else
+	{
+		if ( number > INT_MAX ) {
+			printf("Invalid literal %s\n", literal);
+			exit(0);
+		}
+		DEBUG_PRINT("[DEBUG]The entire string was converted to value %d\n", number);
+		return ;
 	}
 }
 
 ijavatype_t get_tree_type(node_t* self, sym_t* class_table, sym_t* curr_method_table) {
 	assert(self);
 
-	/* FIXME: Do this! Do we need to explicitly deal with, for instance, NODE_NULL? */	
 	/* Base cases */
 	if ( self->nodetype == NODE_TYPE ) {
 		/* We shouldn't ever recurse to other NODE_TYPEs */
 		assert(self->type == TYPE_ID || self->type == TYPE_INTLIT || self->type == TYPE_BOOLLIT); 
 		if ( self->type == TYPE_ID )
-			return lookup_symbol_type(class_table, curr_method_table, self->id); /* FIXME FIXME: In here we should lookup the type's type using semantic stuff */
+			return lookup_symbol_type(class_table, curr_method_table, self->id);
 		else {
 			if ( self->type == TYPE_INTLIT ) {
 				check_intlit(self->id);
@@ -639,7 +652,7 @@ int is_binary_op_boolean(nodetype_t type) {
    ;	
 }
 
-/* FIXME: This is unimplemented, we need to cover function calls */
+
 ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 	nodetype_t type = node->nodetype;
 	assert(node_is_oper(node));
@@ -660,7 +673,7 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 			return TYPE_INT;
 		}
 
-		return expr_type;
+		return expr_type; /* Luckily, this also covers parseargs, which returns TYPE_INT */
 	} else if (is_binary_oper(type)) {
 		/* In the first child we have the first subtree (might just be an Id) that gives us the type */
 		ijavatype_t expr_type1 =  get_tree_type(node->n1, class_table, curr_method_table);
@@ -682,7 +695,7 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 				return TYPE_STRING;
 		} else if ( is_binary_op_boolean(type) ) {
 			return TYPE_BOOL;
-		} /* FIXME: Same thing for ParseArgs */
+		}
 
 
 		return expr_type2; /* Or expr_type2 */
@@ -783,6 +796,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 				assert(iter->n1->id);
 				char* type1_str = sym_type_names[type_lhs];
 				char* type2_str = sym_type_names[type_index];
+				/* This is WORKING in mooshak */
 				printf("Operator [ cannot be applied to types %s, %s\n", type1_str, type2_str);
 				exit(0);
 				/* !!! PROGRAM FLOW ENDS !!! */
@@ -799,6 +813,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 				assert(iter->n1->id);
 				char* type1_str = sym_type_names[type_rhs];
 				char* type2_str = sym_type_names[type_lhs];
+				/* This is WORKING in mooshak */
 				printf("Incompatible type in assignment to %s[] (got %s, required %s)\n", iter->n1->id, type1_str, type2_str);
 				exit(0);
 				/* !!! PROGRAM FLOW ENDS !!! */
@@ -817,13 +832,20 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 				printf("Incompatible type in return statement (got %s, required %s)\n", type1_str, type2_str);
 				exit(0);
 				/* !!! PROGRAM FLOW ENDS !!! */
+			} else if ( expected_return_type == TYPE_VOID && iter->n1 ) {
+				/* FIXME: for stuff like public static void voider() { return voider(); } */
+				/* Currently DOES NOT seem to be tested by Mooshak */
+				char* type1_str = sym_type_names[expr_type];
+				char* type2_str = sym_type_names[expected_return_type];
+				printf("Incompatible type in return statement (got %s, required %s)\n", type1_str, type2_str);
+				exit(0);
 			}
 		}  else if ( iter->nodetype == NODE_STATEMENT_PRINT ) {
 			ijavatype_t expr_type = TYPE_VOID;
 			if ( iter->n1 )
 				expr_type = get_tree_type(iter->n1, class_table, curr_method_table);
 
-			if ( expr_type == TYPE_STRINGARRAY || expr_type == TYPE_INTARRAY || expr_type == TYPE_BOOLARRAY ) {
+			if ( expr_type == TYPE_STRINGARRAY || expr_type == TYPE_INTARRAY || expr_type == TYPE_BOOLARRAY || expr_type == TYPE_VOID || expr_type == TYPE_METHOD ) {
 				/* FIXME: MAYBE CHANGE THIS */
 				char* type1_str = sym_type_names[expr_type];
 				printf("Incompatible type in print statement (got %s, required boolean or int)\n", type1_str);
