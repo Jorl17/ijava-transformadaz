@@ -2,7 +2,7 @@ class Test
 {
     static int outsideInteger;
     static int b;
-
+ 
     public static void main(String []args)
     {
         int a, j, k;

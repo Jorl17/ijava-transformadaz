@@ -231,10 +231,10 @@ int main(int argc, char* argv[])
         print_ast(ast_root);
     
     /*Create the symbol tables*/
-    if ( !had_error)
+    if ( !had_error && (!show_ast || show_tables))
         class_table = analyse_ast(ast_root);
 
-if ( !had_error)
+    if ( !had_error)
         check_ast_for_semantic_errors(ast_root, class_table);
 
     if (show_tables && !had_error)
