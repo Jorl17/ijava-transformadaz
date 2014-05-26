@@ -1,0 +1,12 @@
+class echo
+{
+	public static int k;
+	public static void main(String[] args)
+	{
+		int i;
+
+		k = 0;
+		i = k + 1;
+		System.out.println("Hello World! " + i);
+ 	}
+}
