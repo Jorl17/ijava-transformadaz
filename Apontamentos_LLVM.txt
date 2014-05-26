@@ -1,0 +1,87 @@
+\0A -> \n
+\00 -> \0
+
+Por defeito ele parece estar a por o \n ao imprimir
+
+Definir função: "define <tipo> @nome_da_funcao([argumentos])"
+Podemos fazer "declare <tipo> @nome_da_funcao([argumentos])" se quisermos fazer apenas uma declaração da função
+
+Variávies Locais: "%1"; "%banana"; etc
+Variávies Globais: "@1"; "@banana"; etc
+Não podemos definir duas variávies com o mesmo nome!
+
+Inteiros -> i8; i16; i32; i64; etc
+Floats -> f32; f64; etc
+Vectores -> v8i16 (para um vector 8 x i16)
+Booleans -> i1
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Operações:
+Soma - add
+Multiplicação - mul
+Subtracção - sub
+Divisão Inteira - udiv
+Módulo Divisão Inteira - urem
+And - and
+Or - or
+
+icmp <comp> <tipo> op1, op2 --> comp pode ser "eq"(==); "ne"(!=); "sgt"(>); "sge"(>=); "slt"(<); "sle"(<=)
+
+Exemplos:
+%1 = mul i 32 2 , 8
+%2 = add i 32 %1, 2
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+%arr = alloca i32 , i32 3 --> Alocar array para 3 inteiros
+%ind0 = getelementptr i32* %arr, i32 0 --> Vai buscar um ponteiro para o primeiro elemento do array
+					  int* & array [0]
+
+%ind0v = load i32* %ind0 --> Carrega para %ind0v o valor apontado por %ind0, ou seja, carrega para %ind0v o valor do primeiro elemento do array
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Chamada de Funções:
+%1 = call i32 (i32, i32, i32)* @sum (i32, 1, i32 2, i32 3) -- "i32 (i32, i32, i32)*" -> Ponteiro para a função. A função tem que ser declarada antes (?)
+"i32 (i32, i32, i32)" -> Tipo da função (Tipo de retorno + tipo dos parâmetros)
+
+APENAS PODE EXISTIR UM "ret" NA FUNÇÃO!
+
+Exemplo comando return:
+ret i32 0
+ret i32 %3
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Condicional if:
+x = 1;
+a = 0;
+if ( x > a)
+	x = x + 1;
+else
+	x = x - 1;
+
+a = a + 1;
+x = x + 1;
+return 0;
+
+Codigo LLVM:
+entry:
+	%1 = add i32 0, 1
+	%2 = add i32 0, 0
+	%ifcond = icmp sgt i32 %1, %2
+	br i1 %ifcond, label %then, label %else
+
+then:
+	%1 = add i32 %1, 1
+	br label %ret
+
+else:
+	%1 = sub i32, %1, 1
+	br label %ret
+
+ret:
+	%2 = add i32 %2, 1
+	%1 = phi i32 [%1, %then], [%1, %else] //O operador phi vai buscar o valor de x (%1) correcto, de acordo com a label executada
+	ret i32 0
