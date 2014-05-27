@@ -1,0 +1,22 @@
+class echo
+{
+	public static void main(String[] args)
+	{
+		int a = 2;
+		int k;
+
+		if (a == 2)
+		{
+			a++;
+			k = a * 2;
+			System.out.println("Hello World!");
+		}
+
+		else
+		{
+			a--;
+			k = a / 2;
+			System.out.println("Goodbye World!");
+		}
+ 	}
+}
