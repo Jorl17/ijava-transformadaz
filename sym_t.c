@@ -595,18 +595,18 @@ ijavatype_t get_tree_type(node_t* self, sym_t* class_table, sym_t* curr_method_t
 		/* We shouldn't ever recurse to other NODE_TYPEs */
 		assert(self->type == TYPE_ID || self->type == TYPE_INTLIT || self->type == TYPE_BOOLLIT); 
 		if ( self->type == TYPE_ID )
-			return lookup_symbol_type(class_table, curr_method_table, self->id);
+			return (self->tree_type = lookup_symbol_type(class_table, curr_method_table, self->id));
 		else {
 			if ( self->type == TYPE_INTLIT ) {
 				check_intlit(self->id);
-				return TYPE_INT;
+				return ( self->tree_type = TYPE_INT );
 			} else
-				return TYPE_BOOL;
+				return self->tree_type = TYPE_BOOL;
 		}
 	}
 
 	else if ( node_is_oper(self) ) {
-		return node_get_oper_type(self, class_table, curr_method_table);
+		return (self->tree_type = node_get_oper_type(self, class_table, curr_method_table));
 	}
 
 	else {
@@ -665,11 +665,11 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 
 		/* FIXME: THis is so fugly */
 		if ( type == NODE_OPER_NEWBOOL )
-			return TYPE_BOOLARRAY;
+			return ( node->tree_type = TYPE_BOOLARRAY );
 		 else if ( type == NODE_OPER_NEWINT)
-			return TYPE_INTARRAY;
+			return ( node->tree_type = TYPE_INTARRAY );
 		else if ( type == NODE_OPER_LENGTH) {
-			return TYPE_INT;
+			return ( node->tree_type = TYPE_INT );
 		}
 
 		return expr_type; /* Luckily, this also covers parseargs, which returns TYPE_INT */
@@ -687,13 +687,13 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 		if ( type == NODE_OPER_LOADARRAY ) {
 			assert(expr_type1 == TYPE_BOOLARRAY || expr_type1 == TYPE_INTARRAY || TYPE_STRINGARRAY);
 			if ( expr_type1 == TYPE_INTARRAY )
-				return TYPE_INT;
+				return ( node->tree_type = TYPE_INT);
 			else if ( expr_type1 == TYPE_BOOLARRAY )
-				return TYPE_BOOL;
+				return ( node->tree_type = TYPE_BOOL );
 			else if ( expr_type1 == TYPE_STRINGARRAY )
-				return TYPE_STRING;
+				return ( node->tree_type = TYPE_STRING );
 		} else if ( is_binary_op_boolean(type) ) {
-			return TYPE_BOOL;
+			return ( node->tree_type = TYPE_BOOL );
 		}
 
 
@@ -742,7 +742,7 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 					exit(0);
 		}
 
-		return return_type;
+		return ( node->tree_type = return_type );
 
 	} else {
 		printf("SHOULD NEVER GET HERE! Forcing assert!\n");

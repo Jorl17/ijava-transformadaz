@@ -54,6 +54,9 @@ sym_t* lookup_method(sym_t* class_table, char* method_name);
 ijavatype_t get_return_type(sym_t* table);
 ijavatype_t lookup_return_type(sym_t* class_table, char* method_name);
 
+int is_binary_oper(nodetype_t oper);
+int is_unary_oper(nodetype_t oper);
+
 void check_ast_for_semantic_errors(node_t* root, sym_t* class_table);
 
 #endif

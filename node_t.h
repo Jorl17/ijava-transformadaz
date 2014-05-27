@@ -152,7 +152,10 @@ struct _node_t {
       the value of the int variable*/
     ijavavalue_t value;
 
-    /* FIXME: More things to come */
+    /* This is the type of the tree starting at this node. Or so to say, it is
+       its "role". For instance, for de "+" node in 3+5 it is TYPE_INT.
+       Filled during semantic analysis */
+    ijavatype_t tree_type;
 };
 
 #endif

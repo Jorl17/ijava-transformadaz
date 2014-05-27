@@ -463,7 +463,7 @@ int count_nodes_in_list(node_t* list) {
 node_t* node_create_statement_potential_compoundstatement(node_t* statements) {
     /* Statements might be NULL if, for instance, the user just inserts {}, in which case
        we wish to carry with it being NULL. Note also that NULL statements are filtered out
-       of the list because of the way we built node_steatement_append_statement() (go check it out)
+       of the list because of the way we built node_statement_append_statement() (go check it out)
     */
     if ( statements == NULL ) return NULL;
     int num_statements = count_nodes_in_list(statements);
