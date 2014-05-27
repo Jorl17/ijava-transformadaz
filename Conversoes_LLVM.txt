@@ -1,0 +1,49 @@
+Conversões LLVM:
+
+//-------------- Store --------------
+
+a = 1;//Assumo que a esta em %a e 1 esta em %1
+store i32 %1, i32* %a
+
+a = true;
+store i1 true, i1* %a
+
+a = false;
+store i1 false, i1* %a
+
+//-------------- Soma --------------
+a + b;
+add i32 %a, %b
+
+//-------------- Subtraccao --------------
+a - b;
+sub i32 %a, %b
+
+//-------------- Multiplicacao --------------
+a * b;
+mul i32 %a, %b
+
+//-------------- Divisao Inteira --------------
+a / b;
+udiv i32 %a, %b
+
+//-------------- Modulo Divisao Inteira --------------
+a % b;
+urem i32 %a, %b
+
+//-------------- AND --------------
+a && b;
+and i32 %a, %b
+
+//-------------- OR --------------
+a || b;
+or i32 %a, %b
+
+//-------------- Operador Unario "-" --------------
+- b;
+sub i32 0, -%b
+
+//-------------- Operador Unario "+" --------------
++ b;
+add i32 0, %b
+
