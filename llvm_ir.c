@@ -202,6 +202,26 @@ llvm_var_t* llvm_node_to_instr_unop(node_t* node, sym_t* class_table, sym_t* cur
     return ret;
 }
 
+void llvm_lookup_symbol_from_table(llvm_var_t* ret, char* id, sym_t* class_table, sym_t* curr_method_table) {
+
+  assert(ret);
+  assert(id);
+  asert(class_table);
+  assert(curr_method_table);
+
+  int local;
+
+  sym_t* result = lookup_symbol(class_table, curr_method_table, id, &local);
+
+  ret->type = strdup(llvm_type_from_ijavatype(result->type));
+
+  ret->id = (char *)malloc((2 + strlen(id))*sizeof(char));
+
+  assert((local == 0 || local == 1));/*SHOULD NOT BE NEEDED BUT LET'S KEEP IT SAFE*/
+
+  sprintf(ret->id, "%s%s", local==1 ? "%" : "@", id);
+}
+
 llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
     assert(node->nodetype == NODE_TYPE);
     assert(node->type == TYPE_INTLIT || node->type == TYPE_BOOLLIT || node->type == TYPE_ID);
@@ -211,6 +231,8 @@ llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t
         /*FIXME: Look it up from the table
             FIXME: Joca, do your awesome thing man
         ret->repr = strdup(node->id);*/
+
+        llvm_lookup_symbol_from_table(ret, node->id, class_table, curr_method_table);
     } else {
         /** FIXME: Must convert intlits by pipelining them */
         ret->repr = strdup(node->id);
