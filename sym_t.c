@@ -554,7 +554,7 @@ int node_is_statement(node_t* self) {
 
 ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 
-void check_intlit(char* literal) {
+int check_intlit(char* literal) {
 	DEBUG_PRINT("[check_intlit] literal=%s\n", literal);
 	/* FIXME: Joca, do this thing and error out if needed */
 	char* endptr;
@@ -614,7 +614,7 @@ void check_intlit(char* literal) {
 			exit(0);
 		}
 		DEBUG_PRINT("[DEBUG]The entire string was converted to value %d\n", number);
-		return ;
+		return number;
 	}
 }
 

@@ -434,6 +434,7 @@ void llvm_lookup_symbol_from_table(llvm_var_t* ret, char* id, sym_t* class_table
 llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
     assert(node->nodetype == NODE_TYPE);
     assert(node->type == TYPE_INTLIT || node->type == TYPE_BOOLLIT || node->type == TYPE_ID);
+    int value;
     llvm_var_t* ret = llvm_var_create();   
 
     if ( node->type == TYPE_ID ) {
@@ -447,9 +448,10 @@ llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t
         ret->type = TYPE_BOOL;
 	} else {
           /** FIXME: Must convert intlits by pipelining them */
-    }
-
-    return ret;
+        ret->type = TYPE_INT;
+        value = check_intlit(node->id);
+        ret->repr = (char *)malloc(16*sizeof(char));
+        sprintf(ret->repr, "%d", value);
 }
 
 llvm_var_t* llvm_node_to_instr_return(node_t* node, sym_t* class_table, sym_t* curr_method_table) {

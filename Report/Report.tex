@@ -60,7 +60,7 @@ Nesta linguagem todos os programas são constituídos por uma única classe, que
 
 Podemos utilizar literais dos tipos inteiro e booleano e variáveis inteiras, boleanas e arrays unidimensionais de inteiros e booleanos.
 
-A linguagem implementa ainda expressões aritméticas e lógicas, operações relacionais simples, instruções de atribuição e controlo ($if-else$ e $while$).
+A linguagem implementa também expressões aritméticas e lógicas, operações relacionais simples, instruções de atribuição e controlo ($if-else$ e $while$).
 
 Os métodos definidos, e os respectivos valores de retorno, podem receber como argumentos variáveis de qualquer tipo acima mencionado, com excepção do método $main$, que tal como em $Java$ possui como tipo de retorno o tipo $void$.
 
@@ -68,7 +68,7 @@ Os métodos definidos, e os respectivos valores de retorno, podem receber como a
 
 O desenvolvimento do compilador foi dividido em três fases distintas.
 
-Numa primeira fase foi realizada a \emph{Análise Lexical} do progrma fonte, onde são identificados $tokens$, isto é, cadeias pertencentes à linguagem e que têm significado e relevância para o programa.
+Numa primeira fase foi realizada a \emph{Análise Lexical} do programa fonte, onde são identificados $tokens$, isto é, cadeias pertencentes à linguagem e que têm significado e relevância para o programa.
 
 Seguiu-se a \emph{Análise Semântica}, composta por quatro etapas principais: FIXME, MUDAR A MANEIRA COMO ESTAMOS A DIZER O QUE SE SEGUE
 
@@ -82,11 +82,52 @@ Seguiu-se a \emph{Análise Semântica}, composta por quatro etapas principais: F
 \item \textbf{Verificação de erros semânticos}, etapa principal da \emph{Análise Semântica}, onde são realizadas verificações de tipos, garantindo que para cada operação a realizar não existem incompatiblidades de tipos entre os operandos nela envolvidos.
 \end{itemize}
 
-A última fase do trabalho consistiu na \emph{Geração de Código Intermédio}, da qual resulta, na representação intermédia de $LLVM$,  um programa equivalente ao que pretendemos compilar.
+A última fase do trabalho consistiu na \emph{Geração de Código Intermédio}, da qual resulta, na representação intermédia de $LLVM$, um programa equivalente ao que pretendemos compilar.
+
+METER IMAGEM BONITINHA, TIPO CACEIRO???
 
 \pagebreak
 
 \section{Análise Lexical}
+
+Tal como referimos anteriormente, na \emph{Análise Lexical} procedemos à identificação dos $tokens$ da nossa linguagem. Sempre que é detectada a presença de um comentário no programa a compilar, seja do tipo $// ...$ (comentários de apenas uma linha) ou do tipo $/* ... */$ (comentários multi-linha), os caracteres incluídos nesse comentário são ignorados.
+
+Sempre que é detectado um caracter, ou uma sequência de caracteres, que não constitui nenhum $token$ é detectado um erro lexical, sendo impressa uma mensagem de erro, indicando a existência de um caracter ilegal, juntamente com a sua posição no programa.
+
+Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha que não foi devidamente terminado, o erro lexical é também detectado, sendo impressa uma mensagem de erro que indica a posição no programa onde o comentário foi iniciado.
+
+Em seguida, apresentamos a lista dos $tokens$ válidos na linguagem $iJava$ e a lista dos $tokens$ reservados que, por essa razão, não estão disponíveis na nossa linguagem:
+
+\begin{enumerate}
+\item \textbf{BOOLLIT}
+
+\item \textbf{INT}
+
+\item \textbf{BOOL}
+
+\item \textbf{NEW}
+
+\item \textbf{IF}
+
+\item \textbf{ELSE}
+
+\item \textbf{WHILE}
+
+\item \textbf{PRINT}
+
+\item \textbf{PARSEINT}
+
+\item \textbf{CLASS}
+
+\item \textbf{PUBLIC}
+
+\item \textbf{STATIC}
+
+\item \textbf{VOID}
+
+\item \textbf{STRING}
+\end{enumerate}
+
 
 \pagebreak
 
