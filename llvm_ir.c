@@ -58,10 +58,16 @@ char* get_label_name() {
 typedef struct _llvm_var_t {
     char* repr; /* Representation: %1,@1, etc... */
     ijavatype_t type; /* TYPE_INTARRAY, TYPE_INT... */
+    int value; /* To specify if it's a raw value instead of a pointer */
 } llvm_var_t;
 
 llvm_var_t* llvm_var_create() {
-    return (llvm_var_t*) malloc( sizeof (llvm_var_t));
+    llvm_var_t* ret = (llvm_var_t*)malloc( sizeof (llvm_var_t));
+    ret->value = 0;
+    ret->type = TYPE_UNKNOWN;
+    ret->repr = NULL;
+
+    return ret;
 }
 
 /* Frees an llvm_var_t */
@@ -137,6 +143,17 @@ void llvm_label(char* label) {
   printf("%s:\n", label);
 }
 
+void llvm_store_names_types(char* dest, char* src, ijavatype_t ijavatype) {
+  assert(src); assert(dest);
+  const char* type = llvm_type_from_ijavatype(ijavatype);
+  printf("store %s %s, %s* %s\n", type, src, type, dest);  
+}
+
+void llvm_store(llvm_var_t* dest, llvm_var_t* src) {
+  assert(src); assert(dest); assert(src->type == dest->type);
+  llvm_store_names_types(dest->repr, src->repr, src->type);
+}
+
 
 void llvm_define_function(sym_t* function_table) {
   assert(function_table);
@@ -146,7 +163,7 @@ void llvm_define_function(sym_t* function_table) {
   /* Start at next->next to skip return value */
   for ( current = function_table->next->next; current != NULL; current = current->next ) {
     if ( current->is_parameter )
-      printf("%s %%%s", llvm_type_from_ijavatype(current->type), current->id);
+      printf("%s %%.%s", llvm_type_from_ijavatype(current->type), current->id);
 
     /* Print comma if there is one more parameter */
     if ( current->next && current->next->is_parameter ) printf(", ");
@@ -161,46 +178,76 @@ void llvm_declare_locals(sym_t* function_table) {
   for ( current = function_table->next->next; current != NULL; current = current->next )
     if ( !current->is_parameter )
       llvm_declare_local(current->type, current->id);
-}
-
-
-
-void llvm_function_prologue(ijavatype_t ret) {
-  llvm_declare_local(ret, "return");
-  increase_return_label_count();
-}
-
-void llvm_function_epilogue(ijavatype_t ret) {
-  char* label = get_current_return_label_name();
-  llvm_label(label);
-  printf("ret %s %%return\n", llvm_type_from_ijavatype(ret));
-  free(label);
-  printf("}\n");
-}
-
-void llvm_store(llvm_var_t* dest, llvm_var_t* src) {
-  assert(src); assert(dest); assert(src->type == dest->type);
-  const char* type = llvm_type_from_ijavatype(src->type);
-  printf("store %s %s, %s* %s\n", type, src->repr, type, dest->repr);  
-}
-void llvm_load(char* loaded, llvm_var_t* src) {
-  assert(loaded); assert(src); 
-  const char* type = llvm_type_from_ijavatype(src->type);
-  printf("%s = load %s %s\n", loaded, type, src->repr);
+    else {
+      char* buf_in = (char*)malloc(strlen(current->id)+2);
+      char* buf_out = (char*)malloc(strlen(current->id)+2);
+      sprintf(buf_in,"%%.%s", current->id);
+      sprintf(buf_out,"%%%s", current->id);
+      llvm_declare_local(current->type, current->id);
+      llvm_store_names_types(buf_out, buf_in, current->type);
+      free(buf_in);
+      free(buf_out);
+    }
 }
 
 void llvm_goto(char* label) {
   printf("br label %%%s\n", label);
 }
 
+void llvm_load(char* loaded, llvm_var_t* src) {
+  assert(loaded); assert(src); 
+  const char* type = llvm_type_from_ijavatype(src->type);
+  printf("%s = load %s* %s\n", loaded, type, src->repr);
+}
+
+void llvm_function_prologue(ijavatype_t ret) {
+  llvm_declare_local(ret, "return");
+  increase_return_label_count();
+}
+
+/* We need to do some hacky stuff. First we need to have at least one reference to the return label, so
+   we add a goto. Then, we need to return the value stored at return. Since return is on the stack,
+   we must load it onto another variable (we chose .return) and this is what we return
+ */
+void llvm_function_epilogue(ijavatype_t ret) {
+  char* label = get_current_return_label_name();
+  llvm_var_t* return_val = llvm_var_create(); return_val->repr=strdup("%return"); return_val->type = ret;
+  llvm_goto(label);
+  llvm_label(label);
+  llvm_load("%.return", return_val);
+  printf("ret %s %%.return\n", llvm_type_from_ijavatype(ret));  
+  free(label);
+  printf("}\n");
+  llvm_var_free(return_val);
+}
+
+
+llvm_var_t* llvm_get_value_from_ptr_or_value(llvm_var_t* var) {
+  assert(var);
+  llvm_var_t* var_loaded = llvm_var_create();
+
+  if ( var->value ) {
+     var_loaded->type = var->type; var_loaded->value = 1;
+     var_loaded->repr = strdup(var->repr);
+  }
+  else {
+    var_loaded->type = var->type; var_loaded->value = 1;
+    var_loaded->repr = get_local_var_name();
+    llvm_load(var_loaded->repr, var);
+  }
+
+    return var_loaded;  
+}
+
+
 void llvm_return(ijavatype_t ret, llvm_var_t* var) {
+  assert(ret == var->type);
   char* label = get_current_return_label_name();
 
   if ( ret == TYPE_VOID ) {
     /* Do nothing */
   } else {
-    llvm_var_t* return_var = llvm_var_create(); return_var->type = ret; return_var->repr = strdup("return");
-    llvm_store(return_var, var); 
+    llvm_store_names_types("%return", var->repr, ret); 
   }
 
   llvm_goto(label);  
@@ -213,7 +260,7 @@ void llvm_icmp(const char* comparison, char* dest, char* op1, char* op2) {
 }
 
 void llvm_br(char* condvar, char* labelthen, char* labelelse) {
-  printf("br i1 %s label %%%s, label %%%s\n", condvar, labelthen, labelelse);
+  printf("br i1 %s, label %%%s, label %%%s\n", condvar, labelthen, labelelse);
 }
 
 void llvm_recurse_down(node_t* iter, sym_t* class_table, sym_t* table_method);
@@ -296,8 +343,9 @@ const char* llvm_get_op_from_node(node_t* node) {
 
 llvm_var_t* llvm_node_to_instr_binop_relational(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
   /* Declare result, which will hold the answer */
-  llvm_var_t* result = llvm_var_create(); result->type = TYPE_BOOL; result->repr=get_local_var_name(); 
+  llvm_var_t* result = llvm_var_create(); result->type = TYPE_BOOL; result->repr=get_local_var_name(); result->value=0; 
   llvm_var_t* a, *b;
+  char* loaded;
   llvm_declare_local(TYPE_BOOL, result->repr);
 
   if ( node->nodetype == NODE_OPER_AND ) {
@@ -310,13 +358,21 @@ llvm_var_t* llvm_node_to_instr_binop_relational(node_t* node, sym_t* class_table
     char* labelendifelse = get_label_name();
 
     a = llvm_node_to_instr(node->n1, class_table, curr_method_table);   /* get "%a" */
-    llvm_store(result, a);                                              /* result = a */
-    llvm_br(result->repr, labelthen, labelendifelse);                   /* if ( result ) goto labelthen; else goto labelendifelse; */
-    llvm_label(labelthen);                                              /* labelthen: */
-      b = llvm_node_to_instr(node->n2, class_table, curr_method_table); /* get "%b" */
-      llvm_store(result, b);                                            /* result = b */
-    llvm_label(labelendifelse);                                         /* labelendifelse: */
+    llvm_var_t* a_loaded = llvm_get_value_from_ptr_or_value(a);
+    llvm_store(result, a_loaded);                                       /* result = a */
+    llvm_var_free(a_loaded);
 
+    llvm_var_t* result_loaded = llvm_get_value_from_ptr_or_value(result);
+    llvm_br(result_loaded->repr, labelthen, labelendifelse);                   /* if ( result ) goto labelthen; else goto labelendifelse; */
+    llvm_label(labelthen);                                              /* labelthen: */
+    b = llvm_node_to_instr(node->n2, class_table, curr_method_table); /* get "%b" */
+      
+    llvm_var_free(result_loaded);
+    llvm_var_t* b_loaded = llvm_get_value_from_ptr_or_value(b);
+    llvm_store(result, b_loaded);                                       /* result = a */                                          /* result = b */
+    llvm_goto(labelendifelse);                                        /* goto labelendifelse; */
+    llvm_label(labelendifelse);                                         /* labelendifelse: */
+    /*llvm_var_free(loaded_b);*/
   } else if  ( node->nodetype == NODE_OPER_OR ) {
     /* Implement short circuiting */
     /* a || b becomes
@@ -327,23 +383,38 @@ llvm_var_t* llvm_node_to_instr_binop_relational(node_t* node, sym_t* class_table
     char* labelendifelse = get_label_name();
 
     a = llvm_node_to_instr(node->n1, class_table, curr_method_table); /* get "%a" */
+    llvm_var_t* a_loaded = llvm_get_value_from_ptr_or_value(a);
+    llvm_store(result, a_loaded); /* tmp = a */
+    llvm_var_free(a_loaded);
 
-    llvm_store(result, a); /* tmp = a */
-
-    llvm_var_t* notresult = llvm_var_create(); notresult->type = TYPE_BOOL; notresult->repr=get_local_var_name();
-    llvm_declare_local(TYPE_BOOL, notresult->repr);                     /* Declare notresult */
-    llvm_bin_op("xor", "i1", notresult->repr, result->repr, "true");    /* notresult = result xor true //// same as notresult = !result */
+    llvm_var_t* result_loaded = llvm_get_value_from_ptr_or_value(result);
+    llvm_var_t* notresult = llvm_var_create(); notresult->type = TYPE_BOOL; notresult->repr=get_local_var_name(); notresult->value = 1;
+    
+    llvm_bin_op("xor", "i1", notresult->repr, result_loaded->repr, "true");    /* notresult = result xor true //// same as notresult = !result */
+    llvm_var_free(result_loaded);
     llvm_br(notresult->repr, labelthen, labelendifelse);                /* if ( notresult ) goto labelthen; else goto labelendifelse; */
     llvm_label(labelthen);                                              /* labelthen: */
       b = llvm_node_to_instr(node->n2, class_table, curr_method_table); /* get "%b" */
-      llvm_store(result, b);                                            /* tmp = b */
+      llvm_var_t* b_loaded = llvm_get_value_from_ptr_or_value(b);
+      llvm_store(result, b_loaded);                                            /* tmp = b */
+      llvm_var_free(b_loaded);
+    llvm_goto(labelendifelse);                                        /* goto labelendifelse; */
     llvm_label(labelendifelse);                                         /* labelendifelse: */
 
 
   } else {
     a = llvm_node_to_instr(node->n1, class_table, curr_method_table);        /* Evaluate first operand */
     b = llvm_node_to_instr(node->n2, class_table, curr_method_table);        /* Evaluate second operand */
-    llvm_icmp(llvm_get_op_from_node(node), result->repr, a->repr, b->repr);  /* Store comparison in result */
+
+    llvm_var_t* a_loaded = llvm_get_value_from_ptr_or_value(a);
+    llvm_var_t* b_loaded = llvm_get_value_from_ptr_or_value(b);
+
+    char* tmp = get_local_var_name();
+    llvm_icmp(llvm_get_op_from_node(node), tmp, a_loaded->repr, b_loaded->repr);  /* Store comparison in result */
+    llvm_store_names_types(result->repr, tmp, TYPE_BOOL);
+
+    llvm_var_free(a_loaded);
+    llvm_var_free(b_loaded);
   }
 
   llvm_var_free(a);
@@ -366,16 +437,24 @@ llvm_var_t* llvm_node_to_instr_binop(node_t* node, sym_t* class_table, sym_t* cu
       llvm_var_t* op1 = llvm_node_to_instr(node->n1, class_table, curr_method_table);
       llvm_var_t* op2 = llvm_node_to_instr(node->n2, class_table, curr_method_table);
 
+      llvm_var_t* op1_loaded = llvm_get_value_from_ptr_or_value(op1);
+      llvm_var_t* op2_loaded = llvm_get_value_from_ptr_or_value(op2);
+
       /* Get a nice juicy name for ourselves */
       ret->repr = get_local_var_name();
 
       /* Get the type from the previously calculated "tree_type". Avoids having a fixed table where we map operations to their output sizes */
       ret->type = node->tree_type;
 
+      /* FIXME: Added this in */
+      ret->value = 1;
+
       /* Output the binary op code */
-      llvm_bin_op(llvm_get_op_from_node(node), llvm_type_from_ijavatype(ret->type), ret->repr, op1->repr, op2->repr);
+      llvm_bin_op(llvm_get_op_from_node(node), llvm_type_from_ijavatype(ret->type), ret->repr, op1_loaded->repr, op2_loaded->repr);
       llvm_var_free(op1);
       llvm_var_free(op2);
+      llvm_var_free(op1_loaded);
+      llvm_var_free(op2_loaded);
 
       return ret;
     }
@@ -391,22 +470,27 @@ llvm_var_t* llvm_node_to_instr_unop(node_t* node, sym_t* class_table, sym_t* cur
     const char* op;
     llvm_var_t* op1 = llvm_var_create();
 
-    if      ( node->nodetype == NODE_OPER_PLUS )  { op = "add"; op1->repr = strdup("0");    op1->type = TYPE_INT; }
-    else if ( node->nodetype == NODE_OPER_MINUS ) { op = "sub"; op1->repr = strdup("0");    op1->type = TYPE_INT; }
-    else if ( node->nodetype == NODE_OPER_NOT )   { op = "xor"; op1->repr = strdup("true"); op1->type = TYPE_BOOL;  }
+    if      ( node->nodetype == NODE_OPER_PLUS )  { op = "add"; op1->repr = strdup("0");    op1->type = TYPE_INT;  op1->value = 1;}
+    else if ( node->nodetype == NODE_OPER_MINUS ) { op = "sub"; op1->repr = strdup("0");    op1->type = TYPE_INT;   op1->value = 1;}
+    else if ( node->nodetype == NODE_OPER_NOT )   { op = "xor"; op1->repr = strdup("true"); op1->type = TYPE_BOOL;  op1->value = 1; }
 
     /* Recurse down and find the variables that will be our operands */
     llvm_var_t* op2 = llvm_node_to_instr(node->n1, class_table, curr_method_table);
+    llvm_var_t* op2_loaded = llvm_get_value_from_ptr_or_value(op2);
+
 
     /* Get a nice juicy name for ourselves */
     ret->repr = get_local_var_name();
 
     ret->type = node->tree_type;
 
+    ret->value = 1;
+
     /* Output the binary op code */
-    llvm_bin_op(llvm_get_op_from_node(node), llvm_type_from_ijavatype(ret->type), ret->repr, op1->repr, op2->repr);
+    llvm_bin_op(op, llvm_type_from_ijavatype(ret->type), ret->repr, op1->repr, op2_loaded->repr);
     llvm_var_free(op1);
     llvm_var_free(op2); 
+    llvm_var_free(op2_loaded); 
 
     return ret;
 }
@@ -426,6 +510,8 @@ void llvm_lookup_symbol_from_table(llvm_var_t* ret, char* id, sym_t* class_table
 
   ret->repr = (char *)malloc((2 + strlen(id))*sizeof(char));
 
+  ret->value = 0;
+
   assert((local == 0 || local == 1));/*SHOULD NOT BE NEEDED BUT LET'S KEEP IT SAFE*/
 
   sprintf(ret->repr, "%s%s", local==1 ? "%" : "@", id);
@@ -444,23 +530,40 @@ llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t
 
         llvm_lookup_symbol_from_table(ret, node->id, class_table, curr_method_table);
     } else if ( node->type == TYPE_BOOLLIT) {
-        ret->repr = strdup(node->id);
-        ret->type = TYPE_BOOL;
+       ret->type = TYPE_BOOL;
+       ret->repr = get_local_var_name();
+       printf("%s = add i1 0, %d\n", ret->repr, node->id[0] == 't' ? 1 : 0);
+       ret->value = 1;
+        
 	} else {
-          /** FIXME: Must convert intlits by pipelining them */
+        char* val;
         ret->type = TYPE_INT;
-        value = check_intlit(node->id);
-        ret->repr = (char *)malloc(16*sizeof(char));
-        sprintf(ret->repr, "%d", value);
-}
+        ret->repr = get_local_var_name();
+
+        value = check_intlit(node->id);        
+
+        printf("%s = add i32 0, %d\n", ret->repr, value);
+        ret->value = 1;
+   }
+
+   return ret;
+ }
+
 
 llvm_var_t* llvm_node_to_instr_return(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
   assert(node);
   ijavatype_t ret = get_return_type(curr_method_table);
-  llvm_var_t* val = node->n1 ? llvm_node_to_instr(node->n1, class_table, curr_method_table) : NULL;
+  
 
-  llvm_return(ret, val);
-  if ( val ) llvm_var_free(val);
+  if ( !ret == TYPE_VOID ) {
+    llvm_return(ret, NULL);
+  }  else {
+    llvm_var_t* val = llvm_node_to_instr(node->n1, class_table, curr_method_table);  
+    llvm_var_t* val_loaded = llvm_get_value_from_ptr_or_value(val);
+    llvm_return(ret, val_loaded);
+    llvm_var_free(val);
+    llvm_var_free(val_loaded);
+  }
   return NULL;
 }
 
@@ -471,8 +574,10 @@ llvm_var_t* llvm_node_to_instr_store(node_t* node, sym_t* class_table, sym_t* cu
   llvm_var_t* src = llvm_node_to_instr(node->n2, class_table, curr_method_table);
   llvm_var_t* dest = llvm_var_create(); llvm_lookup_symbol_from_table(dest, node->n1->id, class_table, curr_method_table);
 
-  llvm_store(dest, src);
+  llvm_var_t* src_loaded = llvm_get_value_from_ptr_or_value(src);
+  llvm_store(dest, src_loaded);
   llvm_var_free(src);
+  llvm_var_free(src_loaded);
   llvm_var_free(dest);
   return NULL;
 }
@@ -508,7 +613,9 @@ void llvm_output_code(node_t* root, sym_t* class_table) {
         ijavatype_t return_val = get_return_type(iter->table_method);
         llvm_define_function(iter->table_method);
         llvm_function_prologue(return_val);
-        llvm_recurse_down(iter->method_start->n2, class_table, iter->table_method);
+        llvm_declare_locals(iter->table_method);
+        if ( iter->method_start->n2 )
+          llvm_recurse_down(iter->method_start->n2, class_table, iter->table_method);
         llvm_function_epilogue(return_val);
       }      
   }
