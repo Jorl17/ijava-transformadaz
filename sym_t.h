@@ -56,6 +56,8 @@ ijavatype_t lookup_return_type(sym_t* class_table, char* method_name);
 
 int is_binary_oper(nodetype_t oper);
 int is_unary_oper(nodetype_t oper);
+int node_is_statement(node_t* self);
+int is_binary_op_boolean(nodetype_t type);
 
 void check_ast_for_semantic_errors(node_t* root, sym_t* class_table);
 
