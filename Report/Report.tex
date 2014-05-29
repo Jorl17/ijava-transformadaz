@@ -228,13 +228,70 @@ Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha qu
 
 \pagebreak
 
-\section{Construção da Árvore de Sintaxe Abstracta}
+\section{Construção da Árvore de Sintaxe Abstrata}
+
+FIXME: METER AQUI TAMBÉM O CODIGO: ESTRUTURA NODE\_T E OS TIPOS E ENUM'S PRESENTES NO NODE\_T.H
 
 \pagebreak
 
 \section{Análise Semântica}
 
+	Até esta fase da compilação os passos executados, estruturas criadas, etc tinham como principal objetivo certificar que o programa, de facto, estava escrito na linguagem \emph{iJava} adotada.
+	
+	Na fase da \emph{Análise Semântica} pretendemos estender esse estudo, procurando aferir se as instruções que constituem o programa possuem, de facto, algum significado em \emph{iJava}.
+	
+	Assim, nesta fase da compilação, a principal preocupação irá recair sobre as operações a realizar indicadas no programa, verificando a compatibilidade dos tipos de dados envolvidos nestas. Nesse sentido necessitamos de criar um estrutura que, de alguma forma, nos permita armazenar e consultar as variáveis (e os respetivos tipos) a que podemos aceder a partir de uma qualquer zona do programa.
+	
+	Para tal, foi necessário criar e implementar \emph{Tabelas de Símbolos}, que nos permitem aceder a essas mesmas informações. Desta forma podemos verificar os tipos dos dados envolvidos nas diversas operações que constituem o programa, detetando eventuais situações de incompatibilidade entre tipos, inválidas nos programas.
+
 	\subsection{Tabelas de Símbolos}
+	
+	Uma \emph{Tabela de Símbolos} (ou um \emph{Ambiente}) é, como já referimos, uma estrutura de dados que mapeia identificadores com os seus tipos e localizações.
+	
+	Como a nossa linguagem apenas permite a execução de programas com uma única classe, que possui métodos e atributos estáticos e públicos, necessitamos de conhecer todos os métodos e atributos que compõem a classe, bem como as variáveis definidas em cada um dos métodos.
+	
+	Desta forma podemos facilmente detetar situações em que são invocados métodos não declarados na classe, ou em que são utilizados atributos não definidos na classe ou para o método no qual se pretende utilizar o atributo. 
+
+	Por estas razões mantemos uma \emph{Tabela de Símbolos} para a classe na qual está contido o programa, sendo também mantida uma \emph{Tabela de Símbolos} para cada método definido para a classe.
+	
+	\subsubsection{Criação das Tabelas de Símbolos}
+	
+	Cada \emph{Tabela de Símbolos} é criada a partir da \emph{Árvore de Sintaxe Abstrata}, construída na etapa anterior da compilação.
+	
+	Assim, para a criação da \emph{Tabela de Símbolos} da classe do programa, percorremos os nós da \emph{Árvore de Sintaxe Abstrata} relativos às declarações de atributos e métodos, criando uma nova entrada na tabela para cada método ou atributo declarado, na qual se armazenam o nome do método ou atributo declarado.
+	
+	No caso da entrada corresponder a um atributo é também armazenado o tipo do atributo. Caso a entrada corresponda à declaração de um método é guardado uma referência para a \emph{Tabela de Símbolos} do método.
+	
+	Na criação da \emph{Tabela de Símbolos} de um método da classe percorremos os nós da \emph{Árvore de Sintaxe Abstrata} relativos às instruções que compõem o método, criando na sua \emph{Tabela de Símbolos} uma entrada onde armazenamos o seu nome, outra onde é armazenado o tipo de retorno, e uma entrada para cada argumento ou variável local declarada, contendo o respetivo tipo.
+	
+	\subsubsection{Implementação}
+	
+	Na listagem que se segue apresentamos a estrutura de dados utilizada para representar e implementar cada \emph{Tabela de Símbolos} criada, à qual demos o nome de \emph{sym\_t}:
+	
+	\begin{lstlisting}
+typedef struct _sym_t sym_t;	
+
+struct _sym_t{
+	ijava_table_type_t node_type;
+	char* id;
+	ijavatype_t type;
+	int is_parameter;
+	sym_t* next;
+	sym_t* table_method;
+	node_t* method_start;
+};
+
+typedef enum {
+	CLASS_TABLE,
+	METHOD_TABLE,
+	VARIABLE,
+	METHOD
+} ijava_table_type_t;
+	\end{lstlisting}
+	
+	Chamamos também a atenção do leitor para a definição do tipo \\* \emph{ijava\_table\_type\_t}, apresentado a par da estrutura \emph{sym\_t}.
+	
+	Lembramos ainda que os tipos \emph{ijavatype\_t} e \emph{node\_t} foram apresentados na definição das estruturas utilizadas na \emph{Árvore de Sintaxe Abstracta}.
 	
 	\pagebreak
 	
