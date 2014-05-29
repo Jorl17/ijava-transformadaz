@@ -37,7 +37,7 @@ char* get_current_return_label_name() {
 
 char* get_label_name() {
     char* buf = (char*)malloc(64);
-    sprintf(buf, "label%%%u", ++llvm_label_count);
+    sprintf(buf, "label%u", ++llvm_label_count);
     return buf;
 }
 
@@ -113,6 +113,7 @@ const char* llvm_type_from_ijavatype(ijavatype_t type) {
 
 void llvm_declare_local_onetype(ijavatype_t ijava_type, const char* name) {
     const char* type = llvm_type_from_ijavatype(ijava_type);
+    if ( *name == '%' ) name++; /* Skip over '%' which might be extra */
     printf("%%%s = alloca %s, align 4\n", name, type);
     printf("store %s 0, %s* %%%s\n", type, type, name);
 }
@@ -145,7 +146,7 @@ void llvm_define_function(sym_t* function_table) {
   /* Start at next->next to skip return value */
   for ( current = function_table->next->next; current != NULL; current = current->next ) {
     if ( current->is_parameter )
-      printf("%s %s", llvm_type_from_ijavatype(current->type), current->id);
+      printf("%s %%%s", llvm_type_from_ijavatype(current->type), current->id);
 
     /* Print comma if there is one more parameter */
     if ( current->next && current->next->is_parameter ) printf(", ");
@@ -177,23 +178,33 @@ void llvm_function_epilogue(ijavatype_t ret) {
   printf("}\n");
 }
 
-void llvm_return(ijavatype_t ret, llvm_var_t* var) {
-  char* label = get_current_return_label_name();
-  printf("br label %s\n", label);
-
-  if ( ret == TYPE_VOID ) {
-    /* Do nothing */
-  } else {
-    /* FIXME: Unfinished */  
-  }
-  
-  free(label);
-}
-
 void llvm_store(llvm_var_t* dest, llvm_var_t* src) {
   assert(src); assert(dest); assert(src->type == dest->type);
   const char* type = llvm_type_from_ijavatype(src->type);
   printf("store %s %s, %s* %s\n", type, src->repr, type, dest->repr);  
+}
+void llvm_load(char* loaded, llvm_var_t* src) {
+  assert(loaded); assert(src); 
+  const char* type = llvm_type_from_ijavatype(src->type);
+  printf("%s = load %s %s\n", loaded, type, src->repr);
+}
+
+void llvm_goto(char* label) {
+  printf("br label %%%s\n", label);
+}
+
+void llvm_return(ijavatype_t ret, llvm_var_t* var) {
+  char* label = get_current_return_label_name();
+
+  if ( ret == TYPE_VOID ) {
+    /* Do nothing */
+  } else {
+    llvm_var_t* return_var = llvm_var_create(); return_var->type = ret; return_var->repr = strdup("return");
+    llvm_store(return_var, var); 
+  }
+
+  llvm_goto(label);  
+  free(label);
 }
 
 void llvm_icmp(const char* comparison, char* dest, char* op1, char* op2) {
@@ -202,7 +213,7 @@ void llvm_icmp(const char* comparison, char* dest, char* op1, char* op2) {
 }
 
 void llvm_br(char* condvar, char* labelthen, char* labelelse) {
-  printf("br i1 %s label %s, label %s\n", condvar, labelthen, labelelse);
+  printf("br i1 %s label %%%s, label %%%s\n", condvar, labelthen, labelelse);
 }
 
 void llvm_recurse_down(node_t* iter, sym_t* class_table, sym_t* table_method);
@@ -464,13 +475,16 @@ llvm_var_t* llvm_node_to_instr_store(node_t* node, sym_t* class_table, sym_t* cu
   return NULL;
 }
 
-void llvm_recurse_down(node_t* iter, sym_t* class_table, sym_t* table_method) {
-  assert( node_is_statement(iter) );
+void llvm_recurse_down(node_t* iter, sym_t* class_table, sym_t* table_method) {  
+  assert(iter);
 
-  if ( iter->nodetype == NODE_STATEMENT_COMPOUNDSTATEMENT) {
-      llvm_recurse_down(iter->n1, class_table, table_method);
-  } else {
-      llvm_node_to_instr(iter, class_table, table_method);
+  for ( ;iter != NULL ; iter = iter->next) {
+    assert( node_is_statement(iter) );
+    if ( iter->nodetype == NODE_STATEMENT_COMPOUNDSTATEMENT) {
+        llvm_recurse_down(iter->n1, class_table, table_method);
+    } else {
+        llvm_node_to_instr(iter, class_table, table_method);
+    }
   }
 
 }
