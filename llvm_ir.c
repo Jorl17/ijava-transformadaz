@@ -104,7 +104,7 @@ const char* llvm_types_from_ijavatypes[]  = {
     "IntArray" /* TYPE_INTARRAY */ /* FIXME*/,
     "BoolArray" /* TYPE_BOOLARRAY */  /* FIXME */,
     "i8*" /* TYPE_STRINGARRAY */ /* FIXME */,
-    "void" /*TYPE_VOID*/ /*FIXME */,
+    "i32" /*TYPE_VOID*/ /*FIXME */,
     "NOT_EXPECTED_ID" /* TYPE_STRINGARRAY */ /* FIXME */,
     "i32" /* TYPE_INTLIT */,
     "i1" /* TYPE_BOOLLIT */ /* FIXME */,
