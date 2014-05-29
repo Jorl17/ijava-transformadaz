@@ -11,7 +11,7 @@ define i32 @main() nounwind uwtable {
   store i32 %3, i32* %i, align 4  ;Store the value of the sum in the i variable, finish the i = k + 1 command
   %4 = load i32* %i, align 4 		  ;Load the value of the i variable
   %5 = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([16 x i8]* @.str, i32 0, i32 0), i32 %4)	;Print stuff
-  ret i32 0 						          ;Return the function
+  ret i32 %4 						          ;Return the function
 }
 
 declare i32 @printf(i8*, ...)

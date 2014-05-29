@@ -101,8 +101,8 @@ void llvm_unary_op(const char* op, llvm_type_t type, char* val) {
 const char* llvm_types_from_ijavatypes[]  = {
     "i32" /* TYPE_INT */,
     "i1" /* TYPE_BOOL */ /* FIXME */,
-    "IntArray" /* TYPE_INTARRAY */ /* FIXME*/,
-    "BoolArray" /* TYPE_BOOLARRAY */  /* FIXME */,
+    "%.IntArray" /* TYPE_INTARRAY */ /* FIXME*/,
+    "%.BoolArray" /* TYPE_BOOLARRAY */  /* FIXME */,
     "i8*" /* TYPE_STRINGARRAY */ /* FIXME */,
     "void" /*TYPE_VOID*/ /*FIXME */,
     "NOT_EXPECTED_ID" /* TYPE_STRINGARRAY */ /* FIXME */,
@@ -125,9 +125,37 @@ void llvm_declare_local_onetype(ijavatype_t ijava_type, const char* name) {
 }
 
 void llvm_declare_local_array(ijavatype_t ijava_type, const char* name) {
+    if ( *name == '%' ) name++; /* Skip over '%' which might be extra */
+    const char* type = llvm_type_from_ijavatype(ijavatype);
     if ( ijava_type == TYPE_INTARRAY ) {
 
+      printf("%%%s = alloca %s, align 8\n", name, type);
+      printf("%%.%s = getelementptr inbounds %s* %%%s, i32 0, i32 0\n", name, type, name);
+      printf("store i32 0, i32* %%.1%s, align 4\n", name);
+      printf("%%..%s = getelementptr inbounds %s* %%%s, i32 0, i32 1\n", name, type, name);
+      printf("store i32* null, i32** %%..%s, align 8\n", name);
+/*
+        %array = alloca %.IntArray, align 8
+        %.1 = getelementptr inbounds %.IntArray* %array, i32 0, i32 0
+        store i32 40, i32* %.1, align 4
+        %..1 = getelementptr inbounds %.IntArray* %array, i32 0, i32 1
+        store i32* null, i32** %..1, align 8
+*/
     } else if ( ijava_type == TYPE_BOOLARRAY ) {
+
+      printf("%%%s = alloca %s, align 8\n", name, type);
+      printf("%%.%s = getelementptr inbounds %s* %%%s, i32 0, i32 0\n", name, type, name);
+      printf("store i32 0, i1* %%.1%s, align 4\n", name);
+      printf("%%..%s = getelementptr inbounds %s* %%%s, i32 0, i32 1\n", name, type, name);
+      printf("store i1* null, i1** %%..%s, align 8\n", name);
+
+/*
+  %array = alloca %.BoolArray, align 8
+  %.1 = getelementptr inbounds %.BoolArray* %array, i32 0, i32 0
+  store i32 40, i32* %.1, align 4
+  %..1 = getelementptr inbounds %.BoolArray* %array, i32 0, i32 1
+  store i1* null, i1** %..1, align 8
+*/
 
     }
 }
