@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.31)  29 MAY 2014 00:14
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.31)  29 MAY 2014 00:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -671,18 +671,14 @@ No file Report.ind.
 \openout6 = `Report.toc'.
 
  [2]
-Overfull \hbox (14.68486pt too wide) in paragraph at lines 63--64
-[]\OT1/cmr/m/n/10.95 A lin-gua-gem im-ple-menta ainda ex-press~oes aritm^^Setic
-as e l^^Sogicas, opera^^Xc~oes
- []
-
 LaTeX Font Info:    Try loading font information for OMS+cmr on input line 76.
-(/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
+ (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 76.
- [3]
+
+[3]
 Overfull \hbox (17.6868pt too wide) in paragraph at lines 82--83
 []\OT1/cmr/bx/n/10.95 Verifica^^Xc~ao de er-ros sem^anticos\OT1/cmr/m/n/10.95 ,
  etapa prin-ci-pal da \OT1/cmr/m/it/10.95 An^^Salise Sem^antica\OT1/cmr/m/n/10.
@@ -690,15 +686,15 @@ Overfull \hbox (17.6868pt too wide) in paragraph at lines 82--83
  []
 
 [4] [5] [6] [7] [8] [9] [10]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 115.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 124.
  [11]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 115.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 124.
  (./Report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 115.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 115.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 124.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 124.
 Package rerunfilecheck Info: File `Report.out' has not changed.
 (rerunfilecheck)             Checksum: 08255CB6927CE9112ED30C22D97E3E99;586.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 115.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 124.
  ) 
 Here is how much of TeX's memory you used:
  9376 strings out of 495007
@@ -716,7 +712,7 @@ mf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist
 /fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/t
 ype1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmti10.pfb>
-Output written on Report.pdf (11 pages, 112839 bytes).
+Output written on Report.pdf (11 pages, 117618 bytes).
 PDF statistics:
  139 PDF objects out of 1000 (max. 8388607)
  116 compressed objects within 2 object streams
