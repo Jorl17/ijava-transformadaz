@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.31)  29 MAY 2014 12:19
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.31)  29 MAY 2014 14:23
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -678,62 +678,22 @@ File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 76.
 
-[3]
-Overfull \hbox (17.6868pt too wide) in paragraph at lines 82--83
-[]\OT1/cmr/bx/n/10.95 Verifica^^Xc~ao de er-ros sem^anticos\OT1/cmr/m/n/10.95 ,
- etapa prin-ci-pal da \OT1/cmr/m/it/10.95 An^^Salise Sem^antica\OT1/cmr/m/n/10.
-95 ,
- []
-
-[4] [5]
-Overfull \hbox (7.00328pt too wide) in paragraph at lines 174--175
-[]\OT1/cmr/m/n/10.95 Para al^^Sem dos $\OML/cmm/m/it/10.95 tokens$ \OT1/cmr/m/n
-/10.95 apre-sen-ta-dos, de-fi-ni-mos ainda os se-guin-tes $\OML/cmm/m/it/10.95 
-tokens$\OT1/cmr/m/n/10.95 ,
- []
-
-[6]
-Overfull \hbox (23.5205pt too wide) in paragraph at lines 185--186
-[]\OT1/cmr/bx/n/10.95 SINGLE[]LINE[]COMMENT\OT1/cmr/m/n/10.95 : $\OML/cmm/m/it/
-10.95 Token$ \OT1/cmr/m/n/10.95 uti-li-zado para de-te-tar a ocorr^encia
- []
-
-
-Overfull \hbox (71.89357pt too wide) in paragraph at lines 206--207
-\OT1/cmr/m/n/10.95 no-ra-dos, com exce^^Xc~ao do $\OML/cmm/m/it/10.95 token$ \O
-T1/cmr/m/n/10.95 de fe-cho do co-ment^^Sario multi-linha ($\OML/cmm/m/it/10.95 
-CLOSE[]COMMENT$\OT1/cmr/m/n/10.95 )
- []
-
-[7]
-Overfull \hbox (18.08684pt too wide) in paragraph at lines 212--213
-\OT1/cmr/m/n/10.95 quando o ana-li-sa-dor n~ao se en-con-tra no es-tado $\OML/c
-mm/m/it/10.95 MULTI[]LINE[]COMMENT[]S$
- []
-
-[8] [9] [10] [11] [12] [13]
+[3] [4] [5] [6] [7] [8] [9] [10] [11] [12] [13]
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 251.
  [14]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 251.
  (./Report.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 251.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 251.
-
-
-Package rerunfilecheck Warning: File `Report.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `Report.out':
-(rerunfilecheck)             Before: 115F37A6582A97467C8DFC58B1FC8719;705
-(rerunfilecheck)             After:  0B91350C893FE068F62F1E68CF1AFDE2;783.
+Package rerunfilecheck Info: File `Report.out' has not changed.
+(rerunfilecheck)             Checksum: 0B91350C893FE068F62F1E68CF1AFDE2;783.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 251.
  ) 
 Here is how much of TeX's memory you used:
- 9404 strings out of 495007
- 129219 string characters out of 6180696
- 231426 words of memory out of 5000000
- 12437 multiletter control sequences out of 15000+600000
+ 9405 strings out of 495007
+ 129235 string characters out of 6180696
+ 230426 words of memory out of 5000000
+ 12438 multiletter control sequences out of 15000+600000
  12005 words of font info for 45 fonts, out of 8000000 for 9000
  16 hyphenation exceptions out of 8191
  29i,10n,35p,552b,404s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -746,10 +706,10 @@ mf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist
 ype1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmsy6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
 msfonts/cm/cmti10.pfb>
-Output written on Report.pdf (14 pages, 146129 bytes).
+Output written on Report.pdf (14 pages, 147232 bytes).
 PDF statistics:
- 168 PDF objects out of 1000 (max. 8388607)
- 141 compressed objects within 2 object streams
+ 172 PDF objects out of 1000 (max. 8388607)
+ 145 compressed objects within 2 object streams
  28 named destinations out of 1000 (max. 500000)
- 89 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 97 words of extra memory for PDF output out of 10000 (max. 10000000)
 

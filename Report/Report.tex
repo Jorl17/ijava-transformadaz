@@ -79,7 +79,7 @@ Seguiu-se a \emph{Análise Semântica}, composta por quatro etapas principais: F
 
 \item \textbf{Construção da tabela de símbolos}, utilizadas para armazenar informações relevantes sobre a classe (seus atributos e métodos), bem como sobre cada método definido pelo programador (como, por exemplo, o tipo de retorno e os argumentos).
 
-\item \textbf{Verificação de erros semânticos}, etapa principal da \emph{Análise Semântica}, onde são realizadas verificações de tipos, garantindo que para cada operação a realizar não existem incompatibilidades de tipos entre os operandos nela envolvidos.
+\item \textbf{Verificação de erros semânticos}, etapa principal da \emph{Análise} \\* \emph{Semântica}, onde são realizadas verificações de tipos, garantindo que para cada operação a realizar não existem incompatibilidades de tipos entre os operandos nela envolvidos.
 
 \end{itemize}
 
@@ -171,7 +171,7 @@ Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha qu
 	\item \textbf{RESERVED}: $abstract \mid continue \mid for \mid switch \mid assert \mid default \mid goto \mid package \mid synchronized \mid do \mid private \mid this \mid break \mid double \mid implements \mid protected \mid throw \mid byte \mid import \mid throws \mid case \mid enum \mid instanceof \mid transient \mid catch \mid extends \mid short \mid try \mid char \mid final \mid interface \mid finally \mid long \mid strictfp \mid volatile \mid const \mid float \mid native \mid super \mid null \mid ++ \mid --$
 	\end{itemize}
 
-	Para além dos $tokens$ apresentados, definimos ainda os seguintes $tokens$, que passamos a especificar:
+	Para além dos \emph{tokens} apresentados, definimos outros $tokens$, que passamos a especificar:
 	
 	\begin{itemize}
 	\item \textbf{NEWLINE}: $Token$ correspondente ao caracter de mudança de linha, $\setminus n$
@@ -182,7 +182,7 @@ Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha qu
 	
 	\item \textbf{CLOSE\_COMMENT}: $Token$ correspondente ao fecho de um comentário multi-linha, $*/$
 	
-	\item \textbf{SINGLE\_LINE\_COMMENT}: $Token$ utilizado para detetar a ocorrência de um comentário de uma linha apenas
+	\item \textbf{SINGLE\_LINE\_COMMENT}: $Token$ utilizado para detetar a \\* ocorrência de um comentário de uma linha apenas
 	\end{itemize}
 	
 	Quando implementámos a \emph{Análise Sintática}, para resolver problemas de ambiguidade da gramática foi necessário, entre outras ações que iremos abordar na próxima secção, separar os $tokens$ \textbf{OP1}, \textbf{OP2}, \textbf{OP3} e \textbf{OP4} nas diferentes sequências alfanuméricas que os constituíam. Assim, temos ainda os seguintes $tokens$:
@@ -199,19 +199,19 @@ Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha qu
 	
 	\subsection{Comentários}
 	
-	Para identificarmos a ocorrência de comentários nos programas a compilar recorremos aos $tokens$ $OPEN\_COMMENT$, $CLOSE\_COMMENT$ e $SINGLE\_LINE\_COMMENT$.
+	Para identificarmos a ocorrência de comentários nos programas a compilar recorremos aos \emph{tokens} \emph{OPEN\_COMMENT}, \emph{CLOSE\_COMMENT} e \\* \emph{SINGLE\_LINE\_COMMENT}.
 	
-	Quando detetamos o $token$ $OPEN\_COMMENT$ é criado um novo estado no analisador, que indica a existência de um comentário multi-linha. A esse estamos demos o nome $MULTI\_LINE\_COMMENT\_S$.
+	Quando detetamos o \emph{token OPEN\_COMMENT} é criado um novo estado no analisador, que indica a existência de um comentário multi-linha. A esse estamos demos o nome \emph{MULTI\_LINE\_COMMENT\_S}.
 	
-	Uma vez neste estado, todos os caracteres e $tokens$ identificados são ignorados, com exceção do $token$ de fecho do comentário multi-linha ($CLOSE\_COMMENT$) e do $token$ de fim do ficheiro, $<<EOF>>$, disponível na ferramenta utilizada para desenvolver o analisador ($lex$).
+	Uma vez neste estado, todos os caracteres e \emph{tokens} identificados são ignorados, com exceção do \emph{token} de fecho do comentário multi-linha \\* (\emph{CLOSE\_COMMENT}) e do \emph{token} de fim do ficheiro, $<<EOF>>$, disponível na ferramenta utilizada para desenvolver o analisador (\emph{lex}).
 	
-	Caso seja identificado o $token$ $CLOSE\_COMMENT$, o estado do analisador é reposto, passando este a ter o seu estado por defeito.
+	Caso seja identificado o \emph{token CLOSE\_COMMENT}, o estado do analisador é reposto, passando este a ter o seu estado por defeito.
 	
 	Por outro lado, se for detetado $<<EOF>>$ temos uma situação em que um comentário multi-linha não foi devidamente terminado, pelo que é gerado um erro lexical, terminando a execução do analisador e sendo o utilizador informado da ocorrência do erro e da localização no programa fornecido do comando que inicia o comentário.
 	
-	Se, por alguma razão, o $token$ $CLOSE\_COMMENT$ for identificado quando o analisador não se encontra no estado $MULTI\_LINE\_COMMENT\_S$ é detetada a ocorrência de um erro lexical, uma vez que na nossa linguagem não é possível a existência do comando $*/$ sem que antes tenha sido colocado um $/*$. Mais uma vez, assim que o erro lexical é detetado o utilizador é informado com uma mensagem que indica a posição no programa onde se deu o erro, e o analisador termina a sua execução.
+	Se, por alguma razão, o \emph{token CLOSE\_COMMENT} for identificado quando o analisador não se encontra no estado \emph{MULTI\_LINE\_COMMENT\_S} é detetada a ocorrência de um erro lexical, uma vez que na nossa linguagem não é possível a existência do comando \emph{*/} sem que antes tenha sido colocado um \emph{/*}. Mais uma vez, assim que o erro lexical é detetado o utilizador é informado com uma mensagem que indica a posição no programa onde se deu o erro, e o analisador termina a sua execução.
 	
-	Ao detetarmos o $token$ $SINGLE\_LINE\_COMMENT$ vamos ignorar todos os caracteres e $tokens$ que se lhe seguirem, até que seja reconhecido o $token$ de mudança de linha ($NEWLINE$). Desta forma estamos a descartar toda a restante linha do programa, após a ocorrência de $\setminus \setminus$, tal como seria desejado proceder no tratamento de comentários de uma linha apenas.
+	Ao detetarmos o \emph{token SINGLE\_LINE\_COMMENT} vamos ignorar todos os caracteres e \emph{tokens} que se lhe seguirem, até que seja reconhecido o \emph{token} de mudança de linha (\emph{NEWLINE}). Desta forma estamos a descartar toda a restante linha do programa, após a ocorrência de $\setminus \setminus$, tal como seria desejado proceder no tratamento de comentários de uma linha apenas.
 	
 	\subsection{Tratamento de Erros Lexicais}
 	
