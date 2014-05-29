@@ -1,9 +1,12 @@
 \BOOKMARK [1][-]{section.1}{Introdu\347\343o}{}% 1
 \BOOKMARK [1][-]{section.2}{An\341lise Lexical}{}% 2
-\BOOKMARK [1][-]{section.3}{An\341lise Sint\341tica}{}% 3
-\BOOKMARK [1][-]{section.4}{Constru\347\343o da \301rvore de Sintaxe Abstracta}{}% 4
-\BOOKMARK [1][-]{section.5}{An\341lise Sem\342ntica}{}% 5
-\BOOKMARK [2][-]{subsection.5.1}{Tabelas de S\355mbolos}{section.5}% 6
-\BOOKMARK [2][-]{subsection.5.2}{Dete\347\343o de Erros Sem\342nticos}{section.5}% 7
-\BOOKMARK [1][-]{section.6}{Gera\347\343o de C\363digo}{}% 8
-\BOOKMARK [1][-]{section.7}{Aprecia\347\343o do Trabalho}{}% 9
+\BOOKMARK [2][-]{subsection.2.1}{Tokens}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Coment\341rios}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Tratamento de Erros Lexicais}{section.2}% 5
+\BOOKMARK [1][-]{section.3}{An\341lise Sint\341tica}{}% 6
+\BOOKMARK [1][-]{section.4}{Constru\347\343o da \301rvore de Sintaxe Abstracta}{}% 7
+\BOOKMARK [1][-]{section.5}{An\341lise Sem\342ntica}{}% 8
+\BOOKMARK [2][-]{subsection.5.1}{Tabelas de S\355mbolos}{section.5}% 9
+\BOOKMARK [2][-]{subsection.5.2}{Dete\347\343o de Erros Sem\342nticos}{section.5}% 10
+\BOOKMARK [1][-]{section.6}{Gera\347\343o de C\363digo}{}% 11
+\BOOKMARK [1][-]{section.7}{Aprecia\347\343o do Trabalho}{}% 12

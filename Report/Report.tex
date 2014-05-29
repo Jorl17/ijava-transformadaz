@@ -79,7 +79,7 @@ Seguiu-se a \emph{Análise Semântica}, composta por quatro etapas principais: F
 
 \item \textbf{Construção da tabela de símbolos}, utilizadas para armazenar informações relevantes sobre a classe (seus atributos e métodos), bem como sobre cada método definido pelo programador (como, por exemplo, o tipo de retorno e os argumentos).
 
-\item \textbf{Verificação de erros semânticos}, etapa principal da \emph{Análise Semântica}, onde são realizadas verificações de tipos, garantindo que para cada operação a realizar não existem incompatiblidades de tipos entre os operandos nela envolvidos.
+\item \textbf{Verificação de erros semânticos}, etapa principal da \emph{Análise Semântica}, onde são realizadas verificações de tipos, garantindo que para cada operação a realizar não existem incompatibilidades de tipos entre os operandos nela envolvidos.
 
 \end{itemize}
 
@@ -91,93 +91,135 @@ METER IMAGEM BONITINHA, TIPO CACEIRO???
 
 \section{Análise Lexical}
 
-Tal como referimos anteriormente, na \emph{Análise Lexical} procedemos à identificação dos $tokens$ da nossa linguagem. Sempre que é detectada a presença de um comentário no programa a compilar, seja do tipo $// ...$ (comentários de apenas uma linha) ou do tipo $/* ... */$ (comentários multi-linha), os caracteres incluídos nesse comentário são ignorados.
+Tal como referimos anteriormente, na \emph{Análise Lexical} procedemos à identificação dos $tokens$ da nossa linguagem. Para isso utilizámos a ferramenta $lex$, responsável por gerar analisadores lexicais para linguagens.
 
-Sempre que é detectado um caracter, ou uma sequência de caracteres, que não constitui nenhum $token$ é detectado um erro lexical, sendo impressa uma mensagem de erro, indicando a existência de um caracter ilegal, juntamente com a sua posição no programa.
+Assim, no nosso analisador, sempre que é detetada a presença de um comentário no programa a compilar, seja do tipo $// ...$ (comentários de apenas uma linha) ou do tipo $/* ... */$ (comentários multi-linha), os caracteres incluídos nesse comentário são ignorados.
 
-Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha que não foi devidamente terminado, o erro lexical é também detectado, sendo impressa uma mensagem de erro que indica a posição no programa onde o comentário foi iniciado.
+Sempre que é detetado um caracter, ou uma sequência de caracteres, que não constitui nenhum $token$ é detetado um erro lexical, sendo impressa uma mensagem de erro, indicando a existência de um caracter ilegal, juntamente com a sua posição no programa.
 
-Em seguida, apresentamos a lista dos $tokens$ válidos na linguagem $iJava$ e a lista dos $tokens$ reservados que, por essa razão, não estão disponíveis na nossa linguagem:
+Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha que não foi devidamente terminado, o erro lexical é também detetado, sendo impressa uma mensagem de erro que indica a posição no programa onde o comentário foi iniciado.
 
-\begin{itemize}
-\item \textbf{ID}: Sequências alfanuméricas (maiúsculas e minúsculas) começadas por uma letra, podendo conter também símbolos como $"\_"$ e $"\$"$
+	\subsection{Tokens}
 
-\item \textbf{INTLIT}: Sequências de dígitos decimais e hexadecimais (incluindo a-f e A-F) precedidas de $0x$. Este $token$ pode ser descrito também na forma da seguinte expressão regular: \emph{{[0-9]}+|0x[0-9a-fA-F]+}
+	Em seguida, apresentamos a lista dos $tokens$ válidos na linguagem $iJava$ e a lista dos $tokens$ reservados que, por essa razão, não estão disponíveis na nossa linguagem:
+	
+	\begin{itemize}
+	\item \textbf{ID}: Sequências alfanuméricas (maiúsculas e minúsculas) começadas por uma letra, podendo conter também símbolos como $"\_"$ e $"\$"$. Este $token$ pode também ser descrito na forma da sua expressão regular: \emph{{letra}({letra}|{[0-9]})*}, sendo o $token$ \textbf{letra} da nossa autoria, definido por: $[a-z] \mid [A-Z] \mid "\_"|"\$"$
+	
+	\item \textbf{INTLIT}: Sequências de dígitos decimais e hexadecimais (incluindo a-f e A-F) precedidas de $0x$. Este $token$ pode também ser descrito na forma da seguinte expressão regular: \emph{{[0-9]}+|0x[0-9a-fA-F]+}
+	
+	\item \textbf{BOOLLIT}: $true \mid false$
+	
+	\item \textbf{INT}: $int$
+	
+	\item \textbf{BOOL}: $boolean$
+	
+	\item \textbf{NEW}: $new$
+	
+	\item \textbf{IF}: $if$
+	
+	\item \textbf{ELSE}: $else$
+	
+	\item \textbf{WHILE}: $while$
+	
+	\item \textbf{PRINT}: $System.out.println$
+	
+	\item \textbf{PARSEINT}: $Integer.parseInt$
+	
+	\item \textbf{CLASS}: $class$
+	
+	\item \textbf{PUBLIC}: $public$
+	
+	\item \textbf{STATIC}: $static$
+	
+	\item \textbf{VOID}: $void$
+	
+	\item \textbf{STRING}: $String$
+	
+	\item \textbf{DOTLENGTH}: $.length$
+	
+	\item \textbf{RETURN}: $return$
+	
+	\item \textbf{OCURV}: $($
+	
+	\item \textbf{CCURV}: $)$
+	
+	\item \textbf{OBRACE}: $\{$
+	
+	\item \textbf{CBRACE}: $\}$
+	
+	\item \textbf{OSQUARE}: $[$
+	
+	\item \textbf{CSQUARE}: $]$
+	
+	\item \textbf{OP1}: $\&\& \mid \mid \mid$
+	
+	\item \textbf{OP2}: $< \mid > \mid == \mid != \mid <= \mid >=$
+	
+	\item \textbf{OP3}: $"+" \mid "-"$
+	
+	\item \textbf{OP4}: $"*" \mid "/" \mid "\%"$
+	
+	\item \textbf{NOT}: $"!"$
+	
+	\item \textbf{ASSIGN}: $"="$
+	
+	\item \textbf{SEMIC}: $";"$
+	
+	\item \textbf{COMMA}: $","$
+	
+	\item \textbf{RESERVED}: $abstract \mid continue \mid for \mid switch \mid assert \mid default \mid goto \mid package \mid synchronized \mid do \mid private \mid this \mid break \mid double \mid implements \mid protected \mid throw \mid byte \mid import \mid throws \mid case \mid enum \mid instanceof \mid transient \mid catch \mid extends \mid short \mid try \mid char \mid final \mid interface \mid finally \mid long \mid strictfp \mid volatile \mid const \mid float \mid native \mid super \mid null \mid ++ \mid --$
+	\end{itemize}
 
-\item \textbf{BOOLLIT}: $true \mid false$
-
-\item \textbf{INT}: $int$
-
-\item \textbf{BOOL}: $boolean$
-
-\item \textbf{NEW}: $new$
-
-\item \textbf{IF}: $if$
-
-\item \textbf{ELSE}: $else$
-
-\item \textbf{WHILE}: $while$
-
-\item \textbf{PRINT}: $System.out.println$
-
-\item \textbf{PARSEINT}: $Integer.parseInt$
-
-\item \textbf{CLASS}: $class$
-
-\item \textbf{PUBLIC}: $public$
-
-\item \textbf{STATIC}: $static$
-
-\item \textbf{VOID}: $void$
-
-\item \textbf{STRING}: $String$
-
-\item \textbf{DOTLENGTH}: $.length$
-
-\item \textbf{RETURN}: $return$
-
-\item \textbf{OCURV}: $($
-
-\item \textbf{CCURV}: $)$
-
-\item \textbf{OBRACE}: $\{$
-
-\item \textbf{CBRACE}: $\}$
-
-\item \textbf{OSQUARE}: $[$
-
-\item \textbf{CSQUARE}: $]$
-
-\item \textbf{OP1}: $\&\& \mid \mid \mid$
-
-\item \textbf{OP2}: $< \mid > \mid == \mid != \mid <= \mid >=$
-
-\item \textbf{OP3}: $"+" \mid "-"$
-
-\item \textbf{OP4}: $"*" \mid "/" \mid "\%"$
-
-\item \textbf{NOT}: $"!"$
-
-\item \textbf{ASSIGN}: $"="$
-
-\item \textbf{SEMIC}: $";"$
-
-\item \textbf{COMMA}: $","$
-
-\item \textbf{RESERVED}: $abstract \mid continue \mid for \mid switch \mid assert \mid default \mid goto \mid package \mid synchronized \mid do \mid private \mid this \mid break \mid double \mid implements \mid protected \mid throw \mid byte \mid import \mid throws \mid case \mid enum \mid instanceof \mid transient \mid catch \mid extends \mid short \mid try \mid char \mid final \mid interface \mid finally \mid long \mid strictfp \mid volatile \mid const \mid float \mid native \mid super \mid null \mid ++ \mid --$
-\end{itemize}
-
-Quando implementámos a \emph{Análise Sintática}, para resolver problemas de ambiguidade da gramática foi necessário, entre outras ações que iremos abordar na próxima secção, separar os $tokens$ \textbf{OP1}, \textbf{OP2}, \textbf{OP3} e \textbf{OP4} nas diferentes sequências alfanuméricas que os constituíam. Assim, temos ainda os seguintes $tokens$:
-
-\begin{itemize}
-\item \textbf{AND} ("\&\&") e \textbf{OR} ("$||$"), originados a partir do $token$ \textbf{OP1}
-
-\item \textbf{LE} ("<"), \textbf{GE} (">"), \textbf{EQ} ("=="), \textbf{NEQ} ("!="), \textbf{LEQ} ("<=") e \textbf{GEQ} (">="), originados a partir do $token$ \textbf{OP2}
-
-\item \textbf{PLUS} ("+") e \textbf {MINUS} ("-"), originados a partide do $token$ \textbf{OP3}
-
-\item \textbf{MULT} ("*"), \textbf{DIV} ("/") e \textbf{MOD} ("\%"), originados a partir do $token$ \textbf{OP4}
-\end{itemize}
+	Para além dos $tokens$ apresentados, definimos ainda os seguintes $tokens$, que passamos a especificar:
+	
+	\begin{itemize}
+	\item \textbf{NEWLINE}: $Token$ correspondente ao caracter de mudança de linha, $\setminus n$
+	
+	\item \textbf{WHITESPACE}:$Token$ correspondente ao caracter de espaço em branco
+	
+	\item \textbf{OPEN\_COMMENT}:  $Token$ correspondente ao início de um comentário multi-linha, $/*$
+	
+	\item \textbf{CLOSE\_COMMENT}: $Token$ correspondente ao fecho de um comentário multi-linha, $*/$
+	
+	\item \textbf{SINGLE\_LINE\_COMMENT}: $Token$ utilizado para detetar a ocorrência de um comentário de uma linha apenas
+	\end{itemize}
+	
+	Quando implementámos a \emph{Análise Sintática}, para resolver problemas de ambiguidade da gramática foi necessário, entre outras ações que iremos abordar na próxima secção, separar os $tokens$ \textbf{OP1}, \textbf{OP2}, \textbf{OP3} e \textbf{OP4} nas diferentes sequências alfanuméricas que os constituíam. Assim, temos ainda os seguintes $tokens$:
+	
+	\begin{itemize}
+	\item \textbf{AND} ("\&\&") e \textbf{OR} ("$||$"), originados a partir do $token$ \textbf{OP1}
+	
+	\item \textbf{LE} ("<"), \textbf{GE} (">"), \textbf{EQ} ("=="), \textbf{NEQ} ("!="), \textbf{LEQ} ("<=") e \textbf{GEQ} (">="), originados a partir do $token$ \textbf{OP2}
+	
+	\item \textbf{PLUS} ("+") e \textbf {MINUS} ("-"), originados a partide do $token$ \textbf{OP3}
+	
+	\item \textbf{MULT} ("*"), \textbf{DIV} ("/") e \textbf{MOD} ("\%"), originados a partir do $token$ \textbf{OP4}
+	\end{itemize}
+	
+	\subsection{Comentários}
+	
+	Para identificarmos a ocorrência de comentários nos programas a compilar recorremos aos $tokens$ $OPEN\_COMMENT$, $CLOSE\_COMMENT$ e $SINGLE\_LINE\_COMMENT$.
+	
+	Quando detetamos o $token$ $OPEN\_COMMENT$ é criado um novo estado no analisador, que indica a existência de um comentário multi-linha. A esse estamos demos o nome $MULTI\_LINE\_COMMENT\_S$.
+	
+	Uma vez neste estado, todos os caracteres e $tokens$ identificados são ignorados, com exceção do $token$ de fecho do comentário multi-linha ($CLOSE\_COMMENT$) e do $token$ de fim do ficheiro, $<<EOF>>$, disponível na ferramenta utilizada para desenvolver o analisador ($lex$).
+	
+	Caso seja identificado o $token$ $CLOSE\_COMMENT$, o estado do analisador é reposto, passando este a ter o seu estado por defeito.
+	
+	Por outro lado, se for detetado $<<EOF>>$ temos uma situação em que um comentário multi-linha não foi devidamente terminado, pelo que é gerado um erro lexical, terminando a execução do analisador e sendo o utilizador informado da ocorrência do erro e da localização no programa fornecido do comando que inicia o comentário.
+	
+	Se, por alguma razão, o $token$ $CLOSE\_COMMENT$ for identificado quando o analisador não se encontra no estado $MULTI\_LINE\_COMMENT\_S$ é detetada a ocorrência de um erro lexical, uma vez que na nossa linguagem não é possível a existência do comando $*/$ sem que antes tenha sido colocado um $/*$. Mais uma vez, assim que o erro lexical é detetado o utilizador é informado com uma mensagem que indica a posição no programa onde se deu o erro, e o analisador termina a sua execução.
+	
+	Ao detetarmos o $token$ $SINGLE\_LINE\_COMMENT$ vamos ignorar todos os caracteres e $tokens$ que se lhe seguirem, até que seja reconhecido o $token$ de mudança de linha ($NEWLINE$). Desta forma estamos a descartar toda a restante linha do programa, após a ocorrência de $\setminus \setminus$, tal como seria desejado proceder no tratamento de comentários de uma linha apenas.
+	
+	\subsection{Tratamento de Erros Lexicais}
+	
+	Tal como referimos nos pontos anteriores, sempre que o analisador desenvolvido deteta a ocorrência de um erro lexical (seja por existência de um $token$ não permitido ou por não término de um comentário multi-linha), é impressa uma mensagem de erro que indica a posição do erro no programa a compilar (indicando a linha e coluna onde o erro ocorreu).
+	
+	Quando é detetado um caracter ilegal, o analisador imprime a mensagem de erro, prosseguindo a sua execução na linha seguinte do programa a compilar até ser lido todo o conteúdo do programa.
+	
+	Tendo sido detetada a ocorrência de um ou mais erros lexicais, após ler todo o programa, o analisador termina a sua execução, não sendo realizado mais nenhum passo da compilação.
 
 
 \pagebreak
