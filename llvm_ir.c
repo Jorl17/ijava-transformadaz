@@ -88,6 +88,17 @@ void llvm_declare_global(const char* type, const char* name) {
 
 void llvm_declare_global_array(const char* type, const char* name) {
     /* FIXME */
+
+/*
+    Remember that we must have the following in the beginning of the generated code:
+
+    %.IntArray = type { i32, i32* }
+    %.BoolArray = type { i32, i8* }
+
+    Declaration of a global int array: @array = common global %.IntArray zeroinitializer, align 8
+
+    Declaration of a global bool array: @array = global %.BoolArray zeroinitializer, align 8
+*/
 }
 
 
