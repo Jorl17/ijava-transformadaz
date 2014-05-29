@@ -1,4 +1,4 @@
-% !TeX spellcheck = <none>
+% !TeX spellcheck = pt_PT
 \documentclass[11pt,a4paper]{article}
 \usepackage{etex}
 \reserveinserts{28}
@@ -58,13 +58,13 @@ O presente trabalho pretende-se desenvolver um compilador para a linguagem $iJav
 
 Nesta linguagem todos os programas são constituídos por uma única classe, que possui métodos e atributos estáticos, e públicos. Para além disso, a classe necessita obrigatoriamente de ter um método $main$, onde a execução do programa se inicia. 
 
-Podemos utilizar literais dos tipos inteiro e booleano e variáveis inteiras, boleanas e arrays unidimensionais de inteiros e booleanos.
+Podemos utilizar literais dos tipos inteiro e booleano e variáveis inteiras, booleanas e arrays uni-dimensionais de inteiros e booleanos.
 
 A linguagem implementa também expressões aritméticas e lógicas, operações relacionais simples, instruções de atribuição e controlo ($if-else$ e $while$).
 
-Os métodos definidos, e os respectivos valores de retorno, podem receber como argumentos variáveis de qualquer tipo acima mencionado, com excepção do método $main$, que tal como em $Java$ possui como tipo de retorno o tipo $void$.
+Os métodos definidos, e os respetivos valores de retorno, podem podem ser de qualquer tipo acima mencionado, com exceção do método $main$, que tal como em $Java$ possui como tipo de retorno o tipo $void$.
 
-É também possível passar parâmetros (literais inteiros) ao nosso programa através da linha de comandos. É o método $main$ que vai receber esses parâmetros, armazenando-os num array de objectos do tipo $String$. Embora este tipo de dados não esteja incluído na lista de tipos permitidos em $iJava$, a sua utilização apenas é permitida no método $main$, com a mera finalidade de obter os parâmetros passados ao programa aquando da sua invocação.
+É também possível passar parâmetros (literais inteiros) ao nosso programa através da linha de comandos. É o método $main$ que vai receber esses parâmetros, armazenando-os num array de objetos do tipo $String$. Embora este tipo de dados não esteja incluído na lista de tipos permitidos em $iJava$, a sua utilização apenas é permitida no método $main$, com a mera finalidade de obter os parâmetros passados ao programa aquando da sua invocação.
 
 O desenvolvimento do compilador foi dividido em três fases distintas.
 
@@ -73,13 +73,14 @@ Numa primeira fase foi realizada a \emph{Análise Lexical} do programa fonte, on
 Seguiu-se a \emph{Análise Semântica}, composta por quatro etapas principais: FIXME, MUDAR A MANEIRA COMO ESTAMOS A DIZER O QUE SE SEGUE
 
 \begin{itemize}
-\item \textbf{Tradução da gramática-fonte} (fornecida em notação $EBNF$) para o yacc, permitindo assim reconhecer se o programa fornecido é constituído por sequências de $tokens$ pertencentes à linguagem, e assim detectar eventuais erros de sintaxe.
+\item \textbf{Tradução da gramática-fonte} (fornecida em notação $EBNF$) para o yacc 3 e realização da \textbf{Análise Sintática} do programa, permitindo assim reconhecer se as sequências de $tokens$ que o constituem pertencem à linguagem, permitindo-nos assim detetar eventuais erros de sintaxe.
 
-\item \textbf{Construção da árvore de sintaxe abstracta}, etapa que é realizada em simultâneo com a verificação e validação do programa a compilar, de acordo com a gramática da nossa linguagem. A árvore de sintaxe abstracta irá representar o nosso programa a compilar, recorrendo a uma estrutura em árvore para representar as estruturas sintáticas das cadeias que constituem o programa a compilar.
+\item \textbf{Construção da árvore de sintaxe abstrata}, etapa que é realizada em simultâneo com a \emph{Análise Sintática}. A árvore de sintaxe abstrata irá representar o nosso programa a compilar, recorrendo a uma estrutura em árvore para representar as estruturas sintáticas das cadeias que constituem o programa a compilar.
 
 \item \textbf{Construção da tabela de símbolos}, utilizadas para armazenar informações relevantes sobre a classe (seus atributos e métodos), bem como sobre cada método definido pelo programador (como, por exemplo, o tipo de retorno e os argumentos).
 
-\item \textbf{Verificação de erros semânticos}, etapa principal da \emph{Análise Semântica}, onde são realizadas verificações de tipos, garantindo que para cada operação a realizar não existem incompatiblidades de tipos entre os operandos nela envolvidos.
+\item \textbf{Verificação de erros semânticos}, etapa principal da \emph{Análise Semântica}, onde são realizadas verificações de tipos, garantindo que para cada operação a realizar não existem incompatibilidades de tipos entre os operandos nela envolvidos.
+
 \end{itemize}
 
 A última fase do trabalho consistiu na \emph{Geração de Código Intermédio}, da qual resulta, na representação intermédia de $LLVM$, um programa equivalente ao que pretendemos compilar.
@@ -90,43 +91,135 @@ METER IMAGEM BONITINHA, TIPO CACEIRO???
 
 \section{Análise Lexical}
 
-Tal como referimos anteriormente, na \emph{Análise Lexical} procedemos à identificação dos $tokens$ da nossa linguagem. Sempre que é detectada a presença de um comentário no programa a compilar, seja do tipo $// ...$ (comentários de apenas uma linha) ou do tipo $/* ... */$ (comentários multi-linha), os caracteres incluídos nesse comentário são ignorados.
+Tal como referimos anteriormente, na \emph{Análise Lexical} procedemos à identificação dos $tokens$ da nossa linguagem. Para isso utilizámos a ferramenta $lex$, responsável por gerar analisadores lexicais para linguagens.
 
-Sempre que é detectado um caracter, ou uma sequência de caracteres, que não constitui nenhum $token$ é detectado um erro lexical, sendo impressa uma mensagem de erro, indicando a existência de um caracter ilegal, juntamente com a sua posição no programa.
+Assim, no nosso analisador, sempre que é detetada a presença de um comentário no programa a compilar, seja do tipo $// ...$ (comentários de apenas uma linha) ou do tipo $/* ... */$ (comentários multi-linha), os caracteres incluídos nesse comentário são ignorados.
 
-Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha que não foi devidamente terminado, o erro lexical é também detectado, sendo impressa uma mensagem de erro que indica a posição no programa onde o comentário foi iniciado.
+Sempre que é detetado um caracter, ou uma sequência de caracteres, que não constitui nenhum $token$ é detetado um erro lexical, sendo impressa uma mensagem de erro, indicando a existência de um caracter ilegal, juntamente com a sua posição no programa.
 
-Em seguida, apresentamos a lista dos $tokens$ válidos na linguagem $iJava$ e a lista dos $tokens$ reservados que, por essa razão, não estão disponíveis na nossa linguagem:
+Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha que não foi devidamente terminado, o erro lexical é também detetado, sendo impressa uma mensagem de erro que indica a posição no programa onde o comentário foi iniciado.
 
-\begin{enumerate}
-\item \textbf{BOOLLIT}
+	\subsection{Tokens}
 
-\item \textbf{INT}
+	Em seguida, apresentamos a lista dos $tokens$ válidos na linguagem $iJava$ e a lista dos $tokens$ reservados que, por essa razão, não estão disponíveis na nossa linguagem:
+	
+	\begin{itemize}
+	\item \textbf{ID}: Sequências alfanuméricas (maiúsculas e minúsculas) começadas por uma letra, podendo conter também símbolos como $"\_"$ e $"\$"$. Este $token$ pode também ser descrito na forma da sua expressão regular: \emph{{letra}({letra}|{[0-9]})*}, sendo o $token$ \textbf{letra} da nossa autoria, definido por: $[a-z] \mid [A-Z] \mid "\_"|"\$"$
+	
+	\item \textbf{INTLIT}: Sequências de dígitos decimais e hexadecimais (incluindo a-f e A-F) precedidas de $0x$. Este $token$ pode também ser descrito na forma da seguinte expressão regular: \emph{{[0-9]}+|0x[0-9a-fA-F]+}
+	
+	\item \textbf{BOOLLIT}: $true \mid false$
+	
+	\item \textbf{INT}: $int$
+	
+	\item \textbf{BOOL}: $boolean$
+	
+	\item \textbf{NEW}: $new$
+	
+	\item \textbf{IF}: $if$
+	
+	\item \textbf{ELSE}: $else$
+	
+	\item \textbf{WHILE}: $while$
+	
+	\item \textbf{PRINT}: $System.out.println$
+	
+	\item \textbf{PARSEINT}: $Integer.parseInt$
+	
+	\item \textbf{CLASS}: $class$
+	
+	\item \textbf{PUBLIC}: $public$
+	
+	\item \textbf{STATIC}: $static$
+	
+	\item \textbf{VOID}: $void$
+	
+	\item \textbf{STRING}: $String$
+	
+	\item \textbf{DOTLENGTH}: $.length$
+	
+	\item \textbf{RETURN}: $return$
+	
+	\item \textbf{OCURV}: $($
+	
+	\item \textbf{CCURV}: $)$
+	
+	\item \textbf{OBRACE}: $\{$
+	
+	\item \textbf{CBRACE}: $\}$
+	
+	\item \textbf{OSQUARE}: $[$
+	
+	\item \textbf{CSQUARE}: $]$
+	
+	\item \textbf{OP1}: $\&\& \mid \mid \mid$
+	
+	\item \textbf{OP2}: $< \mid > \mid == \mid != \mid <= \mid >=$
+	
+	\item \textbf{OP3}: $"+" \mid "-"$
+	
+	\item \textbf{OP4}: $"*" \mid "/" \mid "\%"$
+	
+	\item \textbf{NOT}: $"!"$
+	
+	\item \textbf{ASSIGN}: $"="$
+	
+	\item \textbf{SEMIC}: $";"$
+	
+	\item \textbf{COMMA}: $","$
+	
+	\item \textbf{RESERVED}: $abstract \mid continue \mid for \mid switch \mid assert \mid default \mid goto \mid package \mid synchronized \mid do \mid private \mid this \mid break \mid double \mid implements \mid protected \mid throw \mid byte \mid import \mid throws \mid case \mid enum \mid instanceof \mid transient \mid catch \mid extends \mid short \mid try \mid char \mid final \mid interface \mid finally \mid long \mid strictfp \mid volatile \mid const \mid float \mid native \mid super \mid null \mid ++ \mid --$
+	\end{itemize}
 
-\item \textbf{BOOL}
-
-\item \textbf{NEW}
-
-\item \textbf{IF}
-
-\item \textbf{ELSE}
-
-\item \textbf{WHILE}
-
-\item \textbf{PRINT}
-
-\item \textbf{PARSEINT}
-
-\item \textbf{CLASS}
-
-\item \textbf{PUBLIC}
-
-\item \textbf{STATIC}
-
-\item \textbf{VOID}
-
-\item \textbf{STRING}
-\end{enumerate}
+	Para além dos $tokens$ apresentados, definimos ainda os seguintes $tokens$, que passamos a especificar:
+	
+	\begin{itemize}
+	\item \textbf{NEWLINE}: $Token$ correspondente ao caracter de mudança de linha, $\setminus n$
+	
+	\item \textbf{WHITESPACE}:$Token$ correspondente ao caracter de espaço em branco
+	
+	\item \textbf{OPEN\_COMMENT}:  $Token$ correspondente ao início de um comentário multi-linha, $/*$
+	
+	\item \textbf{CLOSE\_COMMENT}: $Token$ correspondente ao fecho de um comentário multi-linha, $*/$
+	
+	\item \textbf{SINGLE\_LINE\_COMMENT}: $Token$ utilizado para detetar a ocorrência de um comentário de uma linha apenas
+	\end{itemize}
+	
+	Quando implementámos a \emph{Análise Sintática}, para resolver problemas de ambiguidade da gramática foi necessário, entre outras ações que iremos abordar na próxima secção, separar os $tokens$ \textbf{OP1}, \textbf{OP2}, \textbf{OP3} e \textbf{OP4} nas diferentes sequências alfanuméricas que os constituíam. Assim, temos ainda os seguintes $tokens$:
+	
+	\begin{itemize}
+	\item \textbf{AND} ("\&\&") e \textbf{OR} ("$||$"), originados a partir do $token$ \textbf{OP1}
+	
+	\item \textbf{LE} ("<"), \textbf{GE} (">"), \textbf{EQ} ("=="), \textbf{NEQ} ("!="), \textbf{LEQ} ("<=") e \textbf{GEQ} (">="), originados a partir do $token$ \textbf{OP2}
+	
+	\item \textbf{PLUS} ("+") e \textbf {MINUS} ("-"), originados a partide do $token$ \textbf{OP3}
+	
+	\item \textbf{MULT} ("*"), \textbf{DIV} ("/") e \textbf{MOD} ("\%"), originados a partir do $token$ \textbf{OP4}
+	\end{itemize}
+	
+	\subsection{Comentários}
+	
+	Para identificarmos a ocorrência de comentários nos programas a compilar recorremos aos $tokens$ $OPEN\_COMMENT$, $CLOSE\_COMMENT$ e $SINGLE\_LINE\_COMMENT$.
+	
+	Quando detetamos o $token$ $OPEN\_COMMENT$ é criado um novo estado no analisador, que indica a existência de um comentário multi-linha. A esse estamos demos o nome $MULTI\_LINE\_COMMENT\_S$.
+	
+	Uma vez neste estado, todos os caracteres e $tokens$ identificados são ignorados, com exceção do $token$ de fecho do comentário multi-linha ($CLOSE\_COMMENT$) e do $token$ de fim do ficheiro, $<<EOF>>$, disponível na ferramenta utilizada para desenvolver o analisador ($lex$).
+	
+	Caso seja identificado o $token$ $CLOSE\_COMMENT$, o estado do analisador é reposto, passando este a ter o seu estado por defeito.
+	
+	Por outro lado, se for detetado $<<EOF>>$ temos uma situação em que um comentário multi-linha não foi devidamente terminado, pelo que é gerado um erro lexical, terminando a execução do analisador e sendo o utilizador informado da ocorrência do erro e da localização no programa fornecido do comando que inicia o comentário.
+	
+	Se, por alguma razão, o $token$ $CLOSE\_COMMENT$ for identificado quando o analisador não se encontra no estado $MULTI\_LINE\_COMMENT\_S$ é detetada a ocorrência de um erro lexical, uma vez que na nossa linguagem não é possível a existência do comando $*/$ sem que antes tenha sido colocado um $/*$. Mais uma vez, assim que o erro lexical é detetado o utilizador é informado com uma mensagem que indica a posição no programa onde se deu o erro, e o analisador termina a sua execução.
+	
+	Ao detetarmos o $token$ $SINGLE\_LINE\_COMMENT$ vamos ignorar todos os caracteres e $tokens$ que se lhe seguirem, até que seja reconhecido o $token$ de mudança de linha ($NEWLINE$). Desta forma estamos a descartar toda a restante linha do programa, após a ocorrência de $\setminus \setminus$, tal como seria desejado proceder no tratamento de comentários de uma linha apenas.
+	
+	\subsection{Tratamento de Erros Lexicais}
+	
+	Tal como referimos nos pontos anteriores, sempre que o analisador desenvolvido deteta a ocorrência de um erro lexical (seja por existência de um $token$ não permitido ou por não término de um comentário multi-linha), é impressa uma mensagem de erro que indica a posição do erro no programa a compilar (indicando a linha e coluna onde o erro ocorreu).
+	
+	Quando é detetado um caracter ilegal, o analisador imprime a mensagem de erro, prosseguindo a sua execução na linha seguinte do programa a compilar até ser lido todo o conteúdo do programa.
+	
+	Tendo sido detetada a ocorrência de um ou mais erros lexicais, após ler todo o programa, o analisador termina a sua execução, não sendo realizado mais nenhum passo da compilação.
 
 
 \pagebreak
@@ -143,11 +236,11 @@ Em seguida, apresentamos a lista dos $tokens$ válidos na linguagem $iJava$ e a 
 
 	\subsection{Tabelas de Símbolos}
 	
-\pagebreak
+	\pagebreak
 	
-	\subsection{Detecção de Erros Semânticos}
+	\subsection{Deteção de Erros Semânticos}
 	
-\pagebreak
+	\pagebreak
 	
 \section{Geração de Código}
 
