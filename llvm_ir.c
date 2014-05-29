@@ -272,6 +272,8 @@ void llvm_br(char* condvar, char* labelthen, char* labelelse) {
   printf("br i1 %s, label %%%s, label %%%s\n", condvar, labelthen, labelelse);
 }
 
+#define RETURN_LOADABLE(x) do { llvm_var_t* x ## _loaded = llvm_get_value_from_ptr_or_value(x); llvm_var_free(x); return x ## _loaded; } while(0)
+
 void llvm_recurse_down(node_t* iter, sym_t* class_table, sym_t* table_method);
 
 llvm_var_t* llvm_node_to_instr_binop(node_t* node, sym_t* class_table, sym_t* curr_method_table);
@@ -279,6 +281,8 @@ llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t
 llvm_var_t* llvm_node_to_instr_unop(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_return(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_store(node_t* node, sym_t* class_table, sym_t* curr_method_table);
+llvm_var_t* llvm_node_to_instr_ifelse(node_t* node, sym_t* class_table, sym_t* curr_method_table);
+llvm_var_t* llvm_node_to_instr_while(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 
 /* This is generic and it just binds the several cases we have: binops, types (which end recursion), and others */
 /* This function works just like get_tree_type() in semantic analysis. It (indirecty) recurses down a statement,
@@ -294,7 +298,11 @@ llvm_var_t* llvm_node_to_instr(node_t* node, sym_t* class_table, sym_t* curr_met
     else if ( node->nodetype == NODE_STATEMENT_RETURN )
         return llvm_node_to_instr_return(node, class_table, curr_method_table);
     else if ( node->nodetype == NODE_STATEMENT_STORE )
-        return llvm_node_to_instr_store(node, class_table, curr_method_table);      
+        return llvm_node_to_instr_store(node, class_table, curr_method_table);
+    else if ( node->nodetype == NODE_STATEMENT_IFELSE )
+        return llvm_node_to_instr_ifelse(node, class_table, curr_method_table);      
+    else if ( node->nodetype == NODE_STATEMENT_WHILE )
+        return llvm_node_to_instr_while(node, class_table, curr_method_table);            
     /* FIXME: MORE TO COME: prints, ifelses, etc.. */
     return NULL;
 }
@@ -354,7 +362,6 @@ llvm_var_t* llvm_node_to_instr_binop_relational(node_t* node, sym_t* class_table
   /* Declare result, which will hold the answer */
   llvm_var_t* result = llvm_var_create(); result->type = TYPE_BOOL; result->repr=get_local_var_name(); result->value=0; 
   llvm_var_t* a, *b;
-  char* loaded;
   llvm_declare_local(TYPE_BOOL, result->repr);
 
   if ( node->nodetype == NODE_OPER_AND ) {
@@ -367,9 +374,7 @@ llvm_var_t* llvm_node_to_instr_binop_relational(node_t* node, sym_t* class_table
     char* labelendifelse = get_label_name();
 
     a = llvm_node_to_instr(node->n1, class_table, curr_method_table);   /* get "%a" */
-    llvm_var_t* a_loaded = llvm_get_value_from_ptr_or_value(a);
-    llvm_store(result, a_loaded);                                       /* result = a */
-    llvm_var_free(a_loaded);
+    llvm_store(result, a);                                       /* result = a */
 
     llvm_var_t* result_loaded = llvm_get_value_from_ptr_or_value(result);
     llvm_br(result_loaded->repr, labelthen, labelendifelse);                   /* if ( result ) goto labelthen; else goto labelendifelse; */
@@ -377,10 +382,10 @@ llvm_var_t* llvm_node_to_instr_binop_relational(node_t* node, sym_t* class_table
     b = llvm_node_to_instr(node->n2, class_table, curr_method_table); /* get "%b" */
       
     llvm_var_free(result_loaded);
-    llvm_var_t* b_loaded = llvm_get_value_from_ptr_or_value(b);
-    llvm_store(result, b_loaded);                                       /* result = a */                                          /* result = b */
+    llvm_store(result, b);                                       /* result = a */                                          /* result = b */
     llvm_goto_nonewlabel(labelendifelse);                                        /* goto labelendifelse; */
     llvm_label(labelendifelse);                                         /* labelendifelse: */
+    free(labelthen); free(labelendifelse);
     /*llvm_var_free(loaded_b);*/
   } else if  ( node->nodetype == NODE_OPER_OR ) {
     /* Implement short circuiting */
@@ -392,9 +397,7 @@ llvm_var_t* llvm_node_to_instr_binop_relational(node_t* node, sym_t* class_table
     char* labelendifelse = get_label_name();
 
     a = llvm_node_to_instr(node->n1, class_table, curr_method_table); /* get "%a" */
-    llvm_var_t* a_loaded = llvm_get_value_from_ptr_or_value(a);
-    llvm_store(result, a_loaded); /* tmp = a */
-    llvm_var_free(a_loaded);
+    llvm_store(result, a); /* tmp = a */
 
     llvm_var_t* result_loaded = llvm_get_value_from_ptr_or_value(result);
     llvm_var_t* notresult = llvm_var_create(); notresult->type = TYPE_BOOL; notresult->repr=get_local_var_name(); notresult->value = 1;
@@ -404,31 +407,24 @@ llvm_var_t* llvm_node_to_instr_binop_relational(node_t* node, sym_t* class_table
     llvm_br(notresult->repr, labelthen, labelendifelse);                /* if ( notresult ) goto labelthen; else goto labelendifelse; */
     llvm_label(labelthen);                                              /* labelthen: */
       b = llvm_node_to_instr(node->n2, class_table, curr_method_table); /* get "%b" */
-      llvm_var_t* b_loaded = llvm_get_value_from_ptr_or_value(b);
-      llvm_store(result, b_loaded);                                            /* tmp = b */
-      llvm_var_free(b_loaded);
+      llvm_store(result, b);                                            /* tmp = b */
     llvm_goto_nonewlabel(labelendifelse);                                        /* goto labelendifelse; */
     llvm_label(labelendifelse);                                         /* labelendifelse: */
 
-
+  free(labelthen); free(labelendifelse);
   } else {
     a = llvm_node_to_instr(node->n1, class_table, curr_method_table);        /* Evaluate first operand */
     b = llvm_node_to_instr(node->n2, class_table, curr_method_table);        /* Evaluate second operand */
 
-    llvm_var_t* a_loaded = llvm_get_value_from_ptr_or_value(a);
-    llvm_var_t* b_loaded = llvm_get_value_from_ptr_or_value(b);
-
     char* tmp = get_local_var_name();
-    llvm_icmp(llvm_get_op_from_node(node), tmp, a_loaded->repr, b_loaded->repr);  /* Store comparison in result */
+    llvm_icmp(llvm_get_op_from_node(node), tmp, a->repr, b->repr);  /* Store comparison in result */
     llvm_store_names_types(result->repr, tmp, TYPE_BOOL);
-
-    llvm_var_free(a_loaded);
-    llvm_var_free(b_loaded);
   }
 
   llvm_var_free(a);
   llvm_var_free(b);
-  return result;
+  
+  RETURN_LOADABLE(result);
 }
 
 /* Currently only does arithmetic */
@@ -446,9 +442,6 @@ llvm_var_t* llvm_node_to_instr_binop(node_t* node, sym_t* class_table, sym_t* cu
       llvm_var_t* op1 = llvm_node_to_instr(node->n1, class_table, curr_method_table);
       llvm_var_t* op2 = llvm_node_to_instr(node->n2, class_table, curr_method_table);
 
-      llvm_var_t* op1_loaded = llvm_get_value_from_ptr_or_value(op1);
-      llvm_var_t* op2_loaded = llvm_get_value_from_ptr_or_value(op2);
-
       /* Get a nice juicy name for ourselves */
       ret->repr = get_local_var_name();
 
@@ -459,13 +452,11 @@ llvm_var_t* llvm_node_to_instr_binop(node_t* node, sym_t* class_table, sym_t* cu
       ret->value = 1;
 
       /* Output the binary op code */
-      llvm_bin_op(llvm_get_op_from_node(node), llvm_type_from_ijavatype(ret->type), ret->repr, op1_loaded->repr, op2_loaded->repr);
+      llvm_bin_op(llvm_get_op_from_node(node), llvm_type_from_ijavatype(ret->type), ret->repr, op1->repr, op2->repr);
       llvm_var_free(op1);
       llvm_var_free(op2);
-      llvm_var_free(op1_loaded);
-      llvm_var_free(op2_loaded);
 
-      return ret;
+      RETURN_LOADABLE(ret);
     }
 
     
@@ -485,7 +476,6 @@ llvm_var_t* llvm_node_to_instr_unop(node_t* node, sym_t* class_table, sym_t* cur
 
     /* Recurse down and find the variables that will be our operands */
     llvm_var_t* op2 = llvm_node_to_instr(node->n1, class_table, curr_method_table);
-    llvm_var_t* op2_loaded = llvm_get_value_from_ptr_or_value(op2);
 
 
     /* Get a nice juicy name for ourselves */
@@ -496,12 +486,11 @@ llvm_var_t* llvm_node_to_instr_unop(node_t* node, sym_t* class_table, sym_t* cur
     ret->value = 1;
 
     /* Output the binary op code */
-    llvm_bin_op(op, llvm_type_from_ijavatype(ret->type), ret->repr, op1->repr, op2_loaded->repr);
+    llvm_bin_op(op, llvm_type_from_ijavatype(ret->type), ret->repr, op1->repr, op2->repr);
     llvm_var_free(op1);
     llvm_var_free(op2); 
-    llvm_var_free(op2_loaded); 
 
-    return ret;
+    RETURN_LOADABLE(ret);
 }
 
 void llvm_lookup_symbol_from_table(llvm_var_t* ret, char* id, sym_t* class_table, sym_t* curr_method_table) {
@@ -555,7 +544,7 @@ llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t
         ret->value = 1;
    }
 
-   return ret;
+   RETURN_LOADABLE(ret);
  }
 
 
@@ -568,10 +557,8 @@ llvm_var_t* llvm_node_to_instr_return(node_t* node, sym_t* class_table, sym_t* c
     llvm_return(ret, NULL);
   }  else {
     llvm_var_t* val = llvm_node_to_instr(node->n1, class_table, curr_method_table);  
-    llvm_var_t* val_loaded = llvm_get_value_from_ptr_or_value(val);
-    llvm_return(ret, val_loaded);
+    llvm_return(ret, val);
     llvm_var_free(val);
-    llvm_var_free(val_loaded);
   }
   return NULL;
 }
@@ -588,6 +575,44 @@ llvm_var_t* llvm_node_to_instr_store(node_t* node, sym_t* class_table, sym_t* cu
   llvm_var_free(src);
   llvm_var_free(src_loaded);
   llvm_var_free(dest);
+  return NULL;
+}
+
+llvm_var_t* llvm_node_to_instr_ifelse(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
+  assert(node); assert(node->n1); assert(node->n2); assert(node->n3);
+  char* labelthen = get_label_name();
+  char* labelelse = get_label_name();
+  char* labelendifelse = get_label_name();
+
+  llvm_var_t* cond = llvm_node_to_instr(node->n1, class_table, curr_method_table);
+  llvm_br(cond->repr, labelthen, labelelse);
+  llvm_label(labelthen);
+    if (node->n2->nodetype != NODE_NULL ) llvm_recurse_down(node->n2, class_table, curr_method_table);    
+    llvm_goto_nonewlabel(labelendifelse);
+  llvm_label(labelelse);
+    if (node->n3->nodetype != NODE_NULL ) llvm_recurse_down(node->n3, class_table, curr_method_table);    
+    llvm_goto_nonewlabel(labelendifelse);    
+  llvm_label(labelendifelse);
+
+  llvm_var_free(cond);
+  free(labelthen); free(labelelse); free(labelendifelse);
+  return NULL;
+}
+
+llvm_var_t* llvm_node_to_instr_while(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
+  assert(node); assert(node->n1); assert(node->n2);
+  char* labelthen = get_label_name();
+  char* labelendifelse = get_label_name();
+
+  llvm_var_t* cond = llvm_node_to_instr(node->n1, class_table, curr_method_table);
+  llvm_br(cond->repr, labelthen, labelendifelse);
+  llvm_label(labelthen);
+    if (node->n2->nodetype != NODE_NULL ) llvm_recurse_down(node->n2, class_table, curr_method_table);    
+    llvm_goto_nonewlabel(labelthen);
+  llvm_label(labelendifelse);
+
+  llvm_var_free(cond);
+  free(labelthen); free(labelendifelse);
   return NULL;
 }
 
