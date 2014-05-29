@@ -31,13 +31,13 @@ void increase_return_label_count() {
 
 char* get_current_return_label_name() {
     char* buf = (char*)malloc(64);
-    sprintf(buf, "return%u", llvm_return_label_count);
+    sprintf(buf, ".return%u", llvm_return_label_count);
     return buf;
 }
 
 char* get_label_name() {
     char* buf = (char*)malloc(64);
-    sprintf(buf, "label%u", ++llvm_label_count);
+    sprintf(buf, ".label%u", ++llvm_label_count);
     return buf;
 }
 
@@ -190,9 +190,18 @@ void llvm_declare_locals(sym_t* function_table) {
     }
 }
 
-void llvm_goto(char* label) {
+void llvm_goto_nonewlabel(char* label) {
   printf("br label %%%s\n", label);
 }
+
+void llvm_goto(char* label) {
+  llvm_goto_nonewlabel(label);
+
+  char* newlabel = get_label_name();
+  llvm_label(newlabel);
+  free(newlabel);
+}
+
 
 void llvm_load(char* loaded, llvm_var_t* src) {
   assert(loaded); assert(src); 
@@ -212,7 +221,7 @@ void llvm_function_prologue(ijavatype_t ret) {
 void llvm_function_epilogue(ijavatype_t ret) {
   char* label = get_current_return_label_name();
   llvm_var_t* return_val = llvm_var_create(); return_val->repr=strdup("%return"); return_val->type = ret;
-  llvm_goto(label);
+  llvm_goto_nonewlabel(label);
   llvm_label(label);
   llvm_load("%.return", return_val);
   printf("ret %s %%.return\n", llvm_type_from_ijavatype(ret));  
@@ -370,7 +379,7 @@ llvm_var_t* llvm_node_to_instr_binop_relational(node_t* node, sym_t* class_table
     llvm_var_free(result_loaded);
     llvm_var_t* b_loaded = llvm_get_value_from_ptr_or_value(b);
     llvm_store(result, b_loaded);                                       /* result = a */                                          /* result = b */
-    llvm_goto(labelendifelse);                                        /* goto labelendifelse; */
+    llvm_goto_nonewlabel(labelendifelse);                                        /* goto labelendifelse; */
     llvm_label(labelendifelse);                                         /* labelendifelse: */
     /*llvm_var_free(loaded_b);*/
   } else if  ( node->nodetype == NODE_OPER_OR ) {
@@ -398,7 +407,7 @@ llvm_var_t* llvm_node_to_instr_binop_relational(node_t* node, sym_t* class_table
       llvm_var_t* b_loaded = llvm_get_value_from_ptr_or_value(b);
       llvm_store(result, b_loaded);                                            /* tmp = b */
       llvm_var_free(b_loaded);
-    llvm_goto(labelendifelse);                                        /* goto labelendifelse; */
+    llvm_goto_nonewlabel(labelendifelse);                                        /* goto labelendifelse; */
     llvm_label(labelendifelse);                                         /* labelendifelse: */
 
 
