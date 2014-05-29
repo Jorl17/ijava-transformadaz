@@ -127,6 +127,8 @@ void llvm_declare_local_onetype(ijavatype_t ijava_type, const char* name) {
 void llvm_declare_local_array(ijavatype_t ijava_type, const char* name) {
     if ( *name == '%' ) name++; /* Skip over '%' which might be extra */
     const char* type = llvm_type_from_ijavatype(ijavatype);
+
+    /*FIXME: Join the common parts of the if-else operations??*/
     if ( ijava_type == TYPE_INTARRAY ) {
 
       printf("%%%s = alloca %s, align 8\n", name, type);
