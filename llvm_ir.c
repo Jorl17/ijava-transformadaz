@@ -283,6 +283,7 @@ llvm_var_t* llvm_node_to_instr_return(node_t* node, sym_t* class_table, sym_t* c
 llvm_var_t* llvm_node_to_instr_store(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_ifelse(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_while(node_t* node, sym_t* class_table, sym_t* curr_method_table);
+llvm_var_t* llvm_node_to_instr_call(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 
 /* This is generic and it just binds the several cases we have: binops, types (which end recursion), and others */
 /* This function works just like get_tree_type() in semantic analysis. It (indirecty) recurses down a statement,
@@ -303,6 +304,8 @@ llvm_var_t* llvm_node_to_instr(node_t* node, sym_t* class_table, sym_t* curr_met
         return llvm_node_to_instr_ifelse(node, class_table, curr_method_table);      
     else if ( node->nodetype == NODE_STATEMENT_WHILE )
         return llvm_node_to_instr_while(node, class_table, curr_method_table);            
+    else if ( node->nodetype == NODE_OPER_CALL )
+        return llvm_node_to_instr_call(node, class_table, curr_method_table);                  
     /* FIXME: MORE TO COME: prints, ifelses, etc.. */
     return NULL;
 }
@@ -601,19 +604,80 @@ llvm_var_t* llvm_node_to_instr_ifelse(node_t* node, sym_t* class_table, sym_t* c
 
 llvm_var_t* llvm_node_to_instr_while(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
   assert(node); assert(node->n1); assert(node->n2);
-  char* labelthen = get_label_name();
+  char* labelwhile = get_label_name();
+  char* labelwhilebody = get_label_name();
   char* labelendifelse = get_label_name();
 
+
+  llvm_goto_nonewlabel(labelwhile);
+  llvm_label(labelwhile);
   llvm_var_t* cond = llvm_node_to_instr(node->n1, class_table, curr_method_table);
-  llvm_br(cond->repr, labelthen, labelendifelse);
-  llvm_label(labelthen);
+  llvm_br(cond->repr, labelwhilebody, labelendifelse);
+  llvm_label(labelwhilebody);
     if (node->n2->nodetype != NODE_NULL ) llvm_recurse_down(node->n2, class_table, curr_method_table);    
-    llvm_goto_nonewlabel(labelthen);
+    llvm_goto_nonewlabel(labelwhile);
   llvm_label(labelendifelse);
 
   llvm_var_free(cond);
-  free(labelthen); free(labelendifelse);
+  free(labelwhile); free(labelwhilebody );free(labelendifelse);
   return NULL;
+}
+
+llvm_var_t* llvm_node_to_instr_call(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
+  assert(node);
+  assert(node->n1);
+  assert(node->n1->nodetype == NODE_TYPE && node->n1->type == TYPE_ID);
+
+  ijavatype_t return_type = lookup_return_type(class_table, node->n1->id);
+  assert(return_type != TYPE_VOID);
+  llvm_var_t* function = llvm_var_create();
+  llvm_lookup_symbol_from_table(function, node->n1->id, class_table, curr_method_table);
+
+  llvm_var_t* ret = llvm_var_create(); ret->value = 1; ret->type = return_type;
+
+  sym_t* function_table = lookup_method(class_table, node->n1->id)->next->next;
+  sym_t* current;
+  int num_vars = 0;
+  for ( current = function_table; current != NULL; current = current->next )
+    if ( current->is_parameter )
+      num_vars++;
+
+  llvm_var_t** variables = (llvm_var_t**)malloc(num_vars * sizeof(llvm_var_t*));
+
+  int i = 0;
+  node_t* arguments = node->n2;
+  for ( current = function_table; current != NULL; current = current->next ) {
+    if ( current->is_parameter ) {
+      variables[i++] = llvm_node_to_instr(arguments, class_table, curr_method_table);
+      arguments = arguments->next;
+    }
+  }
+
+
+  ret->repr = get_local_var_name();
+  printf("%s = call %s (", ret->repr, llvm_type_from_ijavatype(return_type));
+
+  for ( i = 0; i < num_vars; i++) {
+    printf("%s", llvm_type_from_ijavatype(variables[i]->type));
+
+    if ( i != num_vars-1 ) printf(", ");
+  }
+
+  printf(")* %s(", function->repr);
+
+  for ( i = 0; i < num_vars; i++) {
+    printf("%s %s", llvm_type_from_ijavatype(variables[i]->type), variables[i]->repr);
+    if ( i != num_vars-1 ) printf(", ");
+    llvm_var_free(variables[i]);
+
+  }
+
+  printf(")\n");
+  free(variables);
+
+
+
+  RETURN_LOADABLE(ret);
 }
 
 void llvm_recurse_down(node_t* iter, sym_t* class_table, sym_t* table_method) {  
@@ -645,6 +709,7 @@ void llvm_output_code(node_t* root, sym_t* class_table) {
   for (iter = class_table; iter != NULL; iter = iter->next) {
       if (iter->node_type == METHOD) {
         ijavatype_t return_val = get_return_type(iter->table_method);
+        reset_local_vars();
         llvm_define_function(iter->table_method);
         llvm_function_prologue(return_val);
         llvm_declare_locals(iter->table_method);
