@@ -59,6 +59,9 @@ int is_unary_oper(nodetype_t oper);
 int node_is_statement(node_t* self);
 int is_binary_op_boolean(nodetype_t type);
 
+ijavatype_t lookup_symbol_type(sym_t* class_table, sym_t* method_table, char* name);
+sym_t* lookup_symbol(sym_t* class_table, sym_t* method_table, char* name, int* local);
+
 void check_ast_for_semantic_errors(node_t* root, sym_t* class_table);
 
 #endif

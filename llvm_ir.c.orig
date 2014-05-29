@@ -402,20 +402,20 @@ void llvm_lookup_symbol_from_table(llvm_var_t* ret, char* id, sym_t* class_table
 
   assert(ret);
   assert(id);
-  assert(class_table);
+  asert(class_table);
   assert(curr_method_table);
 
-  int local;  
+  int local;
 
   sym_t* result = lookup_symbol(class_table, curr_method_table, id, &local);
 
-  ret->type = result->type;
+  ret->type = strdup(llvm_type_from_ijavatype(result->type));
 
-  ret->repr = (char *)malloc((2 + strlen(id))*sizeof(char));
+  ret->id = (char *)malloc((2 + strlen(id))*sizeof(char));
 
   assert((local == 0 || local == 1));/*SHOULD NOT BE NEEDED BUT LET'S KEEP IT SAFE*/
 
-  sprintf(ret->repr, "%s%s", local==1 ? "%" : "@", id);
+  sprintf(ret->id, "%s%s", local==1 ? "%" : "@", id);
 }
 
 llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
@@ -428,11 +428,16 @@ llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t
             FIXME: Joca, do your awesome thing man
         ret->repr = strdup(node->id);*/
 
-        llvm_lookup_symbol_from_table(ret, node->id, class_table, curr_method_table);
+<<<<<<< HEAD
     } else if ( node->type == TYPE_BOOLLIT) {
+=======
+        llvm_lookup_symbol_from_table(ret, node->id, class_table, curr_method_table);
+    } else {
+        /** FIXME: Must convert intlits by pipelining them */
+>>>>>>> FETCH_HEAD
         ret->repr = strdup(node->id);
         ret->type = TYPE_BOOL;
-	} else {
+    } else {
           /** FIXME: Must convert intlits by pipelining them */
     }
 

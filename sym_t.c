@@ -243,7 +243,7 @@ void add_variables_declarations(sym_t* root, node_t* var_decl)
 
 /*Looks up a given method's symbol table in the class' symbol table
 FIXME: If this function returns NULL then we probably will have a semantic's error*/
-ijavatype_t lookup_symbol_type_from_table(sym_t* table, char* symbol)
+sym_t* lookup_symbol_from_table(sym_t* table, char* symbol)
 {
 	DEBUG_PRINT("[lookup_symbol_type_from_table] table=%p, symbol=%s\n", table, symbol);
 	sym_t* current;
@@ -271,22 +271,53 @@ ijavatype_t lookup_symbol_type_from_table(sym_t* table, char* symbol)
 		current = current->next;
 	}
 
-	if ( !return_var ) return TYPE_UNKNOWN;
-	return return_var->type;
+	if ( !return_var ) return NULL;
+	return return_var;
 }
-ijavatype_t lookup_symbol_type(sym_t* class_table, sym_t* method_table, char* name) {
-	ijavatype_t type = method_table ? lookup_symbol_type_from_table(method_table, name) : TYPE_UNKNOWN;
-	if ( type == TYPE_UNKNOWN ) {
-		type = lookup_symbol_type_from_table(class_table, name);
-			if ( type != TYPE_UNKNOWN )
-				return type;
+
+/*Looks up a given method's symbol table in the class' symbol table
+FIXME: If this function returns NULL then we probably will have a semantic's error*/
+ijavatype_t lookup_symbol_type_from_table(sym_t* table, char* symbol)
+{
+	DEBUG_PRINT("[lookup_symbol_type_from_table] table=%p, symbol=%s\n", table, symbol);
+	sym_t* result;
+
+	assert(table);
+	assert(symbol);
+
+	result = lookup_symbol_from_table(table, symbol);
+
+	if (!result)
+		return TYPE_UNKNOWN;
+	return result->type;
+}
+
+sym_t* lookup_symbol(sym_t* class_table, sym_t* method_table, char* name, int* local) {
+	sym_t* sym = method_table ? lookup_symbol_from_table(method_table, name) : NULL;
+	if ( sym == NULL ) {
+		/*Say that the symbol is not local to the table*/
+		if (local != NULL)
+			*local = 0;
+		sym = lookup_symbol_from_table(class_table, name);
+			if ( sym != NULL )
+				return sym;
 			else {
 				/* FIXME: Move this to its own function */
 				printf("Cannot find symbol %s\n", name);
 				exit(0);
 			}
 	}
-	return type;
+	/*Say that the symbol is local to the table*/
+	else if (local != NULL)
+		*local = 1;
+	return sym;
+}
+
+ijavatype_t lookup_symbol_type(sym_t* class_table, sym_t* method_table, char* name) {
+
+	sym_t* result = lookup_symbol(class_table, method_table, name, NULL);
+
+	return result == NULL ? TYPE_UNKNOWN : result->type;
 }
 
 sym_t* lookup_method(sym_t* class_table, char* method_name)
