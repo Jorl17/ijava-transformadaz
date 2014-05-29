@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 /* Counts current local variables. Don't forget to reset it once we start a new method! */
 unsigned int llvm_tmp_var_count = 0;
@@ -113,7 +114,7 @@ const char* llvm_type_from_ijavatype(ijavatype_t type) {
 void llvm_declare_local_onetype(ijavatype_t ijava_type, const char* name) {
     const char* type = llvm_type_from_ijavatype(ijava_type);
     printf("%%%s = alloca %s, align 4\n", name, type);
-    printf("store %s 0, %s* %s\n", type, type, name);
+    printf("store %s 0, %s* %%%s\n", type, type, name);
 }
 
 void llvm_declare_local_array(ijavatype_t ijava_type, const char* name) {
@@ -173,6 +174,7 @@ void llvm_function_epilogue(ijavatype_t ret) {
   llvm_label(label);
   printf("ret %s %%return\n", llvm_type_from_ijavatype(ret));
   free(label);
+  printf("}\n");
 }
 
 void llvm_return(ijavatype_t ret, llvm_var_t* var) {
@@ -233,7 +235,7 @@ llvm_var_t* llvm_node_to_instr(node_t* node, sym_t* class_table, sym_t* curr_met
 
 /* Used to convert the operations represented by nodes into LLVM IR operations. for instance,
    we map NODE_ADD to "add" */
-const char* llvm_node_to_nodetype[] = {
+const char* llvm_node_to_nodetype [] = {
              "null_should_not_happen",
              "null_should_not_happen",
              "null_should_not_happen",
@@ -439,7 +441,7 @@ llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t
     return ret;
 }
 
-llvm_var_t* llvm_node_to_instr_node_return(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
+llvm_var_t* llvm_node_to_instr_return(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
   assert(node);
   ijavatype_t ret = get_return_type(curr_method_table);
   llvm_var_t* val = node->n1 ? llvm_node_to_instr(node->n1, class_table, curr_method_table) : NULL;
@@ -449,12 +451,12 @@ llvm_var_t* llvm_node_to_instr_node_return(node_t* node, sym_t* class_table, sym
   return NULL;
 }
 
-llvm_var_t* llvm_node_to_instr_node_store(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
+llvm_var_t* llvm_node_to_instr_store(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
   assert(node);
   assert(node->n1);
   assert(node->n2);
   llvm_var_t* src = llvm_node_to_instr(node->n2, class_table, curr_method_table);
-  llvm_var_t* dest = 0;/* FIXME: Call joca's lookup function here on node->n1 */
+  llvm_var_t* dest = llvm_var_create(); llvm_lookup_symbol_from_table(dest, node->n1->id, class_table, curr_method_table);
 
   llvm_store(dest, src);
   llvm_var_free(src);

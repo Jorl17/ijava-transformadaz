@@ -265,7 +265,7 @@ sym_t* lookup_symbol_from_table(sym_t* table, char* symbol)
 		}
 		else*/ if (strcmp(symbol, current->id) == 0)
 		{
-			return current->type; /* FIXME: We need a type for functions!! */
+			return current; /* FIXME: We need a type for functions!! */
 		}
 
 		current = current->next;

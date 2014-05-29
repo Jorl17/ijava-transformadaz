@@ -4,6 +4,7 @@
 #include <string.h>
 #include "node_t.h"
 #include "sym_t.h"
+#include "llvm_ir.h"
 
 extern int prev_col, prev_line;
 extern char* yytext;
@@ -234,8 +235,10 @@ int main(int argc, char* argv[])
     if ( !had_error && (!show_ast || show_tables))
         class_table = analyse_ast(ast_root);
 
-    if ( !had_error)
+    if ( !had_error) {
         check_ast_for_semantic_errors(ast_root, class_table);/*If error quits program*/
+        llvm_output_code(ast_root, class_table);        
+    }
 
     if (show_tables && !had_error)
     {
