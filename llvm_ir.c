@@ -82,29 +82,6 @@ void llvm_bin_op(const char* op, llvm_type_t type, char* lhs, char* arg1, char* 
     printf("%s = %s %s %s, %s\n", lhs, op, type, arg1, arg2);
 }
 
-void llvm_declare_global(const char* type, const char* name) {
-    printf("@%s = global %s 0, align 4\n", name, type);
-}
-
-void llvm_declare_global_array(const char* type, const char* name) {
-    /* FIXME */
-
-/*Joca Edit - Maxi Over Here!*/
-
-/*
-    Remember that we must have the following in the beginning of the generated code:
-
-    %.IntArray = type { i32, i32* }
-    %.BoolArray = type { i32, i8* }
-
-    We can print them even before generating any code
-
-    Declaration of a global int array: @array = common global %.IntArray zeroinitializer, align 8
-
-    Declaration of a global bool array: @array = global %.BoolArray zeroinitializer, align 8
-*/
-}
-
 void llvm_file_header() {
   printf("%%.IntArray = type { i32, i32* }\n");
   printf("%%.BoolArray = type { i32, i1* }\n");
@@ -141,6 +118,21 @@ const char* llvm_types_from_ijavatypes[]  = {
 
 const char* llvm_type_from_ijavatype(ijavatype_t type) {
     return llvm_types_from_ijavatypes[type];
+}
+
+void llvm_declare_global_onetype(const char* type, const char* name) {
+    printf("@%s = global %s 0, align 4\n", name, type);
+}
+
+void llvm_declare_global_array(const char* type, const char* name) {
+  printf("@%s = global %s zeroinitializer, align 8\n", name, type);
+}
+
+void llvm_declare_global(ijavatype_t type, const char* name) {
+  if ( type == TYPE_INTARRAY || type == TYPE_BOOLARRAY )
+    return llvm_declare_global_array(llvm_type_from_ijavatype(type), name);
+  else
+    return llvm_declare_global_onetype(llvm_type_from_ijavatype(type), name);
 }
 
 void llvm_declare_local_onetype(ijavatype_t ijava_type, const char* name) {
@@ -893,7 +885,7 @@ void llvm_output_code(node_t* root, sym_t* class_table) {
 
   for (iter = class_table; iter != NULL; iter = iter->next) {
       if (iter->node_type == VARIABLE) {
-        llvm_declare_global(llvm_type_from_ijavatype(iter->type), iter->id);
+        llvm_declare_global(iter->type, iter->id);
       }      
   }
 
