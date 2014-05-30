@@ -404,6 +404,7 @@ llvm_var_t* llvm_node_to_instr_storearray(node_t* node, sym_t* class_table, sym_
 llvm_var_t* llvm_node_to_instr_loadarray(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_print(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_length(node_t* node, sym_t* class_table, sym_t* curr_method_table);
+llvm_var_t* llvm_node_to_instr_parseargs(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 
 /* This is generic and it just binds the several cases we have: binops, types (which end recursion), and others */
 /* This function works just like get_tree_type() in semantic analysis. It (indirecty) recurses down a statement,
@@ -428,9 +429,9 @@ llvm_var_t* llvm_node_to_instr(node_t* node, sym_t* class_table, sym_t* curr_met
         return llvm_node_to_instr_call(node, class_table, curr_method_table);                  
     else if ( node->nodetype == NODE_STATEMENT_STOREARRAY )
         return llvm_node_to_instr_storearray(node, class_table, curr_method_table);                  
-  else if ( node->nodetype == NODE_STATEMENT_PRINT )
-        return llvm_node_to_instr_print(node, class_table, curr_method_table);                        
-    /* FIXME: MORE TO COME: prints, ifelses, etc.. */
+    else if ( node->nodetype == NODE_STATEMENT_PRINT )
+        return llvm_node_to_instr_print(node, class_table, curr_method_table);                            
+
     return NULL;
 }
 
@@ -564,6 +565,9 @@ llvm_var_t* llvm_node_to_instr_binop(node_t* node, sym_t* class_table, sym_t* cu
       return llvm_node_to_instr_binop_relational(node, class_table, curr_method_table);
     else if ( node->nodetype == NODE_OPER_LOADARRAY) {
       return llvm_node_to_instr_loadarray(node, class_table, curr_method_table);
+    }
+    else if (node->nodetype == NODE_OPER_PARSEARGS) {
+        return llvm_node_to_instr_parseargs(node, class_table, curr_method_table);
     } else {
       llvm_var_t* ret = llvm_var_create();
 
@@ -892,6 +896,29 @@ llvm_var_t* llvm_node_to_instr_length(node_t* node, sym_t* class_table, sym_t* c
 
   llvm_var_free(id);
 
+  RETURN_LOADABLE(ret);
+}
+
+llvm_var_t* llvm_node_to_instr_parseargs(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
+  assert(node);
+  assert(node->n1);
+  assert(node->n2);
+
+  llvm_var_t* val = llvm_node_to_instr(node->n2, class_table, curr_method_table);
+  
+  char* plus_one = get_local_var_name();
+  llvm_bin_op("add", "i32", plus_one, val->repr, "1");
+  llvm_var_free(val);
+
+
+  char* index = get_local_var_name();
+  char* loaded = get_local_var_name();
+  llvm_var_t* ret = llvm_var_create(); ret->repr = get_local_var_name(); ret->type = TYPE_INT; ret->value = 1;
+  printf("%s= getelementptr inbounds i8** %%args, i32 %s\n", index, plus_one);
+  printf("%s = load i8** %s\n", loaded, index);
+  printf("%s = call i32 @atoi(i8* %s) nounwind readonly\n", ret->repr, loaded);
+
+  free(index); free(loaded); free(plus_one);
   RETURN_LOADABLE(ret);
 }
 
