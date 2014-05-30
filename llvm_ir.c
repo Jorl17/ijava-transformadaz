@@ -227,6 +227,16 @@ llvm_var_t* llvm_array_get_index(llvm_var_t* array_loaded, llvm_var_t* index_loa
   return ret;
 }
 
+char* llvm_length_from_array(llvm_var_t* array) {  
+  const char* arraytype = llvm_type_from_ijavatype(array->type);
+  
+  char* array_data_name = get_local_var_name();
+
+  printf("%s = extractvalue %s %s, 0\n", array_data_name, arraytype, array->repr);
+
+  return array_data_name;
+}
+
 void llvm_declare_local(ijavatype_t type, char* id) {
   if ( type == TYPE_INTARRAY || type == TYPE_BOOLARRAY )
     llvm_declare_local_array(type, id);
@@ -262,8 +272,9 @@ void llvm_define_function(sym_t* function_table) {
 
     if ( current->is_parameter ) {
       if(current->type == TYPE_STRINGARRAY)
-        printf("i32 %%%s.length, ", current->id);
-      printf("%s %%.%s", llvm_type_from_ijavatype(current->type), current->id);      
+        printf("i32 %%args.length, %s %%args", llvm_type_from_ijavatype(current->type));
+      else
+        printf("%s %%.%s", llvm_type_from_ijavatype(current->type), current->id);      
     }
 
     /* Print comma if there is one more parameter */
@@ -392,6 +403,7 @@ llvm_var_t* llvm_node_to_instr_call(node_t* node, sym_t* class_table, sym_t* cur
 llvm_var_t* llvm_node_to_instr_storearray(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_loadarray(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_print(node_t* node, sym_t* class_table, sym_t* curr_method_table);
+llvm_var_t* llvm_node_to_instr_length(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 
 /* This is generic and it just binds the several cases we have: binops, types (which end recursion), and others */
 /* This function works just like get_tree_type() in semantic analysis. It (indirecty) recurses down a statement,
@@ -583,6 +595,10 @@ llvm_var_t* llvm_node_to_instr_binop(node_t* node, sym_t* class_table, sym_t* cu
 llvm_var_t* llvm_node_to_instr_unop(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
     assert(node);
     assert(node->n1);
+
+    if ( node->nodetype == NODE_OPER_LENGTH )
+      return llvm_node_to_instr_length(node, class_table, curr_method_table);
+
     llvm_var_t* ret = llvm_var_create();   
     const char* op;
     llvm_var_t* op1 = llvm_var_create();
@@ -639,9 +655,6 @@ llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t
     llvm_var_t* ret = llvm_var_create();   
 
     if ( node->type == TYPE_ID ) {
-        /*FIXME: Look it up from the table
-            FIXME: Joca, do your awesome thing man
-        ret->repr = strdup(node->id);*/
 
         llvm_lookup_symbol_from_table(ret, node->id, class_table, curr_method_table);
     } else if ( node->type == TYPE_BOOLLIT) {
@@ -661,7 +674,10 @@ llvm_var_t* llvm_node_to_instr_node_type(node_t* node, sym_t* class_table, sym_t
         ret->value = 1;
    }
 
-   RETURN_LOADABLE(ret);
+   if ( ret->type == TYPE_STRINGARRAY )
+    return ret;
+  else
+    RETURN_LOADABLE(ret);
  }
 
 
@@ -857,6 +873,26 @@ llvm_var_t* llvm_node_to_instr_print(node_t* node, sym_t* class_table, sym_t* cu
   llvm_var_free(toprint);
 
   return NULL;
+}
+
+llvm_var_t* llvm_node_to_instr_length(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
+  assert(node);
+  assert(node->n1);
+
+  llvm_var_t* id = llvm_node_to_instr(node->n1, class_table, curr_method_table);
+  llvm_var_t* ret = llvm_var_create(); ret->type = TYPE_INT; ret->value = 1;
+  if ( id->type == TYPE_STRINGARRAY ) {
+    char* name = id->repr;
+    name++; /* Skip over % */
+    ret->repr = (char*)malloc(strlen(id->repr + 32));
+    sprintf(ret->repr, "%%args.length", id->repr);
+  } else {
+    ret->repr = llvm_length_from_array(id);
+  }  
+
+  llvm_var_free(id);
+
+  RETURN_LOADABLE(ret);
 }
 
 void llvm_recurse_down(node_t* iter, sym_t* class_table, sym_t* table_method) {  
