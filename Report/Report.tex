@@ -226,11 +226,133 @@ Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha qu
 
 \section{Análise Sintática}
 
+A Análise Lexical permite-nos identificar os $tokens$ da linguagem, isto é, os seus "átomos". No entanto, interessa-nos garantir que os $tokens$ identificados estão organizados de acordo com a estrutura sintática da linguagem.
+
+Para validar essa organização dos $tokens$ necessitamos de utilizar uma gramática, que nos indica como devem estar organizados sintaticamente os $tokens$ da linguagem. Para além disso, utilizámos a ferramenta \emph{YACC (Yet Another Compiler Compiler)}, um gerador de analisadores sintáticos.
+
+Assim, utilizamos o analisador lexical (\emph{lex}) desenvolvido para reconhecer os $tokens$ da linguagem, que são transferidos para o \emph{yacc} onde, com base na gramática da linguagem fornecida, podemos verificar se o programa a compilar se encontra organizado de acordo com a estrutura sintática da linguagem.
+
+No analisador sintático foi criada uma \emph{union}, que define a estrutura de uma variável \emph{yylval}, utilizada na comunicação entre o \emph{yacc} e o \emph{lex}. Apresentamos desde já a estrutura da \emph{union} criada:
+
+\begin{lstlisting}
+%union
+{
+    char* token;    
+    struct _node_t* node;
+    int type;
+}
+\end{lstlisting}
+
+Os $token$ detetados no \emph{lex} são comunicados ao analisador sintático através do campo \emph{token} da variável \emph{yylval}.
+
+Para além disso, no analisador sintático definimos ainda três variáveis externas, para uso partilhado entre o \emph{lex} e o \emph{yacc}: Duas do tipo inteiro, \emph{prev\_col} e \emph{prev\_line}, e uma do tipo array de caracteres (\emph{char*}), chamada \emph{yytext} e que contém a cadeia de caracteres lida pelo analisador, em cada momento.
+
+Tal como o nome pode sugerir, \emph{prev\_col} e \emph{prev\_line} são utilizadas para armazenar o valor da coluna e linha (do programa a compilar) analisadas na iteração anterior da execução do analisador. A justificação para essa prende-se com as situações onde ocorrem erros sintáticos, sendo necessário informar o utilizador da localização no programa desse erro.
+
+\begin{figure}[H]
+  \centering
+      \includegraphics[scale=0.5]{DiagramaLExYACC.png}
+  \caption{Ligação entre o \emph{lex} e o \emph{yacc}, ferramentas utilizadas para gerar os analisadores lexicais e sintáticos. Retirado de \emph{http://pt.wikipedia.org/wiki/Yacc}}
+\end{figure}
+
+\subsection{Gramática}
+
+De seguida, apresentamos a gramática da linguagem \emph{iJava}, fornecida no enunciado do projeto, em notação \textbf{EBNF}:
+
+\vspace{0.5cm}
+
+\hspace{-1cm}Start $\rightarrow$ Program
+
+\hspace{-1cm}Program $\rightarrow$ CLASS ID OBRACE { FieldDecl $\mid$ MethodDecl } CBRACE
+
+\hspace{-1cm}FieldDecl $\rightarrow$ STATIC VarDecl
+
+\hspace{-1cm}MethodDecl $\rightarrow$ PUBLIC STATIC ( Type $\mid$ VOID ) ID OCURV
+
+[ FormalParams ] CCURV OBRACE { VarDecl } { Statement } CBRACE
+
+\hspace{-1cm}FormalParams $\rightarrow$ Type ID { COMMA Type ID }
+
+\hspace{-1cm}FormalParams $\rightarrow$ STRING OSQUARE CSQUARE ID
+
+\hspace{-1cm}VarDecl $\rightarrow$ Type ID { COMMA ID } SEMIC
+
+\hspace{-1cm}Type $\rightarrow$ ( INT $\mid$ BOOL ) [ OSQUARE CSQUARE ]
+
+\hspace{-1cm}Statement $\rightarrow$ OBRACE { Statement } CBRACE
+
+\hspace{-1cm}Statement $\rightarrow$ IF OCURV Expr CCURV Statement [ ELSE Statement ]
+
+\hspace{-1cm}Statement $\rightarrow$ WHILE OCURV Expr CCURV Statement
+
+\hspace{-1cm}Statement $\rightarrow$ PRINT OCURV Expr CCURV SEMIC
+
+\hspace{-1cm}Statement $\rightarrow$ ID [ OSQUARE Expr CSQUARE ] ASSIGN Expr SEMIC
+
+\hspace{-1cm}Statement $\rightarrow$ RETURN [ Expr ] SEMIC
+
+\hspace{-1cm}Expr $\rightarrow$ Expr ( OP1 $\mid$ OP2 $\mid$ OP3 $\mid$ OP4 ) Expr
+
+\hspace{-1cm}Expr $\rightarrow$ Expr OSQUARE Expr CSQUARE
+
+\hspace{-1cm}Expr $\rightarrow$ ID $\mid$ INTLIT $\mid$ BOOLLIT
+
+\hspace{-1cm}Expr $\rightarrow$ NEW ( INT $\mid$ BOOL ) OSQUARE Expr CSQUARE
+
+\hspace{-1cm}Expr $\rightarrow$ OCURV Expr CCURV
+
+\hspace{-1cm}Expr $\rightarrow$ Expr DOTLENGTH $\mid$ ( OP3 $\mid$ NOT ) Expr
+
+\hspace{-1cm}Expr $\rightarrow$ PARSEINT OCURV ID OSQUARE Expr CSQUARE CCURV
+
+\hspace{-1cm}Expr $\rightarrow$ ID OCURV [ Args ] CCURV
+
+\hspace{-1cm}Args $\rightarrow$ Expr { COMMA Expr }
+
+\vspace{0.5cm}
+
+Lembramos que, em notação \textbf{ENBF}, os símbolos \textbf{[...]} englobam $tokens$ opcionais e \textbf{\{...\}} implicam a repetição dos $tokens$ 0 ou mais vezes.
+
+\subsubsection{Ambiguidade}
+
+Um análise mais cuidada da gramática apresentada permite-nos aferir da sua ambiguidade. Por exemplo, se num dado momento da análise sintática pretendermos analisar $2+3*5$, podemos reduzir esta expressão à variável \emph{EXPR} da gramática por duas formas distintas:
+
+\begin{enumerate}
+\item Numa primeira abordagem podemos separar a expressão em \textbf{Expr $\rightarrow$ Expr + Expr} (onde o símbolo \emph{"+"} é proveniente do $token$ \emph{OP3}). De seguida reduziríamos o primeiro símbolo \emph{Expr} para o $token$ \emph{INTLIT} correspondente, neste caso, ao literal \emph{"2"}. O segundo símbolo \emph{Expr} seria desdobrado em \textbf{Expr $\rightarrow$ Expr * Expr} (onde o símbolo \emph{"*"} é proveniente do $token$ \emph{OP4}). Neste caso os dois símbolos \emph{Expr} seriam reduzidos ao $token$ \emph{INTLIT}, correspondente a cada um dos restantes literais.
+
+\item Numa abordagem alternativa começaríamos por separar a expressão em \textbf{Expr $\rightarrow$ Expr * Expr}. De seguida desdobraríamos o primeiro símbolo \emph{Expr} em \textbf{Expr $\rightarrow$ Expr + Expr}. Estes dois novos símbolos \emph{Expr} seriam reduzidos a \emph{INTLIT}, tal como o restante símbolo \emph{Expr}.
+\end{enumerate}
+
+Acabámos de provar a ambiguidade da gramática. Tal como esta situação existem muitas outras envolvendo os operadores englobados pelos $tokens$ \emph{OP1, OP2, OP3 e OP4}. Assim, é imperativa a definição de prioridades nos operadores, de forma a eliminar todas as ambiguidades presentes na gramática, permitindo assim a correta realização da análise sintática do programa.
+
+\subsubsection{Alterações à Gramática Fornecida}
+
+Uma vez que a gramática apresentada é ambígua e apresenta-se em notação \textbf{EBNF}, não aceite pela ferramenta utilizada para gerar o analisador sintático, necessitamos de alterar a gramática, de forma a eliminar as suas ambiguidades, tornando-a numa gramática aceite pela ferramenta utilizada.
+
+Como já referimos, a primeira alteração realizada prende-se com a separação dos operadores englobados pelos $tokens$ \emph{OP1, OP2, OP3 e OP4}, criando um novo $token$ para cada operador.
+
+FIXME: METER AQUI AS PRIORIDADES DOS OPERADORES
+
+%left OR
+%left AND
+%left EQ NEQ
+%left LE GE LEQ GEQ
+%left PLUS MINUS
+%left MULT DIV MOD
+%right ASSIGN
+%left OBRACE
+%right UNARY_HIGHEST_VAL
+%left OSQUARE DOTLENGTH
+
+FIXME: METER ALTERAÇÕES FEITAS À GRAMÁTICA. EXPLICAR QUAIS AS ALTERAÇÕES E PORQUE É QUE AS FIZEMOS
+
 \pagebreak
 
 \section{Construção da Árvore de Sintaxe Abstrata}
 
-FIXME: METER AQUI TAMBÉM O CODIGO: ESTRUTURA NODE\_T E OS TIPOS E ENUM'S PRESENTES NO NODE\_T.H
+FIXME: METER AQUI TAMBÉM O CÓDIGO: ESTRUTURA \\* NODE\_T E OS TIPOS E ENUM'S PRESENTES NO NODE\_T.H
+
+EXPLICAR AS ESTRUTURAS UTILIZADAS E O PORQUE DE TERMOS ESCOLHIDO ESTAS ESTRUTURAS. (PODERÍAMOS TER FEITO MELHOR? MUDARÍAMOS ALGUMA COISA?)
 
 \pagebreak
 
