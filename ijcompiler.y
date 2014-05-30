@@ -237,7 +237,6 @@ int main(int argc, char* argv[])
 
     if ( !had_error) {
         check_ast_for_semantic_errors(ast_root, class_table);/*If error quits program*/
-        llvm_output_code(ast_root, class_table);        
     }
 
     if (show_tables && !had_error)
@@ -261,6 +260,9 @@ int main(int argc, char* argv[])
             temp_node = temp_node->next;
         }
     }
+
+    if ( !had_error )
+        llvm_output_code(ast_root, class_table);        
 
     
 
