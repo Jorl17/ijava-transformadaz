@@ -108,6 +108,12 @@ void llvm_declare_global_array(const char* type, const char* name) {
 void llvm_file_header() {
   printf("%%.IntArray = type { i32, i32* }\n");
   printf("%%.BoolArray = type { i32, i1* }\n");
+  printf("declare i32 @printf(i8*, ...)\n");
+  printf("declare i32 @atoi(i8*) nounwind readonly\n");
+  printf("@str.printf_callstr = private unnamed_addr constant [4 x i8] c\"%%d\\0A\\00\"\n");
+  printf("@str.false_str = private unnamed_addr constant [7 x i8] c\"false\\0A\\00\"\n");
+  printf("@str.true_str = private unnamed_addr constant [7 x i8] c\"true\\0A\\00\\00\"\n");
+  printf("@str.bools_array = global [2 x i8*] [i8* getelementptr inbounds ([7 x i8]* @str.false_str, i32 0, i32 0), i8* getelementptr inbounds ([7 x i8]* @str.true_str, i32 0, i32 0)]\n");
 }
 
 
@@ -123,7 +129,7 @@ const char* llvm_types_from_ijavatypes[]  = {
     "i1" /* TYPE_BOOL */ /* FIXME */,
     "%.IntArray" /* TYPE_INTARRAY */ /* FIXME*/,
     "%.BoolArray" /* TYPE_BOOLARRAY */  /* FIXME */,
-    "i8*" /* TYPE_STRINGARRAY */ /* FIXME */,
+    "i8**" /* TYPE_STRINGARRAY */ /* FIXME */,
     "void" /*TYPE_VOID*/ /*FIXME */,
     "NOT_EXPECTED_ID" /* TYPE_STRINGARRAY */ /* FIXME */,
     "i32" /* TYPE_INTLIT */,
@@ -260,9 +266,13 @@ void llvm_define_function(sym_t* function_table) {
 
   sym_t* current;
   /* Start at next->next to skip return value */
-  for ( current = function_table->next->next; current != NULL; current = current->next ) {
-    if ( current->is_parameter )
-      printf("%s %%.%s", llvm_type_from_ijavatype(current->type), current->id);
+  for ( current = function_table->next->next; current != NULL; current = current->next ) {  
+
+    if ( current->is_parameter ) {
+      if(current->type == TYPE_STRINGARRAY)
+        printf("i32 %%%s.length, ", current->id);
+      printf("%s %%.%s", llvm_type_from_ijavatype(current->type), current->id);      
+    }
 
     /* Print comma if there is one more parameter */
     if ( current->next && current->next->is_parameter ) printf(", ");
@@ -278,6 +288,7 @@ void llvm_declare_locals(sym_t* function_table) {
     if ( !current->is_parameter )
       llvm_declare_local(current->type, current->id);
     else {
+      if ( current->type == TYPE_STRINGARRAY) continue;
       char* buf_in = (char*)malloc(strlen(current->id)+2);
       char* buf_out = (char*)malloc(strlen(current->id)+2);
       sprintf(buf_in,"%%.%s", current->id);
@@ -388,6 +399,7 @@ llvm_var_t* llvm_node_to_instr_while(node_t* node, sym_t* class_table, sym_t* cu
 llvm_var_t* llvm_node_to_instr_call(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_storearray(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_loadarray(node_t* node, sym_t* class_table, sym_t* curr_method_table);
+llvm_var_t* llvm_node_to_instr_print(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 
 /* This is generic and it just binds the several cases we have: binops, types (which end recursion), and others */
 /* This function works just like get_tree_type() in semantic analysis. It (indirecty) recurses down a statement,
@@ -410,9 +422,10 @@ llvm_var_t* llvm_node_to_instr(node_t* node, sym_t* class_table, sym_t* curr_met
         return llvm_node_to_instr_while(node, class_table, curr_method_table);            
     else if ( node->nodetype == NODE_OPER_CALL )
         return llvm_node_to_instr_call(node, class_table, curr_method_table);                  
-    /* FIXME: MORE TO COME: prints, ifelses, etc.. */
     else if ( node->nodetype == NODE_STATEMENT_STOREARRAY )
         return llvm_node_to_instr_storearray(node, class_table, curr_method_table);                  
+  else if ( node->nodetype == NODE_STATEMENT_PRINT )
+        return llvm_node_to_instr_print(node, class_table, curr_method_table);                        
     /* FIXME: MORE TO COME: prints, ifelses, etc.. */
     return NULL;
 }
@@ -822,6 +835,36 @@ llvm_var_t* llvm_node_to_instr_loadarray(node_t* node, sym_t* class_table, sym_t
   llvm_var_free(index);
 
   return ret;
+}
+
+llvm_var_t* llvm_node_to_instr_print(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
+  assert(node);
+  assert(node->n1);
+
+  llvm_var_t* toprint = llvm_node_to_instr(node->n1, class_table, curr_method_table);
+
+  if ( toprint->type == TYPE_INT) {
+    char* callval = get_local_var_name();
+    printf("%s = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @str.printf_callstr, i32 0, i32 0), i32 %s)\n", callval, toprint->repr);
+    free(callval);
+  } else {
+    char* cast = get_local_var_name();
+    char* index = get_local_var_name();
+    char* value = get_local_var_name();
+    char* callval = get_local_var_name();
+    printf("%s = zext i1 %s to i32\n", cast, toprint->repr);
+    printf("%s = getelementptr inbounds [2 x i8*]* @str.bools_array, i32 0, i32 %s\n", index, cast);
+    printf("%s = load i8** %s\n", value, index);
+    printf("%s = call i32 (i8*, ...)* @printf(i8* %s)\n", callval, value);
+    free(cast);
+    free(index);
+    free(value);
+    free(callval);
+  }
+
+  llvm_var_free(toprint);
+
+  return NULL;
 }
 
 void llvm_recurse_down(node_t* iter, sym_t* class_table, sym_t* table_method) {  
