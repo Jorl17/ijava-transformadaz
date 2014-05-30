@@ -10,10 +10,9 @@ struct IntArray array;
 
 int main(void)
 {
-
 	array.size = 40;
 
-	array.array = NULL;
+	array.array = (int *) malloc(array.size*sizeof(int));
 
 	return 0;
 }
