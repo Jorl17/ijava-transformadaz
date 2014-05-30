@@ -351,13 +351,13 @@ llvm_var_t* llvm_get_value_from_ptr_or_value(llvm_var_t* var) {
 }
 
 
-void llvm_return(ijavatype_t ret, llvm_var_t* var) {
-  assert(ret == var->type);
+void llvm_return(ijavatype_t ret, llvm_var_t* var) {  
   char* label = get_current_return_label_name();
 
   if ( ret == TYPE_VOID ) {
     /* Do nothing */
   } else {
+    assert(ret == var->type);
     llvm_store_names_types("%return", var->repr, ret); 
   }
 
@@ -846,22 +846,29 @@ void llvm_output_code(node_t* root, sym_t* class_table) {
 
   llvm_file_header();
 
+  printf("\n\n");
+
   for (iter = class_table; iter != NULL; iter = iter->next) {
       if (iter->node_type == VARIABLE) {
         llvm_declare_global(llvm_type_from_ijavatype(iter->type), iter->id);
       }      
   }
 
+  printf("\n\n");
+
   for (iter = class_table; iter != NULL; iter = iter->next) {
       if (iter->node_type == METHOD) {
         ijavatype_t return_val = get_return_type(iter->table_method);
         reset_local_vars();
-        llvm_define_function(iter->table_method);
+        llvm_define_function(iter->table_method);        
         llvm_function_prologue(return_val);
         llvm_declare_locals(iter->table_method);
+        printf("\n");
         if ( iter->method_start->n2 )
           llvm_recurse_down(iter->method_start->n2, class_table, iter->table_method);
+        printf("\n");
         llvm_function_epilogue(return_val);
+        printf("\n\n");
       }      
   }
   
