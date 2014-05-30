@@ -105,6 +105,11 @@ void llvm_declare_global_array(const char* type, const char* name) {
 */
 }
 
+void llvm_file_header() {
+  printf("%%.IntArray = type { i32, i32* }\n");
+  printf("%%.BoolArray = type { i32, i1* }\n");
+}
+
 
 
 /* Prints an LLVM unary op to stdout (might not correspond to an ijava unary op */
@@ -141,14 +146,14 @@ void llvm_declare_local_onetype(ijavatype_t ijava_type, const char* name) {
 
 void llvm_declare_local_array(ijavatype_t ijava_type, const char* name) {
     if ( *name == '%' ) name++; /* Skip over '%' which might be extra */
-    const char* type = llvm_type_from_ijavatype(ijavatype);
+    const char* type = llvm_type_from_ijavatype(ijava_type);
 
     /*FIXME: Join the common parts of the if-else operations??*/
     if ( ijava_type == TYPE_INTARRAY ) {
 
       printf("%%%s = alloca %s, align 8\n", name, type);
       printf("%%.%s = getelementptr inbounds %s* %%%s, i32 0, i32 0\n", name, type, name);
-      printf("store i32 0, i32* %%.1%s, align 4\n", name);
+      printf("store i32 0, i32* %%.%s, align 4\n", name);
       printf("%%..%s = getelementptr inbounds %s* %%%s, i32 0, i32 1\n", name, type, name);
       printf("store i32* null, i32** %%..%s, align 8\n", name);
 /*
@@ -162,7 +167,7 @@ void llvm_declare_local_array(ijavatype_t ijava_type, const char* name) {
 
       printf("%%%s = alloca %s, align 8\n", name, type);
       printf("%%.%s = getelementptr inbounds %s* %%%s, i32 0, i32 0\n", name, type, name);
-      printf("store i32 0, i1* %%.1%s, align 4\n", name);
+      printf("store i32 0, i32* %%.%s, align 4\n", name);
       printf("%%..%s = getelementptr inbounds %s* %%%s, i32 0, i32 1\n", name, type, name);
       printf("store i1* null, i1** %%..%s, align 8\n", name);
 
@@ -175,6 +180,53 @@ void llvm_declare_local_array(ijavatype_t ijava_type, const char* name) {
 */
 
     }
+}
+
+void llvm_storearray(llvm_var_t* array_loaded, llvm_var_t* index_loaded, llvm_var_t* value_loaded) {
+  char* array_data_name = get_local_var_name();
+  char* index_ptr_name = get_local_var_name();
+  const char* type = llvm_type_from_ijavatype(array_loaded->type);
+  const char* value_type = llvm_type_from_ijavatype(value_loaded->type);
+  printf("%s = extractvalue %s %s, 1\n", array_data_name, type, array_loaded->repr);
+  printf("%s = getelementptr %s* %s, i32 %s\n", index_ptr_name, value_type, array_data_name, index_loaded->repr);
+  printf("store %s %s, %s* %s\n", value_type, value_loaded->repr, value_type, index_ptr_name);
+
+  free(array_data_name);
+  free(index_ptr_name);
+}
+
+
+/* DON'T CONFUSE THIS WITH THE LOADARRAY OPERATION! */
+char* llvm_loadarray(llvm_var_t* src, llvm_var_t* index) {
+  assert(src); assert(index);
+  ijavatype_t elementtype = src->type == TYPE_INTARRAY ? TYPE_INT : TYPE_BOOL;
+  const char* arraytype = llvm_type_from_ijavatype(src->type);
+  const char* value_type = llvm_type_from_ijavatype(index->type);
+  const char* element_type = llvm_type_from_ijavatype(elementtype);
+  
+  char* array_data_name = get_local_var_name();
+  char* index_ptr_name = get_local_var_name();
+  char* loaded = get_local_var_name();
+
+  printf("%s = extractvalue %s %s, 1\n", array_data_name, arraytype, src->repr);
+  printf("%s = getelementptr %s* %s, %s %s\n", index_ptr_name, element_type, array_data_name, value_type, index->repr);
+  printf("%s = load %s* %s\n", loaded, element_type, index_ptr_name);
+
+  free(array_data_name);
+  free(index_ptr_name);
+
+  return loaded;
+}
+
+llvm_var_t* llvm_array_get_index(llvm_var_t* array_loaded, llvm_var_t* index_loaded) {
+  ijavatype_t elementtype = array_loaded->type == TYPE_INTARRAY ? TYPE_INT : TYPE_BOOL;
+
+  char* arraydata = llvm_loadarray(array_loaded, index_loaded);
+  llvm_var_t* ret = llvm_var_create(); ret->type = elementtype; ret->value = 1;
+
+  ret->repr = arraydata;
+
+  return ret;
 }
 
 void llvm_declare_local(ijavatype_t type, char* id) {
@@ -202,7 +254,9 @@ void llvm_store(llvm_var_t* dest, llvm_var_t* src) {
 
 void llvm_define_function(sym_t* function_table) {
   assert(function_table);
-  printf("define %s @%s(", llvm_type_from_ijavatype(function_table->next->type), function_table->id);
+  ijavatype_t return_type = function_table->next->type;
+  if ( return_type == TYPE_VOID ) return_type = TYPE_INT;
+  printf("define %s @%s(", llvm_type_from_ijavatype(return_type), function_table->id);
 
   sym_t* current;
   /* Start at next->next to skip return value */
@@ -255,6 +309,8 @@ void llvm_load(char* loaded, llvm_var_t* src) {
 }
 
 void llvm_function_prologue(ijavatype_t ret) {
+  if ( ret == TYPE_VOID ) ret = TYPE_INT;
+  
   llvm_declare_local(ret, "return");
   increase_return_label_count();
 }
@@ -265,11 +321,12 @@ void llvm_function_prologue(ijavatype_t ret) {
  */
 void llvm_function_epilogue(ijavatype_t ret) {
   char* label = get_current_return_label_name();
+  if ( ret == TYPE_VOID ) ret = TYPE_INT; 
   llvm_var_t* return_val = llvm_var_create(); return_val->repr=strdup("%return"); return_val->type = ret;
   llvm_goto_nonewlabel(label);
   llvm_label(label);
-  llvm_load("%.return", return_val);
-  printf("ret %s %%.return\n", llvm_type_from_ijavatype(ret));  
+    llvm_load("%.return", return_val);
+    printf("ret %s %%.return\n", llvm_type_from_ijavatype(ret));    
   free(label);
   printf("}\n");
   llvm_var_free(return_val);
@@ -329,6 +386,8 @@ llvm_var_t* llvm_node_to_instr_store(node_t* node, sym_t* class_table, sym_t* cu
 llvm_var_t* llvm_node_to_instr_ifelse(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_while(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_call(node_t* node, sym_t* class_table, sym_t* curr_method_table);
+llvm_var_t* llvm_node_to_instr_storearray(node_t* node, sym_t* class_table, sym_t* curr_method_table);
+llvm_var_t* llvm_node_to_instr_loadarray(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 
 /* This is generic and it just binds the several cases we have: binops, types (which end recursion), and others */
 /* This function works just like get_tree_type() in semantic analysis. It (indirecty) recurses down a statement,
@@ -351,6 +410,9 @@ llvm_var_t* llvm_node_to_instr(node_t* node, sym_t* class_table, sym_t* curr_met
         return llvm_node_to_instr_while(node, class_table, curr_method_table);            
     else if ( node->nodetype == NODE_OPER_CALL )
         return llvm_node_to_instr_call(node, class_table, curr_method_table);                  
+    /* FIXME: MORE TO COME: prints, ifelses, etc.. */
+    else if ( node->nodetype == NODE_STATEMENT_STOREARRAY )
+        return llvm_node_to_instr_storearray(node, class_table, curr_method_table);                  
     /* FIXME: MORE TO COME: prints, ifelses, etc.. */
     return NULL;
 }
@@ -483,7 +545,9 @@ llvm_var_t* llvm_node_to_instr_binop(node_t* node, sym_t* class_table, sym_t* cu
 
     if ( is_binary_op_boolean(node->nodetype) ) 
       return llvm_node_to_instr_binop_relational(node, class_table, curr_method_table);
-    else {
+    else if ( node->nodetype == NODE_OPER_LOADARRAY) {
+      return llvm_node_to_instr_loadarray(node, class_table, curr_method_table);
+    } else {
       llvm_var_t* ret = llvm_var_create();
 
       /* Recurse down and find the variables that will be our operands */
@@ -601,7 +665,7 @@ llvm_var_t* llvm_node_to_instr_return(node_t* node, sym_t* class_table, sym_t* c
   ijavatype_t ret = get_return_type(curr_method_table);
   
 
-  if ( !ret == TYPE_VOID ) {
+  if ( ret == TYPE_VOID ) {
     llvm_return(ret, NULL);
   }  else {
     llvm_var_t* val = llvm_node_to_instr(node->n1, class_table, curr_method_table);  
@@ -725,6 +789,41 @@ llvm_var_t* llvm_node_to_instr_call(node_t* node, sym_t* class_table, sym_t* cur
   RETURN_LOADABLE(ret);
 }
 
+llvm_var_t* llvm_node_to_instr_storearray(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
+  assert(node);
+  assert(node->n1);
+  assert(node->n2);
+  assert(node->n3);
+
+  llvm_var_t* id = llvm_node_to_instr(node->n1, class_table, curr_method_table);
+  llvm_var_t* index = llvm_node_to_instr(node->n2, class_table, curr_method_table);
+  llvm_var_t* value = llvm_node_to_instr(node->n3, class_table, curr_method_table);
+
+  llvm_storearray(id, index, value);
+
+  llvm_var_free(id);
+  llvm_var_free(index);
+  llvm_var_free(value);
+
+  return NULL;
+}
+
+llvm_var_t* llvm_node_to_instr_loadarray(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
+  assert(node);
+  assert(node->n1);
+  assert(node->n2);
+
+  llvm_var_t* id = llvm_node_to_instr(node->n1, class_table, curr_method_table);
+  llvm_var_t* index = llvm_node_to_instr(node->n2, class_table, curr_method_table);
+
+  llvm_var_t* ret = llvm_array_get_index(id, index);
+
+  llvm_var_free(id);
+  llvm_var_free(index);
+
+  return ret;
+}
+
 void llvm_recurse_down(node_t* iter, sym_t* class_table, sym_t* table_method) {  
   assert(iter);
 
@@ -744,6 +843,8 @@ void llvm_output_code(node_t* root, sym_t* class_table) {
 
   /* Find all the method entry points and recurse down on them */
   sym_t* iter;
+
+  llvm_file_header();
 
   for (iter = class_table; iter != NULL; iter = iter->next) {
       if (iter->node_type == VARIABLE) {

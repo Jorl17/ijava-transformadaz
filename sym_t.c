@@ -316,7 +316,6 @@ sym_t* lookup_symbol(sym_t* class_table, sym_t* method_table, char* name, int* l
 ijavatype_t lookup_symbol_type(sym_t* class_table, sym_t* method_table, char* name) {
 
 	sym_t* result = lookup_symbol(class_table, method_table, name, NULL);
-
 	return result == NULL ? TYPE_UNKNOWN : result->type;
 }
 
