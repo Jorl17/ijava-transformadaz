@@ -68,12 +68,12 @@ Os métodos definidos, e os respetivos valores de retorno, podem podem ser de qu
 
 O desenvolvimento do compilador foi dividido em três fases distintas.
 
-Numa primeira fase foi realizada a \emph{Análise Lexical} do programa fonte, onde são identificados $tokens$, isto é, cadeias pertencentes à linguagem e que têm significado e relevância para o programa.
+Numa primeira fase foi realizada a \emph{Análise Lexical} do programa fonte, onde são identificados \emph{tokens}, isto é, cadeias pertencentes à linguagem e que têm significado e relevância para o programa.
 
 Seguiu-se a \emph{Análise Semântica}, composta por quatro etapas principais: FIXME, MUDAR A MANEIRA COMO ESTAMOS A DIZER O QUE SE SEGUE
 
 \begin{itemize}
-\item \textbf{Tradução da gramática-fonte} (fornecida em notação $EBNF$) para o yacc 3 e realização da \textbf{Análise Sintática} do programa, permitindo assim reconhecer se as sequências de $tokens$ que o constituem pertencem à linguagem, permitindo-nos assim detetar eventuais erros de sintaxe.
+\item \textbf{Tradução da gramática-fonte} (fornecida em notação $EBNF$) para o yacc 3 e realização da \textbf{Análise Sintática} do programa, permitindo assim reconhecer se as sequências de \emph{tokens} que o constituem pertencem à linguagem, permitindo-nos assim detetar eventuais erros de sintaxe.
 
 \item \textbf{Construção da árvore de sintaxe abstrata}, etapa que é realizada em simultâneo com a \emph{Análise Sintática}. A árvore de sintaxe abstrata irá representar o nosso programa a compilar, recorrendo a uma estrutura em árvore para representar as estruturas sintáticas das cadeias que constituem o programa a compilar.
 
@@ -91,22 +91,22 @@ METER IMAGEM BONITINHA, TIPO CACEIRO???
 
 \section{Análise Lexical}
 
-Tal como referimos anteriormente, na \emph{Análise Lexical} procedemos à identificação dos $tokens$ da nossa linguagem. Para isso utilizámos a ferramenta $lex$, responsável por gerar analisadores lexicais para linguagens.
+Tal como referimos anteriormente, na \emph{Análise Lexical} procedemos à identificação dos \emph{tokens} da nossa linguagem. Para isso utilizámos a ferramenta $lex$, responsável por gerar analisadores lexicais para linguagens.
 
 Assim, no nosso analisador, sempre que é detetada a presença de um comentário no programa a compilar, seja do tipo $// ...$ (comentários de apenas uma linha) ou do tipo $/* ... */$ (comentários multi-linha), os caracteres incluídos nesse comentário são ignorados.
 
-Sempre que é detetado um caracter, ou uma sequência de caracteres, que não constitui nenhum $token$ é detetado um erro lexical, sendo impressa uma mensagem de erro, indicando a existência de um caracter ilegal, juntamente com a sua posição no programa.
+Sempre que é detetado um caracter, ou uma sequência de caracteres, que não constitui nenhum \emph{token} é detetado um erro lexical, sendo impressa uma mensagem de erro, indicando a existência de um caracter ilegal, juntamente com a sua posição no programa.
 
 Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha que não foi devidamente terminado, o erro lexical é também detetado, sendo impressa uma mensagem de erro que indica a posição no programa onde o comentário foi iniciado.
 
 	\subsection{Tokens}
 
-	Em seguida, apresentamos a lista dos $tokens$ válidos na linguagem $iJava$ e a lista dos $tokens$ reservados que, por essa razão, não estão disponíveis na nossa linguagem:
+	Em seguida, apresentamos a lista dos \emph{tokens} válidos na linguagem $iJava$ e a lista dos \emph{tokens} reservados que, por essa razão, não estão disponíveis na nossa linguagem:
 	
 	\begin{itemize}
-	\item \textbf{ID}: Sequências alfanuméricas (maiúsculas e minúsculas) começadas por uma letra, podendo conter também símbolos como $"\_"$ e $"\$"$. Este $token$ pode também ser descrito na forma da sua expressão regular: \emph{{letra}({letra}|{[0-9]})*}, sendo o $token$ \textbf{letra} da nossa autoria, definido por: $[a-z] \mid [A-Z] \mid "\_"|"\$"$
+	\item \textbf{ID}: Sequências alfanuméricas (maiúsculas e minúsculas) começadas por uma letra, podendo conter também símbolos como $"\_"$ e $"\$"$. Este \emph{token} pode também ser descrito na forma da sua expressão regular: \emph{{letra}({letra}|{[0-9]})*}, sendo o \emph{token} \textbf{letra} da nossa autoria, definido por: $[a-z] \mid [A-Z] \mid "\_"|"\$"$
 	
-	\item \textbf{INTLIT}: Sequências de dígitos decimais e hexadecimais (incluindo a-f e A-F) precedidas de $0x$. Este $token$ pode também ser descrito na forma da seguinte expressão regular: \emph{{[0-9]}+|0x[0-9a-fA-F]+}
+	\item \textbf{INTLIT}: Sequências de dígitos decimais e hexadecimais (incluindo a-f e A-F) precedidas de $0x$. Este \emph{token} pode também ser descrito na forma da seguinte expressão regular: \emph{{[0-9]}+|0x[0-9a-fA-F]+}
 	
 	\item \textbf{BOOLLIT}: $true \mid false$
 	
@@ -171,7 +171,7 @@ Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha qu
 	\item \textbf{RESERVED}: $abstract \mid continue \mid for \mid switch \mid assert \mid default \mid goto \mid package \mid synchronized \mid do \mid private \mid this \mid break \mid double \mid implements \mid protected \mid throw \mid byte \mid import \mid throws \mid case \mid enum \mid instanceof \mid transient \mid catch \mid extends \mid short \mid try \mid char \mid final \mid interface \mid finally \mid long \mid strictfp \mid volatile \mid const \mid float \mid native \mid super \mid null \mid ++ \mid --$
 	\end{itemize}
 
-	Para além dos \emph{tokens} apresentados, definimos outros $tokens$, que passamos a especificar:
+	Para além dos \emph{tokens} apresentados, definimos outros \emph{tokens}, que passamos a especificar:
 	
 	\begin{itemize}
 	\item \textbf{NEWLINE}: $Token$ correspondente ao caracter de mudança de linha, $\setminus n$
@@ -185,16 +185,16 @@ Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha qu
 	\item \textbf{SINGLE\_LINE\_COMMENT}: $Token$ utilizado para detetar a \\* ocorrência de um comentário de uma linha apenas
 	\end{itemize}
 	
-	Quando implementámos a \emph{Análise Sintática}, para resolver problemas de ambiguidade da gramática foi necessário, entre outras ações que iremos abordar na próxima secção, separar os $tokens$ \textbf{OP1}, \textbf{OP2}, \textbf{OP3} e \textbf{OP4} nas diferentes sequências alfanuméricas que os constituíam. Assim, temos ainda os seguintes $tokens$:
+	Quando implementámos a \emph{Análise Sintática}, para resolver problemas de ambiguidade da gramática foi necessário, entre outras ações que iremos abordar na próxima secção, separar os \emph{tokens} \textbf{OP1}, \textbf{OP2}, \textbf{OP3} e \textbf{OP4} nas diferentes sequências alfanuméricas que os constituíam. Assim, temos ainda os seguintes \emph{tokens}:
 	
 	\begin{itemize}
-	\item \textbf{AND} ("\&\&") e \textbf{OR} ("$||$"), originados a partir do $token$ \textbf{OP1}
+	\item \textbf{AND} ("\&\&") e \textbf{OR} ("$||$"), originados a partir do \emph{token} \textbf{OP1}
 	
-	\item \textbf{LE} ("<"), \textbf{GE} (">"), \textbf{EQ} ("=="), \textbf{NEQ} ("!="), \textbf{LEQ} ("<=") e \textbf{GEQ} (">="), originados a partir do $token$ \textbf{OP2}
+	\item \textbf{LE} ("<"), \textbf{GE} (">"), \textbf{EQ} ("=="), \textbf{NEQ} ("!="), \textbf{LEQ} ("<=") e \textbf{GEQ} (">="), originados a partir do \emph{token} \textbf{OP2}
 	
-	\item \textbf{PLUS} ("+") e \textbf {MINUS} ("-"), originados a partide do $token$ \textbf{OP3}
+	\item \textbf{PLUS} ("+") e \textbf {MINUS} ("-"), originados a partide do \emph{token} \textbf{OP3}
 	
-	\item \textbf{MULT} ("*"), \textbf{DIV} ("/") e \textbf{MOD} ("\%"), originados a partir do $token$ \textbf{OP4}
+	\item \textbf{MULT} ("*"), \textbf{DIV} ("/") e \textbf{MOD} ("\%"), originados a partir do \emph{token} \textbf{OP4}
 	\end{itemize}
 	
 	\subsection{Comentários}
@@ -215,7 +215,7 @@ Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha qu
 	
 	\subsection{Tratamento de Erros Lexicais}
 	
-	Tal como referimos nos pontos anteriores, sempre que o analisador desenvolvido deteta a ocorrência de um erro lexical (seja por existência de um $token$ não permitido ou por não término de um comentário multi-linha), é impressa uma mensagem de erro que indica a posição do erro no programa a compilar (indicando a linha e coluna onde o erro ocorreu).
+	Tal como referimos nos pontos anteriores, sempre que o analisador desenvolvido deteta a ocorrência de um erro lexical (seja por existência de um \emph{token} não permitido ou por não término de um comentário multi-linha), é impressa uma mensagem de erro que indica a posição do erro no programa a compilar (indicando a linha e coluna onde o erro ocorreu).
 	
 	Quando é detetado um caracter ilegal, o analisador imprime a mensagem de erro, prosseguindo a sua execução na linha seguinte do programa a compilar até ser lido todo o conteúdo do programa.
 	
@@ -226,11 +226,11 @@ Adicionalmente, caso se verifique a ocorrência de um comentário multi-linha qu
 
 \section{Análise Sintática}
 
-A Análise Lexical permite-nos identificar os $tokens$ da linguagem, isto é, os seus "átomos". No entanto, interessa-nos garantir que os $tokens$ identificados estão organizados de acordo com a estrutura sintática da linguagem.
+A Análise Lexical permite-nos identificar os \emph{tokens} da linguagem, isto é, os seus "átomos". No entanto, interessa-nos garantir que os \emph{tokens} identificados estão organizados de acordo com a estrutura sintática da linguagem.
 
-Para validar essa organização dos $tokens$ necessitamos de utilizar uma gramática, que nos indica como devem estar organizados sintaticamente os $tokens$ da linguagem. Para além disso, utilizámos a ferramenta \emph{YACC (Yet Another Compiler Compiler)}, um gerador de analisadores sintáticos.
+Para validar essa organização dos \emph{tokens} necessitamos de utilizar uma gramática, que nos indica como devem estar organizados sintaticamente os \emph{tokens} da linguagem. Para além disso, utilizámos a ferramenta \emph{YACC (Yet Another Compiler Compiler)}, um gerador de analisadores sintáticos.
 
-Assim, utilizamos o analisador lexical (\emph{lex}) desenvolvido para reconhecer os $tokens$ da linguagem, que são transferidos para o \emph{yacc} onde, com base na gramática da linguagem fornecida, podemos verificar se o programa a compilar se encontra organizado de acordo com a estrutura sintática da linguagem.
+Assim, utilizamos o analisador lexical (\emph{lex}) desenvolvido para reconhecer os \emph{tokens} da linguagem, que são transferidos para o \emph{yacc} onde, com base na gramática da linguagem fornecida, podemos verificar se o programa a compilar se encontra organizado de acordo com a estrutura sintática da linguagem.
 
 No analisador sintático foi criada uma \emph{union}, que define a estrutura de uma variável \emph{yylval}, utilizada na comunicação entre o \emph{yacc} e o \emph{lex}. Apresentamos desde já a estrutura da \emph{union} criada:
 
@@ -243,7 +243,7 @@ No analisador sintático foi criada uma \emph{union}, que define a estrutura de 
 }
 \end{lstlisting}
 
-Os $token$ detetados no \emph{lex} são comunicados ao analisador sintático através do campo \emph{token} da variável \emph{yylval}.
+Os \emph{token} detetados no \emph{lex} são comunicados ao analisador sintático através do campo \emph{token} da variável \emph{yylval}.
 
 Para além disso, no analisador sintático definimos ainda três variáveis externas, para uso partilhado entre o \emph{lex} e o \emph{yacc}: Duas do tipo inteiro, \emph{prev\_col} e \emph{prev\_line}, e uma do tipo array de caracteres (\emph{char*}), chamada \emph{yytext} e que contém a cadeia de caracteres lida pelo analisador, em cada momento.
 
@@ -311,25 +311,25 @@ De seguida, apresentamos a gramática da linguagem \emph{iJava}, fornecida no en
 
 \vspace{0.5cm}
 
-Lembramos que, em notação \textbf{ENBF}, os símbolos \textbf{[...]} englobam $tokens$ opcionais e \textbf{\{...\}} implicam a repetição dos $tokens$ 0 ou mais vezes.
+Lembramos que, em notação \textbf{ENBF}, os símbolos \textbf{[...]} englobam \emph{tokens} opcionais e \textbf{\{...\}} implicam a repetição dos \emph{tokens} 0 ou mais vezes.
 
 \subsubsection{Ambiguidade}
 
 Um análise mais cuidada da gramática apresentada permite-nos aferir da sua ambiguidade. Por exemplo, se num dado momento da análise sintática pretendermos analisar $2+3*5$, podemos reduzir esta expressão à variável \emph{EXPR} da gramática por duas formas distintas:
 
 \begin{enumerate}
-\item Numa primeira abordagem podemos separar a expressão em \textbf{Expr $\rightarrow$ Expr + Expr} (onde o símbolo \emph{"+"} é proveniente do $token$ \emph{OP3}). De seguida reduziríamos o primeiro símbolo \emph{Expr} para o $token$ \emph{INTLIT} correspondente, neste caso, ao literal \emph{"2"}. O segundo símbolo \emph{Expr} seria desdobrado em \textbf{Expr $\rightarrow$ Expr * Expr} (onde o símbolo \emph{"*"} é proveniente do $token$ \emph{OP4}). Neste caso os dois símbolos \emph{Expr} seriam reduzidos ao $token$ \emph{INTLIT}, correspondente a cada um dos restantes literais.
+\item Numa primeira abordagem podemos separar a expressão em \textbf{Expr $\rightarrow$ Expr + Expr} (onde o símbolo \emph{"+"} é proveniente do \emph{token} \emph{OP3}). De seguida reduziríamos o primeiro símbolo \emph{Expr} para o \emph{token} \emph{INTLIT} correspondente, neste caso, ao literal \emph{"2"}. O segundo símbolo \emph{Expr} seria desdobrado em \textbf{Expr $\rightarrow$ Expr * Expr} (onde o símbolo \emph{"*"} é proveniente do \emph{token} \emph{OP4}). Neste caso os dois símbolos \emph{Expr} seriam reduzidos ao \emph{token} \emph{INTLIT}, correspondente a cada um dos restantes literais.
 
 \item Numa abordagem alternativa começaríamos por separar a expressão em \textbf{Expr $\rightarrow$ Expr * Expr}. De seguida desdobraríamos o primeiro símbolo \emph{Expr} em \textbf{Expr $\rightarrow$ Expr + Expr}. Estes dois novos símbolos \emph{Expr} seriam reduzidos a \emph{INTLIT}, tal como o restante símbolo \emph{Expr}.
 \end{enumerate}
 
-Acabámos de provar a ambiguidade da gramática. Tal como esta situação existem muitas outras envolvendo os operadores englobados pelos $tokens$ \emph{OP1, OP2, OP3 e OP4}. Assim, é imperativa a definição de prioridades nos operadores, de forma a eliminar todas as ambiguidades presentes na gramática, permitindo assim a correta realização da análise sintática do programa.
+Acabámos de provar a ambiguidade da gramática. Tal como esta situação existem muitas outras envolvendo os operadores englobados pelos \emph{tokens} \emph{OP1, OP2, OP3 e OP4}. Assim, é imperativa a definição de prioridades nos operadores, de forma a eliminar todas as ambiguidades presentes na gramática, permitindo assim a correta realização da análise sintática do programa.
 
 \subsubsection{Alterações à Gramática Fornecida}
 
 Uma vez que a gramática apresentada é ambígua e apresenta-se em notação \textbf{EBNF}, não aceite pela ferramenta utilizada para gerar o analisador sintático, necessitamos de alterar a gramática, de forma a eliminar as suas ambiguidades, tornando-a numa gramática aceite pela ferramenta utilizada.
 
-Como já referimos, a primeira alteração realizada prende-se com a separação dos operadores englobados pelos $tokens$ \emph{OP1, OP2, OP3 e OP4}, criando um novo $token$ para cada operador.
+Como já referimos, a primeira alteração realizada prende-se com a separação dos operadores englobados pelos \emph{tokens} \emph{OP1, OP2, OP3 e OP4}, criando um novo \emph{token} para cada operador.
 
 FIXME: METER AQUI AS PRIORIDADES DOS OPERADORES
 
