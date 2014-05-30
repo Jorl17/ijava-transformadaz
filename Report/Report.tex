@@ -291,7 +291,27 @@ typedef enum {
 	
 	Chamamos também a atenção do leitor para a definição do tipo \\* \emph{ijava\_table\_type\_t}, apresentado a par da estrutura \emph{sym\_t}.
 	
-	Lembramos ainda que os tipos \emph{ijavatype\_t} e \emph{node\_t} foram apresentados na definição das estruturas utilizadas na \emph{Árvore de Sintaxe Abstracta}.
+	Lembramos ainda que os tipos \emph{ijavatype\_t} e \emph{node\_t} foram apresentados na definição das estruturas utilizadas na \emph{Árvore de Sintaxe Abstrata}.
+	
+	Passemos a detalhar um pouco mais a implementação apresentada.
+	
+	Cada entrada da \emph{Tabela de Símbolos} corresponde a uma estrutura do tipo \emph{sym\_t}, sendo cada tabela constituída por uma ou mais entradas.
+	
+	As nossas \emph{Tabelas de Símbolos} não passam de simples listas ligadas, onde o primeiro elemento (a cabeça da lista) caracteriza a tabela, possuindo informação relativa ao seu nome (que coincide com o nome da classe ou do método em questão), armazenado em \emph{id}, e tipo, que se encontra em \emph{node\_type}. O tipo indica-nos se a entrada em questão corresponde a uma tabela de uma classe ou de um método, ou a uma declaração de um método ou de uma variável. Os diferentes elementos da lista encontram-se ligados pelo valor armazenado em \emph{next}, um ponteiro para o próximo elemento da lista.
+	
+	No caso da \emph{Tabela de Símbolos} da classe, os restantes elementos vão corresponder a declarações de atributos ou métodos, possuindo no seu campo \emph{id} o nome do atributo ou método declarado. Os que correspondem a declarações de atributos da classe vão possuir o seu tipo (\emph{int}, \emph{boolean}, etc) armazenado em \emph{type}. Já os que correspondem a declarações de métodos referenciam a \emph{Tabela de Símbolos} desse método através do campo  \emph{table\_method}. Adicionalmente, estes últimos possuem também no campo \emph{method\_start} uma referência para o nó da \emph{Árvore de Sintaxe Abstrata} onde se encontra a declaração do método.
+	
+	Relativamente à \emph{Tabela de Símbolos} de um método, o seu primeiro elemento está de acordo com o descrito anteriormente. Segue-se um elemento que contém o tipo de retorno do método, armazenado no campo \emph{type}. Posteriormente encontram-se os argumentos do método, no caso de existirem, também eles com a informação relativa ao nome e tipo presente em \emph{id} e \emph{type}, respetivamente. Estes elementos possuem também o valor $1$ no campo inteiro \emph{is\_parameter}, que indica que se tratam de parâmetros do método. Por fim, encontram-se as variáveis locais, pela ordem de declaração no método, sendo a informação relativa ao seu nome e tipo armazenada nos campos \emph{id} e \emph{type}, respetivamente.
+	
+	\subsubsection{Conclusão}
+	
+	Após a análise das estruturas de dados apresentadas podemos retirar algumas conclusões acerca das implicações que a escolha destas estruturas teve na implementação das \emph{Tabelas de Símbolos}.
+	
+	Em primeiro lugar é clara a utilização da mesma representação para estruturas conceptualmente distintas, como é o caso da tabela de símbolos da classe e dos métodos, ou das declarações de atributos e métodos de uma classe.
+	
+	De facto, reconhecemos que a utilização de diferentes estruturas seria mais adequado de um ponto de vista conceptual, já que nos permitiria distinguir melhor os elementos que pretendemos representar, evitando a existência de campos não utilizados em algumas estruturas.
+	
+	No entanto, optámos por manter esta representação dado que a consideramos mais simples ao nível da implementação, permitindo-nos generalizar algumas operações como a impressão dos elementos das diferentes tabelas, e até a procura de um elemento numa tabela.
 	
 	\pagebreak
 	
