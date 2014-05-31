@@ -88,7 +88,7 @@ void llvm_file_header() {
   printf("declare i32 @printf(i8*, ...)\n");
   printf("declare i32 @atoi(i8*) nounwind readonly\n");
   printf("declare noalias i8* @malloc(i32) nounwind\n");
-  pritnf("declare noalias i8* @calloc(i64, i64) nounwind");
+  printf("declare noalias i8* @calloc(i32, i32) nounwind");
   printf("@str.printf_callstr = private unnamed_addr constant [4 x i8] c\"%%d\\0A\\00\"\n");
   printf("@str.false_str = private unnamed_addr constant [7 x i8] c\"false\\0A\\00\"\n");
   printf("@str.true_str = private unnamed_addr constant [7 x i8] c\"true\\0A\\00\\00\"\n");
@@ -895,7 +895,7 @@ llvm_var_t* llvm_node_to_instr_length(node_t* node, sym_t* class_table, sym_t* c
     char* name = id->repr;
     name++; /* Skip over % */
     ret->repr = (char*)malloc(strlen(id->repr + 32));
-    sprintf(ret->repr, "%%args.length", id->repr);
+    sprintf(ret->repr, "%%args.length");
   } else {
     ret->repr = llvm_length_from_array(id);
   }  
@@ -972,7 +972,7 @@ llvm_var_t* llvm_node_to_instr_new(node_t* node, sym_t* class_table, sym_t* curr
 
     printf("store %s* %s, %s** %s, align 8\n", ptr_type_element, bitcast_var, ptr_type_element, array_indx_ptr);
 
-    free(arraysize_ptr); /*free(casted_size)*/ /*free(tmpsize);*/ free(malloc_var); free(bitcast_var); free(array_indx_ptr);
+    free(arraysize_ptr); /*free(casted_size)*/ /*free(tmpsize);*/ free(calloc_var); free(bitcast_var); free(array_indx_ptr);
 
     RETURN_LOADABLE(ret);
   
