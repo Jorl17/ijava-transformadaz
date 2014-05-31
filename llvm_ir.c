@@ -87,6 +87,7 @@ void llvm_file_header() {
   printf("%%.BoolArray = type { i32, i1* }\n");
   printf("declare i32 @printf(i8*, ...)\n");
   printf("declare i32 @atoi(i8*) nounwind readonly\n");
+  printf("declare noalias i8* @malloc(i32) nounwind\n");
   printf("@str.printf_callstr = private unnamed_addr constant [4 x i8] c\"%%d\\0A\\00\"\n");
   printf("@str.false_str = private unnamed_addr constant [7 x i8] c\"false\\0A\\00\"\n");
   printf("@str.true_str = private unnamed_addr constant [7 x i8] c\"true\\0A\\00\\00\"\n");
@@ -339,8 +340,8 @@ void llvm_function_epilogue(ijavatype_t ret) {
   llvm_var_t* return_val = llvm_var_create(); return_val->repr=strdup("%return"); return_val->type = ret;
   llvm_goto_nonewlabel(label);
   llvm_label(label);
-    llvm_load("%.return", return_val);
-    printf("ret %s %%.return\n", llvm_type_from_ijavatype(ret));    
+    llvm_load("%.return_final", return_val);
+    printf("ret %s %%.return_final\n", llvm_type_from_ijavatype(ret));    
   free(label);
   printf("}\n");
   llvm_var_free(return_val);
@@ -405,6 +406,7 @@ llvm_var_t* llvm_node_to_instr_loadarray(node_t* node, sym_t* class_table, sym_t
 llvm_var_t* llvm_node_to_instr_print(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_length(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 llvm_var_t* llvm_node_to_instr_parseargs(node_t* node, sym_t* class_table, sym_t* curr_method_table);
+llvm_var_t* llvm_node_to_instr_new(node_t* node, sym_t* class_table, sym_t* curr_method_table);
 
 /* This is generic and it just binds the several cases we have: binops, types (which end recursion), and others */
 /* This function works just like get_tree_type() in semantic analysis. It (indirecty) recurses down a statement,
@@ -602,6 +604,8 @@ llvm_var_t* llvm_node_to_instr_unop(node_t* node, sym_t* class_table, sym_t* cur
 
     if ( node->nodetype == NODE_OPER_LENGTH )
       return llvm_node_to_instr_length(node, class_table, curr_method_table);
+    else if ( node->nodetype == NODE_OPER_NEWINT || node->nodetype == NODE_OPER_NEWBOOL )
+      return llvm_node_to_instr_new(node, class_table, curr_method_table);
 
     llvm_var_t* ret = llvm_var_create();   
     const char* op;
@@ -920,6 +924,57 @@ llvm_var_t* llvm_node_to_instr_parseargs(node_t* node, sym_t* class_table, sym_t
 
   free(index); free(loaded); free(plus_one);
   RETURN_LOADABLE(ret);
+}
+
+llvm_var_t* llvm_node_to_instr_new(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
+  assert(node);
+  assert(node->n1);
+
+  ijavatype_t type = node->nodetype == NODE_OPER_NEWINT ? TYPE_INTARRAY : TYPE_BOOLARRAY;
+  ijavatype_t type_element = node->nodetype == NODE_OPER_NEWINT ? TYPE_INT : TYPE_BOOL;
+  const char* type_str = llvm_type_from_ijavatype(type);
+  const char* ptr_type = llvm_type_from_ijavatype(type);
+  const char* ptr_type_element = llvm_type_from_ijavatype(type_element);
+
+/*%1 = getelementptr inbounds %struct.IntArray* %array, i32 0, i32 0 ;Ponteiro para array.size
+  store i32 40, i32* %1, align 4                                     ;array.size = 40
+  %2 = getelementptr inbounds %struct.IntArray* %array, i32 0, i32 0 ;Ponteiro para array.size
+  %3 = load i32* %2, align 4                                         ;%3 = array.size
+  %4 = sext i32 %3 to i64                                            ;Extend to type i64 - Going to need this?
+  %5 = mul i64 %4, 4                                                 ;array.size*sizeof(int)
+  %6 = call noalias i8* @malloc(i64 %5) nounwind
+  %7 = bitcast i8* %6 to i32*                                        ;malloc devolve i8*, temos que passar para i32*
+  %8 = getelementptr inbounds %struct.IntArray* %array, i32 0, i32 1 
+  store i32* %7, i32** %8, align 8                                   ;Guardar o array
+  */
+    llvm_var_t* size = llvm_node_to_instr(node->n1, class_table, curr_method_table);
+
+    llvm_var_t* ret = llvm_var_create(); ret->type = type; ret->value = 0; 
+    ret->repr = get_local_var_name();
+    llvm_declare_local_array(type, ret->repr);
+    char* arraysize_ptr = get_local_var_name();
+    /*char* casted_size = get_local_var_name();*/
+    printf("%s = getelementptr inbounds %s* %s, i32 0, i32 0\n", arraysize_ptr, type_str, ret->repr);
+    printf("store i32 %s, i32* %s, align 4\n", size->repr, arraysize_ptr);
+    /*printf("%s = sext i32 %s to i64\n", casted_size, ret->repr);*/
+
+    char* tmpsize = get_local_var_name();
+    printf("%s = mul i32 %s, %s\n", tmpsize, type == TYPE_INTARRAY ? "4" : "1", size->repr); /* FIXME: i64? note arraysize_ptr */
+    char* malloc_var = get_local_var_name();
+    printf("%s = call noalias i8* @malloc(i32 %s) nounwind\n", malloc_var, tmpsize);
+
+    char* bitcast_var = get_local_var_name();
+    printf("%s = bitcast i8* %s to %s*\n", bitcast_var, malloc_var, ptr_type_element);
+
+    char* array_indx_ptr = get_local_var_name();
+    printf("%s = getelementptr inbounds %s* %s, i32 0, i32 1\n", array_indx_ptr, type_str, ret->repr);
+
+    printf("store %s* %s, %s** %s, align 8\n", ptr_type_element, bitcast_var, ptr_type_element, array_indx_ptr);
+
+    free(arraysize_ptr); /*free(casted_size)*/ free(tmpsize); free(malloc_var); free(bitcast_var); free(array_indx_ptr);
+
+    RETURN_LOADABLE(ret);
+  
 }
 
 void llvm_recurse_down(node_t* iter, sym_t* class_table, sym_t* table_method) {  
