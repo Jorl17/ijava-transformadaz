@@ -273,7 +273,7 @@ void llvm_define_function(sym_t* function_table) {
   for ( current = function_table->next->next; current != NULL; current = current->next ) {  
 
     if ( current->is_parameter ) {
-      if(current->type == TYPE_STRINGARRAY)
+      if(current->type == TYPE_STRINGARRAY) 
         printf("i32 %%args.length, %s %%args", llvm_type_from_ijavatype(current->type));
       else
         printf("%s %%.%s", llvm_type_from_ijavatype(current->type), current->id);      
@@ -894,8 +894,8 @@ llvm_var_t* llvm_node_to_instr_length(node_t* node, sym_t* class_table, sym_t* c
   if ( id->type == TYPE_STRINGARRAY ) {
     char* name = id->repr;
     name++; /* Skip over % */
-    ret->repr = (char*)malloc(strlen(id->repr + 32));
-    sprintf(ret->repr, "%%args.length");
+    ret->repr = get_local_var_name();
+    llvm_bin_op("sub", "i32", ret->repr, "%args.length", "1");
   } else {
     ret->repr = llvm_length_from_array(id);
   }  
