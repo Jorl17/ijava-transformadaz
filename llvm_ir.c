@@ -380,9 +380,9 @@ void llvm_return(ijavatype_t ret, llvm_var_t* var) {
   free(label);
 }
 
-void llvm_icmp(const char* comparison, char* dest, char* op1, char* op2) {
+void llvm_icmp(const char* comparison, char* dest, char* op1, char* op2, const char* type) {
   /* FIXME: Slightly hardcoded */
-  printf("%s = icmp %s i32 %s, %s\n", dest, comparison, op1, op2);
+  printf("%s = icmp %s %s %s, %s\n", dest, comparison, type, op1, op2);
 }
 
 void llvm_br(char* condvar, char* labelthen, char* labelelse) {
@@ -547,7 +547,8 @@ llvm_var_t* llvm_node_to_instr_binop_relational(node_t* node, sym_t* class_table
     b = llvm_node_to_instr(node->n2, class_table, curr_method_table);        /* Evaluate second operand */
 
     char* tmp = get_local_var_name();
-    llvm_icmp(llvm_get_op_from_node(node), tmp, a->repr, b->repr);  /* Store comparison in result */
+
+    llvm_icmp(llvm_get_op_from_node(node), tmp, a->repr, b->repr, llvm_type_from_ijavatype(a->type));  /* Store comparison in result */
     llvm_store_names_types(result->repr, tmp, TYPE_BOOL);
   }
 
