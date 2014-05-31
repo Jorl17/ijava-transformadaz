@@ -88,6 +88,7 @@ void llvm_file_header() {
   printf("declare i32 @printf(i8*, ...)\n");
   printf("declare i32 @atoi(i8*) nounwind readonly\n");
   printf("declare noalias i8* @malloc(i32) nounwind\n");
+  pritnf("declare noalias i8* @calloc(i64, i64) nounwind");
   printf("@str.printf_callstr = private unnamed_addr constant [4 x i8] c\"%%d\\0A\\00\"\n");
   printf("@str.false_str = private unnamed_addr constant [7 x i8] c\"false\\0A\\00\"\n");
   printf("@str.true_str = private unnamed_addr constant [7 x i8] c\"true\\0A\\00\\00\"\n");
@@ -941,8 +942,7 @@ llvm_var_t* llvm_node_to_instr_new(node_t* node, sym_t* class_table, sym_t* curr
   %2 = getelementptr inbounds %struct.IntArray* %array, i32 0, i32 0 ;Ponteiro para array.size
   %3 = load i32* %2, align 4                                         ;%3 = array.size
   %4 = sext i32 %3 to i64                                            ;Extend to type i64 - Going to need this?
-  %5 = mul i64 %4, 4                                                 ;array.size*sizeof(int)
-  %6 = call noalias i8* @malloc(i64 %5) nounwind
+  %4 = call noalias i8* @calloc(i64 %3, i64 4) nounwind
   %7 = bitcast i8* %6 to i32*                                        ;malloc devolve i8*, temos que passar para i32*
   %8 = getelementptr inbounds %struct.IntArray* %array, i32 0, i32 1 
   store i32* %7, i32** %8, align 8                                   ;Guardar o array
@@ -958,20 +958,20 @@ llvm_var_t* llvm_node_to_instr_new(node_t* node, sym_t* class_table, sym_t* curr
     printf("store i32 %s, i32* %s, align 4\n", size->repr, arraysize_ptr);
     /*printf("%s = sext i32 %s to i64\n", casted_size, ret->repr);*/
 
-    char* tmpsize = get_local_var_name();
-    printf("%s = mul i32 %s, %s\n", tmpsize, type == TYPE_INTARRAY ? "4" : "1", size->repr); /* FIXME: i64? note arraysize_ptr */
-    char* malloc_var = get_local_var_name();
-    printf("%s = call noalias i8* @malloc(i32 %s) nounwind\n", malloc_var, tmpsize);
+    /*char* tmpsize = get_local_var_name();
+    printf("%s = mul i32 %s, %s\n", tmpsize, type == TYPE_INTARRAY ? "4" : "1", size->repr);*/ /* FIXME: i64? note arraysize_ptr */
+    char* calloc_var = get_local_var_name();
+    printf("%s = call noalias i8* @calloc(i32 %s, i32 %s) nounwind\n", calloc_var, size->repr, type == TYPE_INTARRAY ? "4" : "1");
 
     char* bitcast_var = get_local_var_name();
-    printf("%s = bitcast i8* %s to %s*\n", bitcast_var, malloc_var, ptr_type_element);
+    printf("%s = bitcast i8* %s to %s*\n", bitcast_var, calloc_var, ptr_type_element);
 
     char* array_indx_ptr = get_local_var_name();
     printf("%s = getelementptr inbounds %s* %s, i32 0, i32 1\n", array_indx_ptr, type_str, ret->repr);
 
     printf("store %s* %s, %s** %s, align 8\n", ptr_type_element, bitcast_var, ptr_type_element, array_indx_ptr);
 
-    free(arraysize_ptr); /*free(casted_size)*/ free(tmpsize); free(malloc_var); free(bitcast_var); free(array_indx_ptr);
+    free(arraysize_ptr); /*free(casted_size)*/ /*free(tmpsize);*/ free(malloc_var); free(bitcast_var); free(array_indx_ptr);
 
     RETURN_LOADABLE(ret);
   
