@@ -434,6 +434,8 @@ llvm_var_t* llvm_node_to_instr(node_t* node, sym_t* class_table, sym_t* curr_met
         return llvm_node_to_instr_storearray(node, class_table, curr_method_table);                  
     else if ( node->nodetype == NODE_STATEMENT_PRINT )
         return llvm_node_to_instr_print(node, class_table, curr_method_table);                            
+    else if ( node->nodetype == NODE_STATEMENT_COMPOUNDSTATEMENT )
+        llvm_recurse_down(node->n1, class_table, curr_method_table);                                  
 
     return NULL;
 }
