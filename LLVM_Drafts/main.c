@@ -12,7 +12,7 @@ int main(void)
 {
 	array.size = 40;
 
-	array.array = (int *) malloc(array.size*sizeof(int));
+	array.array = (int *) calloc(array.size,sizeof(int));
 
 	return 0;
 }
