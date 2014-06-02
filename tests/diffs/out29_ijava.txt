@@ -1,0 +1,3 @@
+lli: test29.ll:82:30: error: '%sum' defined with type 'i32*'
+%29 = call i32 (%.IntArray)* %sum(%.IntArray %28)
+                             ^
