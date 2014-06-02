@@ -33,45 +33,45 @@ store i1 0, i1* %h
 %i = alloca i1, align 4
 store i1 0, i1* %i
 %j = alloca %.IntArray, align 8
-%.j = getelementptr inbounds %.IntArray* %j, i32 0, i32 0
-store i32 0, i32* %.j, align 4
-%..j = getelementptr inbounds %.IntArray* %j, i32 0, i32 1
-store i32* null, i32** %..j, align 8
+%.array.j = getelementptr inbounds %.IntArray* %j, i32 0, i32 0
+store i32 0, i32* %.array.j, align 4
+%..array.j = getelementptr inbounds %.IntArray* %j, i32 0, i32 1
+store i32* null, i32** %..array.j, align 8
 %k = alloca %.IntArray, align 8
-%.k = getelementptr inbounds %.IntArray* %k, i32 0, i32 0
-store i32 0, i32* %.k, align 4
-%..k = getelementptr inbounds %.IntArray* %k, i32 0, i32 1
-store i32* null, i32** %..k, align 8
+%.array.k = getelementptr inbounds %.IntArray* %k, i32 0, i32 0
+store i32 0, i32* %.array.k, align 4
+%..array.k = getelementptr inbounds %.IntArray* %k, i32 0, i32 1
+store i32* null, i32** %..array.k, align 8
 %l = alloca %.IntArray, align 8
-%.l = getelementptr inbounds %.IntArray* %l, i32 0, i32 0
-store i32 0, i32* %.l, align 4
-%..l = getelementptr inbounds %.IntArray* %l, i32 0, i32 1
-store i32* null, i32** %..l, align 8
+%.array.l = getelementptr inbounds %.IntArray* %l, i32 0, i32 0
+store i32 0, i32* %.array.l, align 4
+%..array.l = getelementptr inbounds %.IntArray* %l, i32 0, i32 1
+store i32* null, i32** %..array.l, align 8
 %m = alloca %.IntArray, align 8
-%.m = getelementptr inbounds %.IntArray* %m, i32 0, i32 0
-store i32 0, i32* %.m, align 4
-%..m = getelementptr inbounds %.IntArray* %m, i32 0, i32 1
-store i32* null, i32** %..m, align 8
+%.array.m = getelementptr inbounds %.IntArray* %m, i32 0, i32 0
+store i32 0, i32* %.array.m, align 4
+%..array.m = getelementptr inbounds %.IntArray* %m, i32 0, i32 1
+store i32* null, i32** %..array.m, align 8
 %n = alloca %.BoolArray, align 8
-%.n = getelementptr inbounds %.BoolArray* %n, i32 0, i32 0
-store i32 0, i32* %.n, align 4
-%..n = getelementptr inbounds %.BoolArray* %n, i32 0, i32 1
-store i1* null, i1** %..n, align 8
+%.array.n = getelementptr inbounds %.BoolArray* %n, i32 0, i32 0
+store i32 0, i32* %.array.n, align 4
+%..array.n = getelementptr inbounds %.BoolArray* %n, i32 0, i32 1
+store i1* null, i1** %..array.n, align 8
 %o = alloca %.BoolArray, align 8
-%.o = getelementptr inbounds %.BoolArray* %o, i32 0, i32 0
-store i32 0, i32* %.o, align 4
-%..o = getelementptr inbounds %.BoolArray* %o, i32 0, i32 1
-store i1* null, i1** %..o, align 8
+%.array.o = getelementptr inbounds %.BoolArray* %o, i32 0, i32 0
+store i32 0, i32* %.array.o, align 4
+%..array.o = getelementptr inbounds %.BoolArray* %o, i32 0, i32 1
+store i1* null, i1** %..array.o, align 8
 %p = alloca %.BoolArray, align 8
-%.p = getelementptr inbounds %.BoolArray* %p, i32 0, i32 0
-store i32 0, i32* %.p, align 4
-%..p = getelementptr inbounds %.BoolArray* %p, i32 0, i32 1
-store i1* null, i1** %..p, align 8
+%.array.p = getelementptr inbounds %.BoolArray* %p, i32 0, i32 0
+store i32 0, i32* %.array.p, align 4
+%..array.p = getelementptr inbounds %.BoolArray* %p, i32 0, i32 1
+store i1* null, i1** %..array.p, align 8
 %q = alloca %.BoolArray, align 8
-%.q = getelementptr inbounds %.BoolArray* %q, i32 0, i32 0
-store i32 0, i32* %.q, align 4
-%..q = getelementptr inbounds %.BoolArray* %q, i32 0, i32 1
-store i1* null, i1** %..q, align 8
+%.array.q = getelementptr inbounds %.BoolArray* %q, i32 0, i32 0
+store i32 0, i32* %.array.q, align 4
+%..array.q = getelementptr inbounds %.BoolArray* %q, i32 0, i32 1
+store i1* null, i1** %..array.q, align 8
 
 
 br label %.return1

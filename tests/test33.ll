@@ -31,10 +31,10 @@ store i32 0, i32* %a
 store i32 %1, i32* %a
 %2 = add i32 0, 9
 %3 = alloca %.BoolArray, align 8
-%.3 = getelementptr inbounds %.BoolArray* %3, i32 0, i32 0
-store i32 0, i32* %.3, align 4
-%..3 = getelementptr inbounds %.BoolArray* %3, i32 0, i32 1
-store i1* null, i1** %..3, align 8
+%.array.3 = getelementptr inbounds %.BoolArray* %3, i32 0, i32 0
+store i32 0, i32* %.array.3, align 4
+%..array.3 = getelementptr inbounds %.BoolArray* %3, i32 0, i32 1
+store i1* null, i1** %..array.3, align 8
 %4 = getelementptr inbounds %.BoolArray* %3, i32 0, i32 0
 store i32 %2, i32* %4, align 4
 %5 = call noalias i8* @calloc(i32 %2, i32 1) nounwind
@@ -45,10 +45,10 @@ store i1* %6, i1** %7, align 8
 store %.BoolArray %8, %.BoolArray* @h
 %9 = add i32 0, 3
 %10 = alloca %.IntArray, align 8
-%.10 = getelementptr inbounds %.IntArray* %10, i32 0, i32 0
-store i32 0, i32* %.10, align 4
-%..10 = getelementptr inbounds %.IntArray* %10, i32 0, i32 1
-store i32* null, i32** %..10, align 8
+%.array.10 = getelementptr inbounds %.IntArray* %10, i32 0, i32 0
+store i32 0, i32* %.array.10, align 4
+%..array.10 = getelementptr inbounds %.IntArray* %10, i32 0, i32 1
+store i32* null, i32** %..array.10, align 8
 %11 = getelementptr inbounds %.IntArray* %10, i32 0, i32 0
 store i32 %9, i32* %11, align 4
 %12 = call noalias i8* @calloc(i32 %9, i32 4) nounwind
@@ -96,10 +96,10 @@ br label %.label1
 store i32 %40, i32* %42
 %43 = add i32 0, 4
 %44 = alloca %.IntArray, align 8
-%.44 = getelementptr inbounds %.IntArray* %44, i32 0, i32 0
-store i32 0, i32* %.44, align 4
-%..44 = getelementptr inbounds %.IntArray* %44, i32 0, i32 1
-store i32* null, i32** %..44, align 8
+%.array.44 = getelementptr inbounds %.IntArray* %44, i32 0, i32 0
+store i32 0, i32* %.array.44, align 4
+%..array.44 = getelementptr inbounds %.IntArray* %44, i32 0, i32 1
+store i32* null, i32** %..array.44, align 8
 %45 = getelementptr inbounds %.IntArray* %44, i32 0, i32 0
 store i32 %43, i32* %45, align 4
 %46 = call noalias i8* @calloc(i32 %43, i32 4) nounwind
@@ -145,27 +145,27 @@ ret i32 %.return_final
 
 define %.IntArray @banana(i32 %.a) {
 %return = alloca %.IntArray, align 8
-%.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 0
-store i32 0, i32* %.return, align 4
-%..return = getelementptr inbounds %.IntArray* %return, i32 0, i32 1
-store i32* null, i32** %..return, align 8
+%.array.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 0
+store i32 0, i32* %.array.return, align 4
+%..array.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 1
+store i32* null, i32** %..array.return, align 8
 %a = alloca i32, align 4
 store i32 0, i32* %a
 store i32 %.a, i32* %a
 %f2 = alloca %.IntArray, align 8
-%.f2 = getelementptr inbounds %.IntArray* %f2, i32 0, i32 0
-store i32 0, i32* %.f2, align 4
-%..f2 = getelementptr inbounds %.IntArray* %f2, i32 0, i32 1
-store i32* null, i32** %..f2, align 8
+%.array.f2 = getelementptr inbounds %.IntArray* %f2, i32 0, i32 0
+store i32 0, i32* %.array.f2, align 4
+%..array.f2 = getelementptr inbounds %.IntArray* %f2, i32 0, i32 1
+store i32* null, i32** %..array.f2, align 8
 %i = alloca i32, align 4
 store i32 0, i32* %i
 
 %1 = load i32* %a
 %2 = alloca %.IntArray, align 8
-%.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
-store i32 0, i32* %.2, align 4
-%..2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 1
-store i32* null, i32** %..2, align 8
+%.array.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
+store i32 0, i32* %.array.2, align 4
+%..array.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 1
+store i32* null, i32** %..array.2, align 8
 %3 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
 store i32 %1, i32* %3, align 4
 %4 = call noalias i8* @calloc(i32 %1, i32 4) nounwind
@@ -220,7 +220,7 @@ br i1 %33, label %.label9, label %.label10
 store i1 0, i1* %34
 %35 = load i32* %a
 %36 = add i32 0, 2
-%37 = urem i32 %35, %36
+%37 = srem i32 %35, %36
 %38 = add i32 0, 0
 %39 = icmp eq i32 %37, %38
 store i1 %39, i1* %34

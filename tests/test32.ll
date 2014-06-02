@@ -54,10 +54,10 @@ br label %.label1
 .label3:
 %16 = add i32 0, 4
 %17 = alloca %.IntArray, align 8
-%.17 = getelementptr inbounds %.IntArray* %17, i32 0, i32 0
-store i32 0, i32* %.17, align 4
-%..17 = getelementptr inbounds %.IntArray* %17, i32 0, i32 1
-store i32* null, i32** %..17, align 8
+%.array.17 = getelementptr inbounds %.IntArray* %17, i32 0, i32 0
+store i32 0, i32* %.array.17, align 4
+%..array.17 = getelementptr inbounds %.IntArray* %17, i32 0, i32 1
+store i32* null, i32** %..array.17, align 8
 %18 = getelementptr inbounds %.IntArray* %17, i32 0, i32 0
 store i32 %16, i32* %18, align 4
 %19 = call noalias i8* @calloc(i32 %16, i32 4) nounwind
@@ -94,22 +94,22 @@ ret i32 %.return_final
 
 define %.IntArray @banana() {
 %return = alloca %.IntArray, align 8
-%.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 0
-store i32 0, i32* %.return, align 4
-%..return = getelementptr inbounds %.IntArray* %return, i32 0, i32 1
-store i32* null, i32** %..return, align 8
+%.array.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 0
+store i32 0, i32* %.array.return, align 4
+%..array.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 1
+store i32* null, i32** %..array.return, align 8
 %f2 = alloca %.IntArray, align 8
-%.f2 = getelementptr inbounds %.IntArray* %f2, i32 0, i32 0
-store i32 0, i32* %.f2, align 4
-%..f2 = getelementptr inbounds %.IntArray* %f2, i32 0, i32 1
-store i32* null, i32** %..f2, align 8
+%.array.f2 = getelementptr inbounds %.IntArray* %f2, i32 0, i32 0
+store i32 0, i32* %.array.f2, align 4
+%..array.f2 = getelementptr inbounds %.IntArray* %f2, i32 0, i32 1
+store i32* null, i32** %..array.f2, align 8
 
 %1 = add i32 0, 4
 %2 = alloca %.IntArray, align 8
-%.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
-store i32 0, i32* %.2, align 4
-%..2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 1
-store i32* null, i32** %..2, align 8
+%.array.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
+store i32 0, i32* %.array.2, align 4
+%..array.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 1
+store i32* null, i32** %..array.2, align 8
 %3 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
 store i32 %1, i32* %3, align 4
 %4 = call noalias i8* @calloc(i32 %1, i32 4) nounwind

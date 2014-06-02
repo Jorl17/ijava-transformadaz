@@ -19,26 +19,26 @@ store i32 0, i32* %a
 %e = alloca i32, align 4
 store i32 0, i32* %e
 %b = alloca %.IntArray, align 8
-%.b = getelementptr inbounds %.IntArray* %b, i32 0, i32 0
-store i32 0, i32* %.b, align 4
-%..b = getelementptr inbounds %.IntArray* %b, i32 0, i32 1
-store i32* null, i32** %..b, align 8
+%.array.b = getelementptr inbounds %.IntArray* %b, i32 0, i32 0
+store i32 0, i32* %.array.b, align 4
+%..array.b = getelementptr inbounds %.IntArray* %b, i32 0, i32 1
+store i32* null, i32** %..array.b, align 8
 %c = alloca i1, align 4
 store i1 0, i1* %c
 %d = alloca %.BoolArray, align 8
-%.d = getelementptr inbounds %.BoolArray* %d, i32 0, i32 0
-store i32 0, i32* %.d, align 4
-%..d = getelementptr inbounds %.BoolArray* %d, i32 0, i32 1
-store i1* null, i1** %..d, align 8
+%.array.d = getelementptr inbounds %.BoolArray* %d, i32 0, i32 0
+store i32 0, i32* %.array.d, align 4
+%..array.d = getelementptr inbounds %.BoolArray* %d, i32 0, i32 1
+store i1* null, i1** %..array.d, align 8
 
 %1 = add i32 0, 1
 store i32 %1, i32* %a
 %2 = add i32 0, 2
 %3 = alloca %.IntArray, align 8
-%.3 = getelementptr inbounds %.IntArray* %3, i32 0, i32 0
-store i32 0, i32* %.3, align 4
-%..3 = getelementptr inbounds %.IntArray* %3, i32 0, i32 1
-store i32* null, i32** %..3, align 8
+%.array.3 = getelementptr inbounds %.IntArray* %3, i32 0, i32 0
+store i32 0, i32* %.array.3, align 4
+%..array.3 = getelementptr inbounds %.IntArray* %3, i32 0, i32 1
+store i32* null, i32** %..array.3, align 8
 %4 = getelementptr inbounds %.IntArray* %3, i32 0, i32 0
 store i32 %2, i32* %4, align 4
 %5 = call noalias i8* @calloc(i32 %2, i32 4) nounwind
@@ -64,10 +64,10 @@ store i32 %17, i32* %19
 store i1 %20, i1* %c
 %21 = add i32 0, 2
 %22 = alloca %.BoolArray, align 8
-%.22 = getelementptr inbounds %.BoolArray* %22, i32 0, i32 0
-store i32 0, i32* %.22, align 4
-%..22 = getelementptr inbounds %.BoolArray* %22, i32 0, i32 1
-store i1* null, i1** %..22, align 8
+%.array.22 = getelementptr inbounds %.BoolArray* %22, i32 0, i32 0
+store i32 0, i32* %.array.22, align 4
+%..array.22 = getelementptr inbounds %.BoolArray* %22, i32 0, i32 1
+store i1* null, i1** %..array.22, align 8
 %23 = getelementptr inbounds %.BoolArray* %22, i32 0, i32 0
 store i32 %21, i32* %23, align 4
 %24 = call noalias i8* @calloc(i32 %21, i32 1) nounwind
@@ -109,19 +109,19 @@ store i32 0, i32* %return
 store i32 0, i32* %a
 store i32 %.a, i32* %a
 %b = alloca %.IntArray, align 8
-%.b = getelementptr inbounds %.IntArray* %b, i32 0, i32 0
-store i32 0, i32* %.b, align 4
-%..b = getelementptr inbounds %.IntArray* %b, i32 0, i32 1
-store i32* null, i32** %..b, align 8
+%.array.b = getelementptr inbounds %.IntArray* %b, i32 0, i32 0
+store i32 0, i32* %.array.b, align 4
+%..array.b = getelementptr inbounds %.IntArray* %b, i32 0, i32 1
+store i32* null, i32** %..array.b, align 8
 store %.IntArray %.b, %.IntArray* %b
 %c = alloca i1, align 4
 store i1 0, i1* %c
 store i1 %.c, i1* %c
 %d = alloca %.BoolArray, align 8
-%.d = getelementptr inbounds %.BoolArray* %d, i32 0, i32 0
-store i32 0, i32* %.d, align 4
-%..d = getelementptr inbounds %.BoolArray* %d, i32 0, i32 1
-store i1* null, i1** %..d, align 8
+%.array.d = getelementptr inbounds %.BoolArray* %d, i32 0, i32 0
+store i32 0, i32* %.array.d, align 4
+%..array.d = getelementptr inbounds %.BoolArray* %d, i32 0, i32 1
+store i1* null, i1** %..array.d, align 8
 store %.BoolArray %.d, %.BoolArray* %d
 
 %1 = load i32* %a
@@ -129,10 +129,10 @@ store %.BoolArray %.d, %.BoolArray* %d
 store i32 %2, i32* %a
 %3 = add i32 0, 2
 %4 = alloca %.IntArray, align 8
-%.4 = getelementptr inbounds %.IntArray* %4, i32 0, i32 0
-store i32 0, i32* %.4, align 4
-%..4 = getelementptr inbounds %.IntArray* %4, i32 0, i32 1
-store i32* null, i32** %..4, align 8
+%.array.4 = getelementptr inbounds %.IntArray* %4, i32 0, i32 0
+store i32 0, i32* %.array.4, align 4
+%..array.4 = getelementptr inbounds %.IntArray* %4, i32 0, i32 1
+store i32* null, i32** %..array.4, align 8
 %5 = getelementptr inbounds %.IntArray* %4, i32 0, i32 0
 store i32 %3, i32* %5, align 4
 %6 = call noalias i8* @calloc(i32 %3, i32 4) nounwind
@@ -146,10 +146,10 @@ store %.IntArray %9, %.IntArray* %b
 store i1 %11, i1* %c
 %12 = add i32 0, 2
 %13 = alloca %.BoolArray, align 8
-%.13 = getelementptr inbounds %.BoolArray* %13, i32 0, i32 0
-store i32 0, i32* %.13, align 4
-%..13 = getelementptr inbounds %.BoolArray* %13, i32 0, i32 1
-store i1* null, i1** %..13, align 8
+%.array.13 = getelementptr inbounds %.BoolArray* %13, i32 0, i32 0
+store i32 0, i32* %.array.13, align 4
+%..array.13 = getelementptr inbounds %.BoolArray* %13, i32 0, i32 1
+store i1* null, i1** %..array.13, align 8
 %14 = getelementptr inbounds %.BoolArray* %13, i32 0, i32 0
 store i32 %12, i32* %14, align 4
 %15 = call noalias i8* @calloc(i32 %12, i32 1) nounwind

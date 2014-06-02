@@ -19,29 +19,29 @@ store i32 0, i32* %a
 %b = alloca i32, align 4
 store i32 0, i32* %b
 %a2 = alloca %.IntArray, align 8
-%.a2 = getelementptr inbounds %.IntArray* %a2, i32 0, i32 0
-store i32 0, i32* %.a2, align 4
-%..a2 = getelementptr inbounds %.IntArray* %a2, i32 0, i32 1
-store i32* null, i32** %..a2, align 8
+%.array.a2 = getelementptr inbounds %.IntArray* %a2, i32 0, i32 0
+store i32 0, i32* %.array.a2, align 4
+%..array.a2 = getelementptr inbounds %.IntArray* %a2, i32 0, i32 1
+store i32* null, i32** %..array.a2, align 8
 %b2 = alloca %.IntArray, align 8
-%.b2 = getelementptr inbounds %.IntArray* %b2, i32 0, i32 0
-store i32 0, i32* %.b2, align 4
-%..b2 = getelementptr inbounds %.IntArray* %b2, i32 0, i32 1
-store i32* null, i32** %..b2, align 8
+%.array.b2 = getelementptr inbounds %.IntArray* %b2, i32 0, i32 0
+store i32 0, i32* %.array.b2, align 4
+%..array.b2 = getelementptr inbounds %.IntArray* %b2, i32 0, i32 1
+store i32* null, i32** %..array.b2, align 8
 %c = alloca i1, align 4
 store i1 0, i1* %c
 %d = alloca i1, align 4
 store i1 0, i1* %d
 %c2 = alloca %.BoolArray, align 8
-%.c2 = getelementptr inbounds %.BoolArray* %c2, i32 0, i32 0
-store i32 0, i32* %.c2, align 4
-%..c2 = getelementptr inbounds %.BoolArray* %c2, i32 0, i32 1
-store i1* null, i1** %..c2, align 8
+%.array.c2 = getelementptr inbounds %.BoolArray* %c2, i32 0, i32 0
+store i32 0, i32* %.array.c2, align 4
+%..array.c2 = getelementptr inbounds %.BoolArray* %c2, i32 0, i32 1
+store i1* null, i1** %..array.c2, align 8
 %d2 = alloca %.BoolArray, align 8
-%.d2 = getelementptr inbounds %.BoolArray* %d2, i32 0, i32 0
-store i32 0, i32* %.d2, align 4
-%..d2 = getelementptr inbounds %.BoolArray* %d2, i32 0, i32 1
-store i1* null, i1** %..d2, align 8
+%.array.d2 = getelementptr inbounds %.BoolArray* %d2, i32 0, i32 0
+store i32 0, i32* %.array.d2, align 4
+%..array.d2 = getelementptr inbounds %.BoolArray* %d2, i32 0, i32 1
+store i1* null, i1** %..array.d2, align 8
 
 %1 = call i32 ()* @test1()
 store i32 %1, i32* %a
@@ -182,17 +182,17 @@ ret i1 %.return_final
 
 define %.IntArray @test5() {
 %return = alloca %.IntArray, align 8
-%.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 0
-store i32 0, i32* %.return, align 4
-%..return = getelementptr inbounds %.IntArray* %return, i32 0, i32 1
-store i32* null, i32** %..return, align 8
+%.array.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 0
+store i32 0, i32* %.array.return, align 4
+%..array.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 1
+store i32* null, i32** %..array.return, align 8
 
 %1 = add i32 0, 2
 %2 = alloca %.IntArray, align 8
-%.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
-store i32 0, i32* %.2, align 4
-%..2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 1
-store i32* null, i32** %..2, align 8
+%.array.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
+store i32 0, i32* %.array.2, align 4
+%..array.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 1
+store i32* null, i32** %..array.2, align 8
 %3 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
 store i32 %1, i32* %3, align 4
 %4 = call noalias i8* @calloc(i32 %1, i32 4) nounwind
@@ -213,22 +213,22 @@ ret %.IntArray %.return_final
 
 define %.IntArray @test6() {
 %return = alloca %.IntArray, align 8
-%.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 0
-store i32 0, i32* %.return, align 4
-%..return = getelementptr inbounds %.IntArray* %return, i32 0, i32 1
-store i32* null, i32** %..return, align 8
+%.array.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 0
+store i32 0, i32* %.array.return, align 4
+%..array.return = getelementptr inbounds %.IntArray* %return, i32 0, i32 1
+store i32* null, i32** %..array.return, align 8
 %b = alloca %.IntArray, align 8
-%.b = getelementptr inbounds %.IntArray* %b, i32 0, i32 0
-store i32 0, i32* %.b, align 4
-%..b = getelementptr inbounds %.IntArray* %b, i32 0, i32 1
-store i32* null, i32** %..b, align 8
+%.array.b = getelementptr inbounds %.IntArray* %b, i32 0, i32 0
+store i32 0, i32* %.array.b, align 4
+%..array.b = getelementptr inbounds %.IntArray* %b, i32 0, i32 1
+store i32* null, i32** %..array.b, align 8
 
 %1 = add i32 0, 1
 %2 = alloca %.IntArray, align 8
-%.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
-store i32 0, i32* %.2, align 4
-%..2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 1
-store i32* null, i32** %..2, align 8
+%.array.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
+store i32 0, i32* %.array.2, align 4
+%..array.2 = getelementptr inbounds %.IntArray* %2, i32 0, i32 1
+store i32* null, i32** %..array.2, align 8
 %3 = getelementptr inbounds %.IntArray* %2, i32 0, i32 0
 store i32 %1, i32* %3, align 4
 %4 = call noalias i8* @calloc(i32 %1, i32 4) nounwind
@@ -257,17 +257,17 @@ ret %.IntArray %.return_final
 
 define %.BoolArray @test7() {
 %return = alloca %.BoolArray, align 8
-%.return = getelementptr inbounds %.BoolArray* %return, i32 0, i32 0
-store i32 0, i32* %.return, align 4
-%..return = getelementptr inbounds %.BoolArray* %return, i32 0, i32 1
-store i1* null, i1** %..return, align 8
+%.array.return = getelementptr inbounds %.BoolArray* %return, i32 0, i32 0
+store i32 0, i32* %.array.return, align 4
+%..array.return = getelementptr inbounds %.BoolArray* %return, i32 0, i32 1
+store i1* null, i1** %..array.return, align 8
 
 %1 = add i32 0, 0
 %2 = alloca %.BoolArray, align 8
-%.2 = getelementptr inbounds %.BoolArray* %2, i32 0, i32 0
-store i32 0, i32* %.2, align 4
-%..2 = getelementptr inbounds %.BoolArray* %2, i32 0, i32 1
-store i1* null, i1** %..2, align 8
+%.array.2 = getelementptr inbounds %.BoolArray* %2, i32 0, i32 0
+store i32 0, i32* %.array.2, align 4
+%..array.2 = getelementptr inbounds %.BoolArray* %2, i32 0, i32 1
+store i1* null, i1** %..array.2, align 8
 %3 = getelementptr inbounds %.BoolArray* %2, i32 0, i32 0
 store i32 %1, i32* %3, align 4
 %4 = call noalias i8* @calloc(i32 %1, i32 1) nounwind
@@ -288,22 +288,22 @@ ret %.BoolArray %.return_final
 
 define %.BoolArray @test8() {
 %return = alloca %.BoolArray, align 8
-%.return = getelementptr inbounds %.BoolArray* %return, i32 0, i32 0
-store i32 0, i32* %.return, align 4
-%..return = getelementptr inbounds %.BoolArray* %return, i32 0, i32 1
-store i1* null, i1** %..return, align 8
+%.array.return = getelementptr inbounds %.BoolArray* %return, i32 0, i32 0
+store i32 0, i32* %.array.return, align 4
+%..array.return = getelementptr inbounds %.BoolArray* %return, i32 0, i32 1
+store i1* null, i1** %..array.return, align 8
 %a = alloca %.BoolArray, align 8
-%.a = getelementptr inbounds %.BoolArray* %a, i32 0, i32 0
-store i32 0, i32* %.a, align 4
-%..a = getelementptr inbounds %.BoolArray* %a, i32 0, i32 1
-store i1* null, i1** %..a, align 8
+%.array.a = getelementptr inbounds %.BoolArray* %a, i32 0, i32 0
+store i32 0, i32* %.array.a, align 4
+%..array.a = getelementptr inbounds %.BoolArray* %a, i32 0, i32 1
+store i1* null, i1** %..array.a, align 8
 
 %1 = add i32 0, 7
 %2 = alloca %.BoolArray, align 8
-%.2 = getelementptr inbounds %.BoolArray* %2, i32 0, i32 0
-store i32 0, i32* %.2, align 4
-%..2 = getelementptr inbounds %.BoolArray* %2, i32 0, i32 1
-store i1* null, i1** %..2, align 8
+%.array.2 = getelementptr inbounds %.BoolArray* %2, i32 0, i32 0
+store i32 0, i32* %.array.2, align 4
+%..array.2 = getelementptr inbounds %.BoolArray* %2, i32 0, i32 1
+store i1* null, i1** %..array.2, align 8
 %3 = getelementptr inbounds %.BoolArray* %2, i32 0, i32 0
 store i32 %1, i32* %3, align 4
 %4 = call noalias i8* @calloc(i32 %1, i32 1) nounwind
