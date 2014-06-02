@@ -105,22 +105,20 @@ O desenvolvimento do compilador foi dividido em três fases distintas.
 
 Numa primeira fase foi realizada a \emph{Análise Lexical} do programa fonte, onde são identificados \emph{tokens}, isto é, cadeias pertencentes à linguagem e que têm significado e relevância para o programa.
 
-Seguiu-se a \emph{Análise Semântica}, composta por quatro etapas principais:
+Seguiram-se a realização da \emph{Análise Sintática} e \emph{Análise Semântica}, compostas por quatro etapas principais:
 
 \begin{itemize}
-\item \textbf{Tradução da gramática-fonte} (fornecida em notação $EBNF$) para o yacc 3 e realização da \textbf{Análise Sintática} do programa, permitindo assim reconhecer se as sequências de \emph{tokens} que o constituem pertencem à linguagem, permitindo-nos assim detectar eventuais erros de sintaxe.
+\item \textbf{Tradução da gramática-fonte} (fornecida em notação $EBNF$) para o yacc e realização da \textbf{Análise Sintática} do programa, permitindo assim reconhecer se as sequências de \emph{tokens} que o constituem pertencem à linguagem, permitindo-nos assim detetar eventuais erros de sintaxe.
 
-\item \textbf{Construção da árvore de sintaxe abstrata}, etapa que é realizada em simultâneo com a \emph{Análise Sintática}. A árvore de sintaxe abstrata irá representar o nosso programa a compilar, recorrendo a uma estrutura em árvore para representar as estruturas sintáticas das cadeias que constituem o programa a compilar.
+\item \textbf{Construção da árvore de sintaxe abstrata}, etapa realizada em simultâneo com a \textbf{Análise Sintática}. A árvore de sintaxe abstrata irá representar o nosso programa a compilar, recorrendo a uma estrutura em árvore para representar as estruturas sintáticas das cadeias que o constituem.
 
 \item \textbf{Construção das tabelas de símbolos}, utilizadas para armazenar informações relevantes sobre a classe (seus atributos e métodos), bem como sobre cada método definido pelo programador (mais concretamente o tipo de retorno e os argumentos).
 
-\item \textbf{Verificação de erros semânticos}, etapa principal da \emph{Análise} \\* \emph{Semântica}, onde são realizadas verificações de tipos, garantindo que para cada operação a realizar não existem incompatibilidades de tipos entre os operandos nela envolvidos.
+\item \textbf{Verificação de erros semânticos}, etapa principal da \textbf{Análise} \\* \textbf{Semântica}, onde são realizadas verificações de tipos, garantindo que para cada operação a realizar não existem incompatibilidades de tipos entre os operandos nela envolvidos.
 
 \end{itemize}
 
-A última fase do trabalho consistiu na \emph{Geração de Código Intermédio}, da qual resulta, na representação intermédia de $LLVM$, um programa equivalente ao que pretendemos compilar.
-
-METER IMAGEM BONITINHA, TIPO CACEIRO???
+A última fase do trabalho consistiu na \emph{Geração de Código Intermédio}, da qual resulta, na representação intermédia de \emph{LLVM}, um programa equivalente ao que pretendemos compilar.
 
 \pagebreak
 
@@ -298,23 +296,23 @@ De seguida, apresentamos a gramática da linguagem \emph{iJava}, fornecida no en
 
 \hspace{-1cm}Start $\rightarrow$ Program
 
-\hspace{-1cm}Program $\rightarrow$ CLASS ID OBRACE { FieldDecl $\mid$ MethodDecl } CBRACE
+\hspace{-1cm}Program $\rightarrow$ CLASS ID OBRACE \{ FieldDecl $\mid$ MethodDecl \} CBRACE
 
 \hspace{-1cm}FieldDecl $\rightarrow$ STATIC VarDecl
 
 \hspace{-1cm}MethodDecl $\rightarrow$ PUBLIC STATIC ( Type $\mid$ VOID ) ID OCURV
 
-[ FormalParams ] CCURV OBRACE { VarDecl } { Statement } CBRACE
+\hspace{-.5cm}[ FormalParams ] CCURV OBRACE \{ VarDecl \} \{ Statement \} CBRACE
 
-\hspace{-1cm}FormalParams $\rightarrow$ Type ID { COMMA Type ID }
+\hspace{-1cm}FormalParams $\rightarrow$ Type ID \{ COMMA Type ID \}
 
 \hspace{-1cm}FormalParams $\rightarrow$ STRING OSQUARE CSQUARE ID
 
-\hspace{-1cm}VarDecl $\rightarrow$ Type ID { COMMA ID } SEMIC
+\hspace{-1cm}VarDecl $\rightarrow$ Type ID \{ COMMA ID \} SEMIC
 
 \hspace{-1cm}Type $\rightarrow$ ( INT $\mid$ BOOL ) [ OSQUARE CSQUARE ]
 
-\hspace{-1cm}Statement $\rightarrow$ OBRACE { Statement } CBRACE
+\hspace{-1cm}Statement $\rightarrow$ OBRACE \{ Statement \} CBRACE
 
 \hspace{-1cm}Statement $\rightarrow$ IF OCURV Expr CCURV Statement [ ELSE Statement ]
 
@@ -342,7 +340,7 @@ De seguida, apresentamos a gramática da linguagem \emph{iJava}, fornecida no en
 
 \hspace{-1cm}Expr $\rightarrow$ ID OCURV [ Args ] CCURV
 
-\hspace{-1cm}Args $\rightarrow$ Expr { COMMA Expr }
+\hspace{-1cm}Args $\rightarrow$ Expr \{ COMMA Expr \}
 
 \vspace{0.5cm}
 
@@ -360,14 +358,20 @@ Um análise mais cuidada da gramática apresentada permite-nos aferir da sua amb
 
 Acabámos de provar a ambiguidade da gramática. Tal como esta situação existem muitas outras envolvendo os operadores englobados pelos \emph{tokens} \emph{OP1, OP2, OP3 e OP4}. Assim, é imperativa a definição de prioridades nos operadores, de forma a eliminar todas as ambiguidades presentes na gramática, permitindo assim a correta realização da análise sintática do programa. A definição de prioridades também nos auxiliará a definir concisamente as prioridades que o Java implementa.
 
-\subsubsection{Alterações à Gramática Fornecida}
+\subsection{Alterações à Gramática Fornecida}
 
 Uma vez que a gramática apresentada é ambígua e está apresentada em notação \textbf{EBNF}, não aceite pela ferramenta utilizada para gerar o analisador sintático, necessitámos de alterar a gramática, de forma a eliminar as suas ambiguidades, tornando-a numa gramática aceite pela ferramenta utilizada.
 
-Como já referimos, a primeira alteração realizada prende-se com a separação dos operadores englobados pelos \emph{tokens} \emph{OP1, OP2, OP3 e OP4}, criando um novo \emph{token} para cada operador.
+\subsubsection{Definição de Novos \emph{Tokens}}
 
-FIXME: METER AQUI AS PRIORIDADES DOS OPERADORES
+Como já referimos, a primeira alteração realizada prende-se com a separação dos operadores englobados pelos \emph{tokens} \emph{OP1, OP2, OP3 e OP4}, criando um novo \emph{token} para cada operador, definindo de seguida a prioridade dos diferentes operadores representados pelos \emph{tokens} criados.
 
+As prioridades dos operadores foram definidas na ferramenta \emph{yacc}, de acordo com a sua notação. De seguida apresentamos a definição, em notação \emph{yacc} da prioridade dos operadores identificados:
+
+\begin{lstlisting}
+%nonassoc THEN
+%nonassoc ELSE
+%nonassoc REDUCEEXPRESSON1
 %left OR
 %left AND
 %left EQ NEQ
@@ -378,8 +382,191 @@ FIXME: METER AQUI AS PRIORIDADES DOS OPERADORES
 %left OBRACE
 %right UNARY_HIGHEST_VAL
 %left OSQUARE DOTLENGTH
+\end{lstlisting}
 
-FIXME: METER ALTERAÇÕES FEITAS À GRAMÁTICA. EXPLICAR QUAIS AS ALTERAÇÕES E PORQUE É QUE AS FIZEMOS
+\vspace{0.5cm}
+
+Na notação \emph{yacc} a prioridade de um \emph{token} é definida com as instruções \emph{\%left} e \emph{\%right}, correspondendo respetivamente à associatividade à esquerda ou à direita. Alternativamente podemos também utilizar a instrução \emph{\%nonassoc}, indicando que o operador não tem qualquer associatividade. Para além disso a prioridade de um operador é tanto maior quanto posterior for a sua definição.
+
+Na situação apresentada indicamos, por exemplo, que os operadores \emph{THEN} e \emph{ELSE} não têm qualquer associatividade, tendo o operador \emph{ELSE} maior prioridade do que o operador \emph{THEN}.
+
+\subsubsection{Alterações nas Regras da Gramática}
+
+Após a criação de novos \emph{tokens} e definição das respetivas prioridades procedemos a modificações na gramática, visando:
+
+\begin{itemize}
+\item Lidar com situações como \emph{Expr $\rightarrow$ ID OCURV [ Args ] CCURV} ou \emph{Args $\rightarrow$ Expr \{ COMMA Expr \}}, correspondentes a \emph{tokens} opcionais e a 0 ou mais repetições de uma dada sequência de \emph{tokens}
+
+\item Distinguir expressões indexáveis, isto é às quais podemos aplicar o operador \textbf{``["}, das restantes operações não indexáveis
+\end{itemize}
+
+\subsubsection{\emph{Tokens} Opcionais}
+
+Estas alterações justificam-se pelo facto de que, evitando a existência de símbolos anuláveis, a criação da \emph{Árvore de Sintaxe Abstrata} se tornar mais fácil, dado que as regras anuláveis implicam a criação de nós nulos na \emph{Árvore de Sintaxe Abstrata}, o que adiciona alguma complexidade e dificuldade à sua criação, manutenção e utilização. Por essa razão, e com o principal objetivo de não adicionar demasiada complexidade à criação da \emph{Árvore de Sintaxe Abstrata}, optámos por eliminar essas situações, sempre que possível.
+
+Assim, as situações correspondentes a \emph{tokens} opcionais na gramática foram substituídas pelas respetivas regras, com e sem os \emph{tokens} opcionais. No exemplo apresentado, a regra \emph{Expr $\rightarrow$ ID OCURV [ Args ] CCURV} seria substituída pelas regras \emph{Expr $\rightarrow$ ID OCURV CCURV} e \emph{Expr $\rightarrow$ ID OCURV Args CCURV}.
+
+Por sua vez, as repetições de \emph{tokens} 0 ou mais vezes obrigaram-nos a introduzir um novo símbolo na gramática, que garante a ocorrência da repetição de \emph{tokens} pelo menos uma vez, ou obrigando a que os \emph{tokens} não sejam derivados a partir do símbolo da gramática em questão
+
+Assim, no caso apresentado anteriormente, correspondente à regra \emph{Args $\rightarrow$ Expr \{ COMMA Expr \}}, introduzimos o símbolo \emph{RealArguments}, substituindo a regra por \emph{Args $\rightarrow$ RealArguments}. Por sua vez, o símbolo \emph{RealArguments} possui duas regras, sendo que numa considera apenas uma ocorrência de \emph{Expr} (não ocorrendo nenhuma repetição de \emph{COMMA Expr}), e na outra obriga a que a sequência de \emph{tokens} \emph{COMMA Expr} ocorra pelo menos uma vez. Assim, introduzimos as regras:
+
+\emph{Args $\rightarrow$ RealArguments}
+\emph{RealArguments $\rightarrow$ Expr}
+\emph{RealArguments $\rightarrow$ Expr COMMA RealArguments}
+
+\subsubsection{Expressões Indexáveis}
+
+À semelhança do que acontece em \emph{Java}, também em \emph{iJava} existem expressões passíveis de serem indexadas e outras onde a operação de indexação não é possível. A nível sintáctico, optámos por estruturar a detecção destes erros de acordo com o seguinte catálogo:
+
+\begin{itemize}
+\item \textbf{Operações Não-Indexáveis:} Declarações de arrays (inteiros e booleanos), expressões compostas apenas por símbolos terminais (literais inteiros ou booleanos) e expressões onde já é realizada indexação (ou seja, indexáveis)
+
+\item \textbf{Expressões Indexáveis:} Todas as restantes
+\end{itemize}
+
+Realçamos que nem todas as restantes expressões são indexáveis, mas que a verificação da correcta indexação destas é delegada para a análise semântica.
+
+\subsubsection{Expressões Não-Indexáveis}
+
+Dadas as características da linguagem descritas em secções anteriores, uma vez que em \emph{iJava} apenas está disponível a utilização de arrays uni-dimensionais, não podemos considerar as declarações de arrays indexáveis. Caso o fizéssemos, a operação \emph{new int[5][2]} seria válida na nossa linguagem.
+
+De facto, poderíamos entender esta instrução como a declaração de um array uni-dimensional de inteiros, e o posterior acesso à sua terceira posição. No entanto, esta operação corresponde, na linguagem \emph{Java} à declaração de um array bi-dimensional de inteiros, não permitido em \emph{iJava}.
+
+Assim, consideramos a operação \emph{new int[5][2]} inválida na linguagem \emph{iJava}, o que nos permite concluir que todas as declarações de arrays não são indexáveis. Para além disso, caso um programador pretenda declarar um array uni-dimensional e aceder de seguida a uma das suas posições, na mesma linha de código, também o poderá fazer em \emph{iJava}, devendo envolver a declaração do array numa expressão indexável, através da utilização de parêntesis: emph{(new int[5])[2]}.
+
+\subsubsection{Expressões Indexáveis}
+
+Todas as expressões que não declarações de arrays ou terminais são passíveis de serem indexadas na nossa linguagem.
+
+Queremos, contudo, chamar a atenção para situações não permitidas na linguagem, como por exemplo \emph{a[0]} caso \emph{a} seja uma variável do tipo inteiro ou booleano.
+
+De facto, a nível sintático esta expressão é considerada válida, sendo apenas na \emph{Análise Semântica} (a detalhar mais à frente) realizadas verificações dos tipos de dados envolvidos em cada operação, assegurando a adequação dos mesmos à operações a realizar. Naturalmente que o exemplo descrito levará à deteção de um erro semântico, que será posteriormente relatado ao utilizador.
+
+\subsubsection{Gramática Final}
+
+Apresentamos de seguida a gramática final da linguagem, após efetuar todas as alterações referidas:
+
+\begin{lstlisting}
+Start:	Program
+	;
+
+Program: CLASS ID OBRACE Declarations CBRACE
+    |    CLASS ID OBRACE CBRACE
+	;
+
+Declarations: Declarations FieldDecl
+    |     Declarations MethodDecl
+    |     FieldDecl
+    |     MethodDecl
+    ;
+
+FieldDecl: STATIC VarDecl
+	;
+
+VarDecls: VarDecl
+    |     VarDecls VarDecl
+    ;
+
+MethodDecl: PUBLIC STATIC MethodType ID OCURV
+            FormalParams CCURV OBRACE VarDecls
+            Statements CBRACE
+            
+    |       PUBLIC STATIC MethodType ID OCURV
+            FormalParams CCURV OBRACE VarDecls CBRACE
+            
+    |       PUBLIC STATIC MethodType ID OCURV
+            FormalParams CCURV OBRACE
+            Statements CBRACE
+            
+    |       PUBLIC STATIC MethodType ID OCURV
+            FormalParams CCURV OBRACE CBRACE
+    ;
+
+MethodType: Type
+    |       VOID
+    ;
+
+Statements: Statement
+    |       Statement Statements
+    ;
+
+FormalParams: RealParams
+    |         STRING OSQUARE CSQUARE ID
+    |
+    ;                                                                             
+
+RealParams: Type ID
+    |       Type ID COMMA RealParams
+    ;
+    
+VarDecl: Type IDs SEMIC
+    ;
+
+IDs:  ID
+    | IDs COMMA ID
+    ;
+
+Type:  INT OSQUARE CSQUARE
+    |  BOOL OSQUARE CSQUARE
+    |  INT
+    |  BOOL
+    ;
+
+Statement: OBRACE CBRACE
+    |     OBRACE Statements CBRACE
+    |     IF OCURV Expr CCURV Statement %prec THEN
+    |     IF OCURV Expr CCURV Statement ELSE Statement
+    |     WHILE OCURV Expr CCURV Statement
+    |     PRINT OCURV Expr CCURV SEMIC
+    |     ID ASSIGN Expr SEMIC
+    |     ID OSQUARE Expr CSQUARE ASSIGN Expr SEMIC
+    |     RETURN SEMIC
+    |     RETURN Expr SEMIC
+    ;
+
+Expr:     NEW INT OSQUARE Expr CSQUARE
+    |     NEW BOOL OSQUARE Expr CSQUARE
+    |     exprIndexable %prec REDUCEEXPRESSON1
+    ;
+
+exprIndexable: exprIndexable OSQUARE Expr CSQUARE
+    |          Expr AND Expr
+    |          Expr OR Expr
+    |          Expr LE Expr
+    |          Expr GE Expr
+    |          Expr EQ Expr
+    |          Expr NEQ Expr
+    |          Expr GEQ Expr
+    |          Expr LEQ Expr
+    |          Expr PLUS Expr
+    |          Expr MINUS Expr
+    |          Expr MULT Expr
+    |          Expr DIV Expr
+    |          Expr MOD Expr
+    |          NOT Expr %prec UNARY_HIGHEST_VAL
+    |          PLUS Expr %prec UNARY_HIGHEST_VAL
+    |          MINUS Expr %prec UNARY_HIGHEST_VAL
+    |          Terminal
+    |          OCURV Expr CCURV
+    |          Expr DOTLENGTH
+    |          PARSEINT OCURV ID OSQUARE Expr
+               CSQUARE CCURV
+    ;
+
+Terminal:     ID
+    |         INTLIT
+    |         BOOLLIT
+    |         ID OCURV Args CCURV
+    |         ID OCURV CCURV
+    ;
+
+Args:         RealArguments
+    ;
+
+RealArguments: Expr
+    |          Expr COMMA RealArguments
+    ;
+\end{lstlisting}
 
 \pagebreak
 
@@ -635,6 +822,8 @@ typedef enum {
 
 	\subsubsection{Impressão}
 	A impressão das tabelas de símbolos faz-se novamente com recurso a uma tabela de lookup, como já outrora feito para a AST. Este mecanismo permite-nos facilmente modificar todas as strings que esperamos que apareçam no ecrã aquando do output desta tabela.
+	
+	FIXME FIXME FIXME: METER IMAGEM PARA AS TABELAS DE SIMBOLOS
 	
 	\subsubsection{Conclusão}
 	
