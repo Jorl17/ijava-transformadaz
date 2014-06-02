@@ -331,9 +331,12 @@ Uma vez que a gramática apresentada é ambígua e apresenta-se em notação \te
 
 Como já referimos, a primeira alteração realizada prende-se com a separação dos operadores englobados pelos \emph{tokens} \emph{OP1, OP2, OP3 e OP4}, criando um novo \emph{token} para cada operador, definindo de seguida a prioridade dos diferentes operadores representados pelos \emph{tokens} criados.
 
-Utilizando a ferramenta \emph{yacc} definimos do seguinte modo as prioridades dos operadores referidos:
+As prioridades dos operadores foram definidas na ferramenta \emph{yacc}, de acordo com a sua notação. De seguida apresentamos a definição, em notação \emph{yacc} da prioridade dos operadores identificados:
 
 \begin{lstlisting}
+%nonassoc THEN
+%nonassoc ELSE
+%nonassoc REDUCEEXPRESSON1
 %left OR
 %left AND
 %left EQ NEQ
@@ -345,6 +348,13 @@ Utilizando a ferramenta \emph{yacc} definimos do seguinte modo as prioridades do
 %right UNARY_HIGHEST_VAL
 %left OSQUARE DOTLENGTH
 \end{lstlisting}
+
+\vspace{0.5cm}
+
+Na notação \emph{yacc} a prioridade de um \emph{token} é definida com as instruções \emph{\%left} e \emph{\%right}, correspondendo respetivamente à associatividade à esquerda ou à direita. Alternativamente podemos também utilizar a instrução \emph{\%nonassoc}, indicando que o operador não tem qualquer associatividade. Para além disso a prioridade de um operador é tanto maior quanto posterior for a sua definição.
+
+Na situação apresentada indicamos, por exemplo, que os operadores \emph{THEN} e \emph{ELSE} não têm qualquer associatividade, tendo o operador \emph{ELSE} maior prioridade do que o operador \emph{THEN}.
+
 
 FIXME: METER ALTERAÇÕES FEITAS À GRAMÁTICA. EXPLICAR QUAIS AS ALTERAÇÕES E PORQUE É QUE AS FIZEMOS
 
