@@ -75,7 +75,7 @@ Seguiu-se a \emph{Análise Semântica}, composta por quatro etapas principais: F
 \begin{itemize}
 \item \textbf{Tradução da gramática-fonte} (fornecida em notação $EBNF$) para o yacc 3 e realização da \textbf{Análise Sintática} do programa, permitindo assim reconhecer se as sequências de \emph{tokens} que o constituem pertencem à linguagem, permitindo-nos assim detetar eventuais erros de sintaxe.
 
-\item \textbf{Construção da árvore de sintaxe abstrata}, etapa que é realizada em simultâneo com a \emph{Análise Sintática}. A árvore de sintaxe abstrata irá representar o nosso programa a compilar, recorrendo a uma estrutura em árvore para representar as estruturas sintáticas das cadeias que constituem o programa a compilar.
+\item \textbf{Construção da árvore de sintaxe abstrata}, etapa que é realizada em simultâneo com a \emph{Análise Sintática}. A árvore de sintaxe abstrata irá representar o nosso programa a compilar, recorrendo a uma estrutura em árvore para representar as estruturas sintáticas das cadeias que o constituem.
 
 \item \textbf{Construção da tabela de símbolos}, utilizadas para armazenar informações relevantes sobre a classe (seus atributos e métodos), bem como sobre cada método definido pelo programador (como, por exemplo, o tipo de retorno e os argumentos).
 
@@ -329,6 +329,8 @@ Acabámos de provar a ambiguidade da gramática. Tal como esta situação existe
 
 Uma vez que a gramática apresentada é ambígua e apresenta-se em notação \textbf{EBNF}, não aceite pela ferramenta utilizada para gerar o analisador sintático, necessitamos de alterar a gramática, de forma a eliminar as suas ambiguidades, tornando-a numa gramática aceite pela ferramenta utilizada.
 
+\subsubsection{Definição de Novos \emph{Tokens}}
+
 Como já referimos, a primeira alteração realizada prende-se com a separação dos operadores englobados pelos \emph{tokens} \emph{OP1, OP2, OP3 e OP4}, criando um novo \emph{token} para cada operador, definindo de seguida a prioridade dos diferentes operadores representados pelos \emph{tokens} criados.
 
 As prioridades dos operadores foram definidas na ferramenta \emph{yacc}, de acordo com a sua notação. De seguida apresentamos a definição, em notação \emph{yacc} da prioridade dos operadores identificados:
@@ -355,6 +357,135 @@ Na notação \emph{yacc} a prioridade de um \emph{token} é definida com as inst
 
 Na situação apresentada indicamos, por exemplo, que os operadores \emph{THEN} e \emph{ELSE} não têm qualquer associatividade, tendo o operador \emph{ELSE} maior prioridade do que o operador \emph{THEN}.
 
+\subsubsection{Alterações nas Regras da Gramática}
+
+Coisitos - Dava jeito na criação da AST para não estar sempre a receber NULL's
+
+Indexável - Variaveis Indexaveis
+
+Apresentamos de seguida a gramática final da linguagem, após efetuar todas as alterações referidas:
+
+\begin{lstlisting}
+Start:	Program
+	;
+
+Program: CLASS ID OBRACE Declarations CBRACE
+    |    CLASS ID OBRACE CBRACE
+	;
+
+Declarations: Declarations FieldDecl
+	|     Declarations MethodDecl
+    |     FieldDecl
+    |     MethodDecl
+    ;
+
+FieldDecl: STATIC VarDecl
+	;
+
+VarDecls: VarDecl
+    |     VarDecls VarDecl
+    ;
+
+MethodDecl: PUBLIC STATIC MethodType ID OCURV
+            FormalParams CCURV OBRACE VarDecls
+            Statements CBRACE
+            
+    |       PUBLIC STATIC MethodType ID OCURV
+            FormalParams CCURV OBRACE VarDecls CBRACE
+            
+    |       PUBLIC STATIC MethodType ID OCURV
+            FormalParams CCURV OBRACE
+            Statements CBRACE
+            
+    |       PUBLIC STATIC MethodType ID OCURV
+            FormalParams CCURV OBRACE CBRACE
+    ;
+
+MethodType: Type
+    |       VOID
+    ;
+
+Statements: Statement
+    |       Statement Statements
+    ;
+
+FormalParams: RealParams
+    |         STRING OSQUARE CSQUARE ID
+    |
+    ;                                                                             
+
+RealParams: Type ID
+    |       Type ID COMMA RealParams
+    ;
+    
+VarDecl: Type IDs SEMIC
+    ;
+
+IDs:  ID
+    | IDs COMMA ID
+    ;
+
+Type:  INT OSQUARE CSQUARE
+    |  BOOL OSQUARE CSQUARE
+    |  INT
+    |  BOOL
+    ;
+
+Statement: OBRACE CBRACE
+    |     OBRACE Statements CBRACE
+    |     IF OCURV Expr CCURV Statement %prec THEN
+    |     IF OCURV Expr CCURV Statement ELSE Statement
+    |     WHILE OCURV Expr CCURV Statement
+    |     PRINT OCURV Expr CCURV SEMIC
+    |     ID ASSIGN Expr SEMIC
+    |     ID OSQUARE Expr CSQUARE ASSIGN Expr SEMIC
+    |     RETURN SEMIC
+    |     RETURN Expr SEMIC
+    ;
+
+Expr:     NEW INT OSQUARE Expr CSQUARE
+    |     NEW BOOL OSQUARE Expr CSQUARE
+    |     exprIndexable %prec REDUCEEXPRESSON1
+    ;
+
+exprIndexable: exprIndexable OSQUARE Expr CSQUARE
+    |          Expr AND Expr
+    |          Expr OR Expr
+    |          Expr LE Expr
+    |          Expr GE Expr
+    |          Expr EQ Expr
+    |          Expr NEQ Expr
+    |          Expr GEQ Expr
+    |          Expr LEQ Expr
+    |          Expr PLUS Expr
+    |          Expr MINUS Expr
+    |          Expr MULT Expr
+    |          Expr DIV Expr
+    |          Expr MOD Expr
+    |          NOT Expr %prec UNARY_HIGHEST_VAL
+    |          PLUS Expr %prec UNARY_HIGHEST_VAL
+    |          MINUS Expr %prec UNARY_HIGHEST_VAL
+    |          Terminal
+    |          OCURV Expr CCURV
+    |          Expr DOTLENGTH
+    |          PARSEINT OCURV ID OSQUARE Expr
+               CSQUARE CCURV
+    ;
+
+Terminal:     ID
+    |         INTLIT
+    |         BOOLLIT
+    |         ID OCURV Args CCURV
+    |         ID OCURV CCURV
+    ;
+
+Args:         RealArguments
+    ;
+
+RealArguments: Expr
+    |          Expr COMMA RealArguments
+    ;
+\end{lstlisting}
 
 FIXME: METER ALTERAÇÕES FEITAS À GRAMÁTICA. EXPLICAR QUAIS AS ALTERAÇÕES E PORQUE É QUE AS FIZEMOS
 
