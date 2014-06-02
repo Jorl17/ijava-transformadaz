@@ -148,12 +148,9 @@ struct _node_t {
        FIXME: We might need to create a special id node for this later on... */     
     char* id;
      
-    /*The value of the node, that is, if the node is an INT this field will contain
-      the value of the int variable*/
-    ijavavalue_t value;
 
     /* This is the type of the tree starting at this node. Or so to say, it is
-       its "role". For instance, for de "+" node in 3+5 it is TYPE_INT.
+       its "role". For instance, for the "+" node in 3+5 it is TYPE_INT.
        Filled during semantic analysis */
     ijavatype_t tree_type;
 };

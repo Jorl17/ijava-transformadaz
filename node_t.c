@@ -224,7 +224,7 @@ node_t* node_create_terminal_int(ijavatype_t type, int token_value) {
         ;
     else {
         /* token might be null in case we just want to create a node which says "Int", "Bool", "IntArray", "BoolArray", etc.. */
-        self->value = token_value;
+        
     }
 
     DEBUG_PRINT("[node_create_terminal]-->self = %p\n", self);
