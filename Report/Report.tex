@@ -43,6 +43,7 @@
 \setlength{\parindent}{1cm}
 \title{\bf{Compiladores - Projecto}\vspace{50mm}\\iJava\vspace{80mm}}
 \author{
+\textbf{Login Mooshak: TeamTransformadaZ}\\
 João Ricardo Lourenço, Nº 2011151194\\
 Joaquim Pedro Bento Gonçalves Pratas Leitão, Nº 2011150072}
 \makeindex
@@ -420,6 +421,30 @@ Queremos, contudo, chamar a atenção para situações não permitidas na lingua
 
 De facto, a nível sintático esta expressão é considerada válida, sendo apenas na \emph{Análise Semântica} (a detalhar mais à frente) realizadas verificações dos tipos de dados envolvidos em cada operação, assegurando a adequação dos mesmos à operações a realizar. Naturalmente que o exemplo descrito levará à deteção de um erro semântico, que será posteriormente relatado ao utilizador.
 
+\subsubsection{Alterações nas Regras da Gramática}
+
+Após a criação de novos \emph{tokens} e definição das respetivas prioridades procedemos a modificações na gramática, visando:
+
+\begin{itemize}
+\item Lidar com situações como \emph{Expr $\rightarrow$ ID OCURV [ Args ] CCURV} ou \emph{Args $\rightarrow$ Expr \{ COMMA Expr \}}, correspondentes a \emph{tokens} opcionais e a 0 ou mais repetições de uma dada sequência de \emph{tokens}
+
+\item Distinguir expressões indexáveis, isto é às quais podemos aplicar o operador \textbf{``["}, das restantes operações não indexáveis
+\end{itemize}
+
+\subsubsection{\emph{Tokens} Opcionais}
+
+Estas alterações justificam-se pelo facto de que, evitando a existência de símbolos anuláveis, a criação da \emph{Árvore de Sintaxe Abstrata} se tornar mais fácil, dado que as regras anuláveis implicam a criação de nós nulos na \emph{Árvore de Sintaxe Abstrata}, o que adiciona alguma complexidade e dificuldade à sua criação, manutenção e utilização. Por essa razão, e com o principal objetivo de não adicionar demasiada complexidade à criação da \emph{Árvore de Sintaxe Abstrata}, optámos por eliminar essas situações, sempre que possível.
+
+Assim, as situações correspondentes a \emph{tokens} opcionais na gramática foram substituídas pelas respetivas regras, com e sem os \emph{tokens} opcionais. No exemplo apresentado, a regra \emph{Expr $\rightarrow$ ID OCURV [ Args ] CCURV} seria substituída pelas regras \emph{Expr $\rightarrow$ ID OCURV CCURV} e \emph{Expr $\rightarrow$ ID OCURV Args CCURV}.
+
+Por sua vez, as repetições de \emph{tokens} 0 ou mais vezes obrigaram-nos a introduzir um novo símbolo na gramática, que garante a ocorrência da repetição de \emph{tokens} pelo menos uma vez, ou obrigando a que os \emph{tokens} não sejam derivados a partir do símbolo da gramática em questão
+
+Assim, no caso apresentado anteriormente, correspondente à regra \emph{Args $\rightarrow$ Expr \{ COMMA Expr \}}, introduzimos o símbolo \emph{RealArguments}, substituindo a regra por \emph{Args $\rightarrow$ RealArguments}. Por sua vez, o símbolo \emph{RealArguments} possui duas regras, sendo que numa considera apenas uma ocorrência de \emph{Expr} (não ocorrendo nenhuma repetição de \emph{COMMA Expr}), e na outra obriga a que a sequência de \emph{tokens} \emph{COMMA Expr} ocorra pelo menos uma vez. Assim, introduzimos as regras:
+
+\emph{Args $\rightarrow$ RealArguments}
+\emph{RealArguments $\rightarrow$ Expr}
+\emph{RealArguments $\rightarrow$ Expr COMMA RealArguments}
+
 \subsubsection{Tokens \emph{THEN} e \emph{ELSE} e o conflito \emph{IF-ELSE}}
 
 Um dos conflitos com os quais nos deparámos centrou-se, exactamente, no caso das instruções de controlo de fluxo \emph{if} e \emph{else}.
@@ -452,30 +477,6 @@ Por essa razão tivemos necessidade de separar estes dois \emph{``tipos"} de exp
 No entanto, como não permitimos mais do que uma indexação (dupla indexação não é permitida na nossa linguagem), pretendemos impedir que uma expressão indexada uma vez não o seja novamente. Por outras palavras, sempre que encontrarmos uma expressão indexável que já tenha sido indexada queremos reduzi-la a uma expressão (''normal"), de impedindo-a de ser novamente indexada.
 
 Assim, de uma forma semelhante ao que explicámos nas últimas duas secções, definimos um \emph{token} ao qual demos o nome de \emph{REDUCEEXPRESSON1}, atribuindo-lhe um valor de prioridade, que associámos à regra da gramática que nos permite reduzir uma expressão indexável a uma simples expressão, não indexável: \emph{Expr $\rightarrow$ exprIndexable}. Tal foi conseguido com o comando \emph{\%prec REDUCEEXPRESSON1}, já abordado em secções anteriores.
-
-\subsubsection{Alterações nas Regras da Gramática}
-
-Após a criação de novos \emph{tokens} e definição das respetivas prioridades procedemos a modificações na gramática, visando:
-
-\begin{itemize}
-\item Lidar com situações como \emph{Expr $\rightarrow$ ID OCURV [ Args ] CCURV} ou \emph{Args $\rightarrow$ Expr \{ COMMA Expr \}}, correspondentes a \emph{tokens} opcionais e a 0 ou mais repetições de uma dada sequência de \emph{tokens}
-
-\item Distinguir expressões indexáveis, isto é às quais podemos aplicar o operador \textbf{``["}, das restantes operações não indexáveis
-\end{itemize}
-
-\subsubsection{\emph{Tokens} Opcionais}
-
-Estas alterações justificam-se pelo facto de que, evitando a existência de símbolos anuláveis, a criação da \emph{Árvore de Sintaxe Abstrata} se tornar mais fácil, dado que as regras anuláveis implicam a criação de nós nulos na \emph{Árvore de Sintaxe Abstrata}, o que adiciona alguma complexidade e dificuldade à sua criação, manutenção e utilização. Por essa razão, e com o principal objetivo de não adicionar demasiada complexidade à criação da \emph{Árvore de Sintaxe Abstrata}, optámos por eliminar essas situações, sempre que possível.
-
-Assim, as situações correspondentes a \emph{tokens} opcionais na gramática foram substituídas pelas respetivas regras, com e sem os \emph{tokens} opcionais. No exemplo apresentado, a regra \emph{Expr $\rightarrow$ ID OCURV [ Args ] CCURV} seria substituída pelas regras \emph{Expr $\rightarrow$ ID OCURV CCURV} e \emph{Expr $\rightarrow$ ID OCURV Args CCURV}.
-
-Por sua vez, as repetições de \emph{tokens} 0 ou mais vezes obrigaram-nos a introduzir um novo símbolo na gramática, que garante a ocorrência da repetição de \emph{tokens} pelo menos uma vez, ou obrigando a que os \emph{tokens} não sejam derivados a partir do símbolo da gramática em questão
-
-Assim, no caso apresentado anteriormente, correspondente à regra \emph{Args $\rightarrow$ Expr \{ COMMA Expr \}}, introduzimos o símbolo \emph{RealArguments}, substituindo a regra por \emph{Args $\rightarrow$ RealArguments}. Por sua vez, o símbolo \emph{RealArguments} possui duas regras, sendo que numa considera apenas uma ocorrência de \emph{Expr} (não ocorrendo nenhuma repetição de \emph{COMMA Expr}), e na outra obriga a que a sequência de \emph{tokens} \emph{COMMA Expr} ocorra pelo menos uma vez. Assim, introduzimos as regras:
-
-\emph{Args $\rightarrow$ RealArguments}
-\emph{RealArguments $\rightarrow$ Expr}
-\emph{RealArguments $\rightarrow$ Expr COMMA RealArguments}
 
 \subsubsection{Gramática Final}
 
