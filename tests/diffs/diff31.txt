@@ -1,6 +1,0 @@
---- diffs/out31_java.txt	2014-06-02 01:02:25.000000000 +0100
-+++ diffs/out31_ijava.txt	2014-06-02 01:02:25.000000000 +0100
-@@ -0,0 +1,3 @@
-+lli: test31.ll:112:1: error: multiple definition of local value named '.b'
-+%.b = getelementptr inbounds %.IntArray* %b, i32 0, i32 0
-+^
