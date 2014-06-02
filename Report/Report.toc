@@ -7,15 +7,17 @@
 \contentsline {section}{\numberline {3}An\IeC {\'a}lise Sint\IeC {\'a}tica}{9}{section.3}
 \contentsline {subsection}{\numberline {3.1}Gram\IeC {\'a}tica}{10}{subsection.3.1}
 \contentsline {subsubsection}{\numberline {3.1.1}Ambiguidade}{11}{subsubsection.3.1.1}
-\contentsline {subsubsection}{\numberline {3.1.2}Altera\IeC {\c c}\IeC {\~o}es \IeC {\`a} Gram\IeC {\'a}tica Fornecida}{11}{subsubsection.3.1.2}
-\contentsline {subsubsection}{\numberline {3.1.3}Defini\IeC {\c c}\IeC {\~a}o de Novos \emph {Tokens}}{11}{subsubsection.3.1.3}
-\contentsline {subsubsection}{\numberline {3.1.4}Altera\IeC {\c c}\IeC {\~o}es nas Regras da Gram\IeC {\'a}tica}{12}{subsubsection.3.1.4}
-\contentsline {section}{\numberline {4}Constru\IeC {\c c}\IeC {\~a}o da \IeC {\'A}rvore de Sintaxe Abstrata}{16}{section.4}
-\contentsline {section}{\numberline {5}An\IeC {\'a}lise Sem\IeC {\^a}ntica}{17}{section.5}
-\contentsline {subsection}{\numberline {5.1}Tabelas de S\IeC {\'\i }mbolos}{17}{subsection.5.1}
-\contentsline {subsubsection}{\numberline {5.1.1}Cria\IeC {\c c}\IeC {\~a}o das Tabelas de S\IeC {\'\i }mbolos}{17}{subsubsection.5.1.1}
-\contentsline {subsubsection}{\numberline {5.1.2}Implementa\IeC {\c c}\IeC {\~a}o}{18}{subsubsection.5.1.2}
-\contentsline {subsubsection}{\numberline {5.1.3}Conclus\IeC {\~a}o}{19}{subsubsection.5.1.3}
-\contentsline {subsection}{\numberline {5.2}Dete\IeC {\c c}\IeC {\~a}o de Erros Sem\IeC {\^a}nticos}{20}{subsection.5.2}
-\contentsline {section}{\numberline {6}Gera\IeC {\c c}\IeC {\~a}o de C\IeC {\'o}digo}{21}{section.6}
-\contentsline {section}{\numberline {7}Aprecia\IeC {\c c}\IeC {\~a}o do Trabalho}{22}{section.7}
+\contentsline {subsection}{\numberline {3.2}Altera\IeC {\c c}\IeC {\~o}es \IeC {\`a} Gram\IeC {\'a}tica Fornecida}{11}{subsection.3.2}
+\contentsline {subsubsection}{\numberline {3.2.1}Defini\IeC {\c c}\IeC {\~a}o de Novos \emph {Tokens}}{11}{subsubsection.3.2.1}
+\contentsline {subsubsection}{\numberline {3.2.2}Altera\IeC {\c c}\IeC {\~o}es nas Regras da Gram\IeC {\'a}tica}{12}{subsubsection.3.2.2}
+\contentsline {subsubsection}{\numberline {3.2.3}\emph {Tokens} Opcionais}{12}{subsubsection.3.2.3}
+\contentsline {subsubsection}{\numberline {3.2.4}Express\IeC {\~o}es Index\IeC {\'a}veis}{13}{subsubsection.3.2.4}
+\contentsline {section}{\numberline {4}Constru\IeC {\c c}\IeC {\~a}o da \IeC {\'A}rvore de Sintaxe Abstrata}{17}{section.4}
+\contentsline {section}{\numberline {5}An\IeC {\'a}lise Sem\IeC {\^a}ntica}{18}{section.5}
+\contentsline {subsection}{\numberline {5.1}Tabelas de S\IeC {\'\i }mbolos}{18}{subsection.5.1}
+\contentsline {subsubsection}{\numberline {5.1.1}Cria\IeC {\c c}\IeC {\~a}o das Tabelas de S\IeC {\'\i }mbolos}{18}{subsubsection.5.1.1}
+\contentsline {subsubsection}{\numberline {5.1.2}Implementa\IeC {\c c}\IeC {\~a}o}{19}{subsubsection.5.1.2}
+\contentsline {subsubsection}{\numberline {5.1.3}Conclus\IeC {\~a}o}{20}{subsubsection.5.1.3}
+\contentsline {subsection}{\numberline {5.2}Dete\IeC {\c c}\IeC {\~a}o de Erros Sem\IeC {\^a}nticos}{22}{subsection.5.2}
+\contentsline {section}{\numberline {6}Gera\IeC {\c c}\IeC {\~a}o de C\IeC {\'o}digo}{23}{section.6}
+\contentsline {section}{\numberline {7}Aprecia\IeC {\c c}\IeC {\~a}o do Trabalho}{24}{section.7}

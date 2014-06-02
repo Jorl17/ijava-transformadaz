@@ -263,23 +263,23 @@ De seguida, apresentamos a gramática da linguagem \emph{iJava}, fornecida no en
 
 \hspace{-1cm}Start $\rightarrow$ Program
 
-\hspace{-1cm}Program $\rightarrow$ CLASS ID OBRACE { FieldDecl $\mid$ MethodDecl } CBRACE
+\hspace{-1cm}Program $\rightarrow$ CLASS ID OBRACE \{ FieldDecl $\mid$ MethodDecl \} CBRACE
 
 \hspace{-1cm}FieldDecl $\rightarrow$ STATIC VarDecl
 
 \hspace{-1cm}MethodDecl $\rightarrow$ PUBLIC STATIC ( Type $\mid$ VOID ) ID OCURV
 
-[ FormalParams ] CCURV OBRACE { VarDecl } { Statement } CBRACE
+\hspace{-.5cm}[ FormalParams ] CCURV OBRACE \{ VarDecl \} \{ Statement \} CBRACE
 
-\hspace{-1cm}FormalParams $\rightarrow$ Type ID { COMMA Type ID }
+\hspace{-1cm}FormalParams $\rightarrow$ Type ID \{ COMMA Type ID \}
 
 \hspace{-1cm}FormalParams $\rightarrow$ STRING OSQUARE CSQUARE ID
 
-\hspace{-1cm}VarDecl $\rightarrow$ Type ID { COMMA ID } SEMIC
+\hspace{-1cm}VarDecl $\rightarrow$ Type ID \{ COMMA ID \} SEMIC
 
 \hspace{-1cm}Type $\rightarrow$ ( INT $\mid$ BOOL ) [ OSQUARE CSQUARE ]
 
-\hspace{-1cm}Statement $\rightarrow$ OBRACE { Statement } CBRACE
+\hspace{-1cm}Statement $\rightarrow$ OBRACE \{ Statement \} CBRACE
 
 \hspace{-1cm}Statement $\rightarrow$ IF OCURV Expr CCURV Statement [ ELSE Statement ]
 
@@ -307,7 +307,7 @@ De seguida, apresentamos a gramática da linguagem \emph{iJava}, fornecida no en
 
 \hspace{-1cm}Expr $\rightarrow$ ID OCURV [ Args ] CCURV
 
-\hspace{-1cm}Args $\rightarrow$ Expr { COMMA Expr }
+\hspace{-1cm}Args $\rightarrow$ Expr \{ COMMA Expr \}
 
 \vspace{0.5cm}
 
@@ -325,7 +325,7 @@ Um análise mais cuidada da gramática apresentada permite-nos aferir da sua amb
 
 Acabámos de provar a ambiguidade da gramática. Tal como esta situação existem muitas outras envolvendo os operadores englobados pelos \emph{tokens} \emph{OP1, OP2, OP3 e OP4}. Assim, é imperativa a definição de prioridades nos operadores, de forma a eliminar todas as ambiguidades presentes na gramática, permitindo assim a correta realização da análise sintática do programa.
 
-\subsubsection{Alterações à Gramática Fornecida}
+\subsection{Alterações à Gramática Fornecida}
 
 Uma vez que a gramática apresentada é ambígua e apresenta-se em notação \textbf{EBNF}, não aceite pela ferramenta utilizada para gerar o analisador sintático, necessitamos de alterar a gramática, de forma a eliminar as suas ambiguidades, tornando-a numa gramática aceite pela ferramenta utilizada.
 
@@ -359,7 +359,31 @@ Na situação apresentada indicamos, por exemplo, que os operadores \emph{THEN} 
 
 \subsubsection{Alterações nas Regras da Gramática}
 
-Coisitos - Dava jeito na criação da AST para não estar sempre a receber NULL's
+Após a criação de novos \emph{tokens} e definição das respetivas prioridades procedemos a modificações na gramática, visando:
+
+\begin{itemize}
+\item Lidar com situações como \emph{Expr $\rightarrow$ ID OCURV [ Args ] CCURV} ou \emph{Args $\rightarrow$ Expr \{ COMMA Expr \}}, correspondentes a \emph{tokens} opcionais e a 0 ou mais repetições de uma dada sequência de \emph{tokens}
+
+\item Distinguir expressões indexáveis, isto é às quais podemos aplicar o operador \textbf{``["}, das restantes operações não indexáveis
+\end{itemize}
+
+\subsubsection{\emph{Tokens} Opcionais}
+
+Estas alterações justificam-se pelo facto de que, evitando a existência de símbolos anuláveis, a criação da \emph{Árvore de Sintaxe Abstrata} se tornar mais fácil, dado que as regras anuláveis implicam a criação de nós nulos na \emph{Árvore de Sintaxe Abstrata}, o que adiciona alguma complexidade e dificuldade à sua criação, manutenção e utilização. Por essa razão, e com o principal objetivo de não adicionar demasiada complexidade à criação da \emph{Árvore de Sintaxe Abstrata}, optámos por eliminar essas situações, sempre que possível.
+
+Assim, as situações correspondentes a \emph{tokens} opcionais na gramática foram substituídas pelas respetivas regras, com e sem os \emph{tokens} opcionais. No exemplo apresentado, a regra \emph{Expr $\rightarrow$ ID OCURV [ Args ] CCURV} seria substituída pelas regras \emph{Expr $\rightarrow$ ID OCURV CCURV} e \emph{Expr $\rightarrow$ ID OCURV Args CCURV}.
+
+Por sua vez, as repetições de \emph{tokens} 0 ou mais vezes obrigaram-nos a introduzir um novo símbolo na gramática, que garante a ocorrência da repetição de \emph{tokens} pelo menos uma vez, ou obrigando a que os \emph{tokens} não sejam derivados a partir do símbolo da gramática em questão
+
+Assim, no caso apresentado anteriormente, correspondente à regra \emph{Args $\rightarrow$ Expr \{ COMMA Expr \}}, introduzimos o símbolo \emph{RealArguments}, substituindo a regra por \emph{Args $\rightarrow$ RealArguments}. Por sua vez, o símbolo \emph{RealArguments} possui duas regras, sendo que numa considera apenas uma ocorrência de \emph{Expr} (não ocorrendo nenhuma repetição de \emph{COMMA Expr}), e na outra obriga a que a sequência de \emph{tokens} \emph{COMMA Expr} ocorra pelo menos uma vez. Assim, introduzimos as regras:
+
+\emph{Args $\rightarrow$ RealArguments}
+\emph{RealArguments $\rightarrow$ Expr}
+\emph{RealArguments $\rightarrow$ Expr COMMA RealArguments}
+
+FIXME: EXPLICAÇÂO BUE MERDOSA. MAXI VE ISTO E DIZ DE TUA JUSTIÇA!!!!! O CARDOSO CURTE BLICA!
+
+\subsubsection{Expressões Indexáveis}
 
 Indexável - Variaveis Indexaveis
 
@@ -563,6 +587,8 @@ typedef enum {
 	No caso da \emph{Tabela de Símbolos} da classe, os restantes elementos vão corresponder a declarações de atributos ou métodos, possuindo no seu campo \emph{id} o nome do atributo ou método declarado. Os que correspondem a declarações de atributos da classe vão possuir o seu tipo (\emph{int}, \emph{boolean}, etc) armazenado em \emph{type}. Já os que correspondem a declarações de métodos referenciam a \emph{Tabela de Símbolos} desse método através do campo  \emph{table\_method}. Adicionalmente, estes últimos possuem também no campo \emph{method\_start} uma referência para o nó da \emph{Árvore de Sintaxe Abstrata} onde se encontra a declaração do método.
 	
 	Relativamente à \emph{Tabela de Símbolos} de um método, o seu primeiro elemento está de acordo com o descrito anteriormente. Segue-se um elemento que contém o tipo de retorno do método, armazenado no campo \emph{type}. Posteriormente encontram-se os argumentos do método, no caso de existirem, também eles com a informação relativa ao nome e tipo presente em \emph{id} e \emph{type}, respetivamente. Estes elementos possuem também o valor $1$ no campo inteiro \emph{is\_parameter}, que indica que se tratam de parâmetros do método. Por fim, encontram-se as variáveis locais, pela ordem de declaração no método, sendo a informação relativa ao seu nome e tipo armazenada nos campos \emph{id} e \emph{type}, respetivamente.
+	
+	FIXME FIXME FIXME: METER IMAGEM PARA AS TABELAS DE SIMBOLOS
 	
 	\subsubsection{Conclusão}
 	
