@@ -105,17 +105,17 @@ void llvm_unary_op(const char* op, llvm_type_t type, char* val) {
 /* Used to convert TYPE_INT, TYPE_BOOL, TYPE_INTLIT, etc to their llvm_type_t types */
 const char* llvm_types_from_ijavatypes[]  = {
     "i32" /* TYPE_INT */,
-    "i1" /* TYPE_BOOL */ /* FIXME */,
-    "%.IntArray" /* TYPE_INTARRAY */ /* FIXME*/,
-    "%.BoolArray" /* TYPE_BOOLARRAY */  /* FIXME */,
-    "i8**" /* TYPE_STRINGARRAY */ /* FIXME */,
-    "void" /*TYPE_VOID*/ /*FIXME */,
-    "NOT_EXPECTED_ID" /* TYPE_STRINGARRAY */ /* FIXME */,
+    "i1" /* TYPE_BOOL */,
+    "%.IntArray" /* TYPE_INTARRAY */,
+    "%.BoolArray" /* TYPE_BOOLARRAY */,
+    "i8**" /* TYPE_STRINGARRAY */,
+    "void" /*TYPE_VOID*/,
+    "NOT_EXPECTED_ID" /* TYPE_STRINGARRAY */,
     "i32" /* TYPE_INTLIT */,
-    "i1" /* TYPE_BOOLLIT */ /* FIXME */,
-    "i8*" /* TYPE_STRING */ /* FIXME */,
-    "NOT_EXPECTED_METHOD" /* TYPE_METHOD */ /* FIXME */,
-    "NOT_EXPECTED_UNKNOWN" /* TYPE_UNKNOWN */ /* FIXME */
+    "i1" /* TYPE_BOOLLIT */,
+    "i8*" /* TYPE_STRING */,
+    "NOT_EXPECTED_METHOD" /* TYPE_METHOD */,
+    "NOT_EXPECTED_UNKNOWN" /* TYPE_UNKNOWN */
 };
 
 const char* llvm_type_from_ijavatype(ijavatype_t type) {
@@ -382,7 +382,6 @@ void llvm_return(ijavatype_t ret, llvm_var_t* var) {
 }
 
 void llvm_icmp(const char* comparison, char* dest, char* op1, char* op2, const char* type) {
-  /* FIXME: Slightly hardcoded */
   printf("%s = icmp %s %s %s, %s\n", dest, comparison, type, op1, op2);
 }
 
@@ -471,17 +470,17 @@ const char* llvm_node_to_nodetype [] = {
               "sdiv",
               "srem",
               "xor",
-              "NODE_OPER_MINUS",
-              "NODE_OPER_PLUS",
-              "NODE_OPER_LENGTH",
-              "NODE_OPER_LOADARRAY",
-              "NODE_OPER_CALL",
-              "NODE_OPER_NEWINT",
-              "NODE_OPER_NEWBOOL",
-              "NODE_OPER_PARSEARGS",
-              "NODE_NULL", /* Very useful: the NULL node */              
-              "NODE_TYPE", /* Means it might be of type INTLIT, BOOLLIT, VOID, ID... It is defined by the 'type' property of the node */
-              "NODE_LAST_NODE_TYPE" /* Used internally to signify the end of a table of node types */
+              "null_should_not_happen",
+              "null_should_not_happen",
+              "null_should_not_happen",
+              "null_should_not_happen",
+              "null_should_not_happen",
+              "null_should_not_happen",
+              "null_should_not_happen",
+              "null_should_not_happen",
+              "null_should_not_happen",
+              "null_should_not_happen",
+              "null_should_not_happen" 
 };
 
 const char* llvm_get_op_from_node(node_t* node) {
@@ -587,7 +586,6 @@ llvm_var_t* llvm_node_to_instr_binop(node_t* node, sym_t* class_table, sym_t* cu
       /* Get the type from the previously calculated "tree_type". Avoids having a fixed table where we map operations to their output sizes */
       ret->type = node->tree_type;
 
-      /* FIXME: Added this in */
       ret->value = 1;
 
       /* Output the binary op code */

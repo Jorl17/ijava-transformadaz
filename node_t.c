@@ -219,43 +219,16 @@ node_t* node_create_terminal_int(ijavatype_t type, int token_value) {
     /* token is supposed to be given to us from a valid malloc() or strdup()
        so we can take care of it */
 
-    if ( type == TYPE_VOID )
-        /*assert ( token_value == NULL ); -- FIXME: Can not make this assertion because we can support -1 values, right?*/
-        ;
-    else {
-        /* token might be null in case we just want to create a node which says "Int", "Bool", "IntArray", "BoolArray", etc.. */
-        
-    }
-
     DEBUG_PRINT("[node_create_terminal]-->self = %p\n", self);
     return self;
 }
 
-/* FIXME: We're not using this atm, and I hope we never have to */
-node_t* node_fuse_vardecls_into_main_vardecl_node(node_t* vardeclares) {
-    assert(vardeclares);
-    
-    node_t* final = node_create(NODE_VARDECL);
-    node_t* iter = vardeclares;
-    node_t* target_iter = final;
-    node_t* tmp;
-
-    while ( iter != NULL ) {
-        assert(iter->n1); /* has type */
-        assert(iter->n2); /* has id */    
-        target_iter->next = node_append(iter->n1, iter->n2);
-        tmp =  iter;
-        iter = iter->next;
-        node_delete(tmp);
-    }
-    return final;
-}
 
 node_t* node_create_type(ijavatype_t type) {
     return node_create_terminal(type,NULL);
 }
 
-/* FIXME: We will probably change this to use Joca's string functions... but for now this will probably suffice */
+
 node_t* node_create_vardecl(ijavatype_t type, node_t* vars) {
     DEBUG_PRINT("[node_create_vardecl] type='%d' ('%s'), vars='%p'\n", type, node_type_names[type], vars);
     assert(vars != NULL);
@@ -514,7 +487,6 @@ int is_nodetype_in_table(nodetype_t nodetype, nodetype_t* table) {
 }
 
 void node_delete(node_t* self) {
-    /* FIXME: Needs change? */
     free(self);
 }
 
@@ -537,11 +509,7 @@ void print_node(node_t* node) {
         printf("%s", node_get_name(node));
     } else {
         assert(node->id);
-/*
-        if ( node->type == TYPE_INTLIT || node->type == TYPE_ID || node->type == TYPE_BOOLLIT )
- 
-            printf("%s(%s)", node_get_name(node), node->id);            
-        else*/
+
             printf("%s(%s)", node_get_name(node), node->id);
     }
 }

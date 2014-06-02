@@ -241,8 +241,7 @@ void add_variables_declarations(sym_t* root, node_t* var_decl)
 	}
 }
 
-/*Looks up a given method's symbol table in the class' symbol table
-FIXME: If this function returns NULL then we probably will have a semantic's error*/
+/* Looks up a given method's symbol table in the class' symbol table */
 sym_t* lookup_symbol_from_table(sym_t* table, char* symbol)
 {
 	DEBUG_PRINT("[lookup_symbol_type_from_table] table=%p, symbol=%s\n", table, symbol);
@@ -265,7 +264,7 @@ sym_t* lookup_symbol_from_table(sym_t* table, char* symbol)
 		}
 		else*/ if (strcmp(symbol, current->id) == 0)
 		{
-			return current; /* FIXME: We need a type for functions!! */
+			return current;
 		}
 
 		current = current->next;
@@ -275,8 +274,6 @@ sym_t* lookup_symbol_from_table(sym_t* table, char* symbol)
 	return return_var;
 }
 
-/*Looks up a given method's symbol table in the class' symbol table
-FIXME: If this function returns NULL then we probably will have a semantic's error*/
 ijavatype_t lookup_symbol_type_from_table(sym_t* table, char* symbol)
 {
 	DEBUG_PRINT("[lookup_symbol_type_from_table] table=%p, symbol=%s\n", table, symbol);
@@ -369,7 +366,6 @@ ijavatype_t lookup_return_type(sym_t* class_table, char* method_name)
 
 	if (method_table == NULL)
 	{
-		/* FIXME!! */
 		printf("Cannot find symbol %s\n", method_name);
 		exit(0);
 	}
@@ -555,7 +551,6 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 
 int check_intlit(char* literal) {
 	DEBUG_PRINT("[check_intlit] literal=%s\n", literal);
-	/* FIXME: Joca, do this thing and error out if needed */
 	char* endptr;
 	size_t len;
 	long number;
@@ -588,19 +583,17 @@ int check_intlit(char* literal) {
 		}
 	}
 
-	else if (len == 1)/*(len > 0) and !(len > 1) -- Can only be decimal -- FIXME: NEED TO CHECK IF LEN == 1?*/
+	else if (len == 1)/*(len > 0) and !(len > 1) -- Can only be decimal -- */
 		number = strtol(literal, &endptr, 10);
 
 	else
 	{
-		printf("FIXME FIXME FIXME: AM I SUPPOSED TO GET HERE?? GOING TO ASSERT\n");
 		assert(0);
 	}
 
 	/*After the call to strtol*/
 	if (literal == endptr  || ((number == LONG_MAX || number == LONG_MIN) && errno == ERANGE) || *endptr!='\0' )
 	{
-		/*FIXME FIXME FIXME: NEED TO KILL THE PROGRAM??*/
 		DEBUG_PRINT("[DEBUG]Could not convert the string\n");
 		printf("Invalid literal %s\n", literal);
 		exit(0);		
@@ -693,7 +686,7 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 			/* !!! PROGRAM FLOW ENDS !!! */
 		}
 
-		/* FIXME: THis is so fugly */
+		/* FIXME: This is so fugly */
 		if ( type == NODE_OPER_NEWBOOL )
 			return ( node->tree_type = TYPE_BOOLARRAY );
 		 else if ( type == NODE_OPER_NEWINT)
@@ -729,16 +722,13 @@ ijavatype_t node_get_oper_type(node_t* node, sym_t* class_table, sym_t* curr_met
 
 		return expr_type2; /* Or expr_type2 */
 	} else if (type == NODE_OPER_CALL) {
-		/* FIXME: Check basically all of this */
 		assert(node->n1);
 		assert(node->n1->id);
 		char* fnc_name = node->n1->id;
 		node_t* args = node->n2;
 		sym_t* method_table = lookup_method(class_table, fnc_name);
 		if ( !method_table ) {
-			/* FIXME! */
 			printf("Cannot find symbol %s\n", fnc_name);			
-			/* FIXME: What if we found it, but it's not a method? */
 			exit(0);
 		}
 
@@ -797,7 +787,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 		assert( node_is_statement(iter) );
 
 		if ( iter->nodetype == NODE_STATEMENT_COMPOUNDSTATEMENT) {
-			recurse_down(iter->n1, class_table, curr_method_table); /* FIXME: Is this right? */
+			recurse_down(iter->n1, class_table, curr_method_table);
 		}
 
 		else if ( iter->nodetype == NODE_STATEMENT_STORE ) {
@@ -825,7 +815,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 				assert(iter->n1->id);
 				char* type1_str = sym_type_names[type_lhs];
 				char* type2_str = sym_type_names[type_index];
-				/* This is WORKING in mooshak */
+
 				printf("Operator [ cannot be applied to types %s, %s\n", type1_str, type2_str);
 				exit(0);
 				/* !!! PROGRAM FLOW ENDS !!! */
@@ -842,7 +832,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 				assert(iter->n1->id);
 				char* type1_str = sym_type_names[type_rhs];
 				char* type2_str = sym_type_names[type_lhs];
-				/* This is WORKING in mooshak */
+
 				printf("Incompatible type in assignment to %s[] (got %s, required %s)\n", iter->n1->id, type1_str, type2_str);
 				exit(0);
 				/* !!! PROGRAM FLOW ENDS !!! */
@@ -855,7 +845,6 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 			ijavatype_t expected_return_type = get_return_type(curr_method_table);
 
 			if ( expr_type != expected_return_type ) {
-				/* FIXME: MAYBE CHANGE THIS */
 				char* type1_str = sym_type_names[expr_type];
 				char* type2_str = sym_type_names[expected_return_type];
 				printf("Incompatible type in return statement (got %s, required %s)\n", type1_str, type2_str);
@@ -876,7 +865,6 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 				expr_type = get_tree_type(iter->n1, class_table, curr_method_table);
 
 			if ( expr_type == TYPE_STRINGARRAY || expr_type == TYPE_INTARRAY || expr_type == TYPE_BOOLARRAY || expr_type == TYPE_VOID || expr_type == TYPE_METHOD ) {
-				/* FIXME: MAYBE CHANGE THIS */
 				char* type1_str = sym_type_names[expr_type];
 				printf("Incompatible type in System.out.println statement (got %s, required boolean or int)\n", type1_str);
 				exit(0);
@@ -885,7 +873,6 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 		} else if ( iter->nodetype == NODE_STATEMENT_IFELSE ) {
 			ijavatype_t expr_type = TYPE_VOID;
 			if ( iter->n1->nodetype == NODE_NULL ) {
-				/* FIXME: Is it right? FIXME? */
 				printf("Incompatible type in if statement (got void, required boolean)\n");
 				exit(0);
 				/* !!! PROGRAM FLOW ENDS !!! */
@@ -907,7 +894,6 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 		} else if ( iter->nodetype == NODE_STATEMENT_WHILE ) {
 			ijavatype_t expr_type = TYPE_VOID;
 			if ( iter->n1->nodetype == NODE_NULL ) {
-				/* FIXME: Is it right? FIXME? */
 				printf("Incompatible type in while statement (got void, required boolean)\n");
 				exit(0);
 				/* !!! PROGRAM FLOW ENDS !!! */
@@ -931,7 +917,7 @@ void recurse_down(node_t* node, sym_t* class_table, sym_t* curr_method_table) {
 
 void check_ast_for_semantic_errors(node_t* root, sym_t* class_table) {
 	DEBUG_PRINT("[check_ast_for_semantic_errors] root=%p, class_table=%p\n", root, class_table);
-	if ( !root || !class_table ) return; /* FIXME: WIll this ever happen? */
+	if ( !root || !class_table ) return;
 
 	/* Find all the method entry points and recurse down on them */
 	sym_t* iter = class_table;

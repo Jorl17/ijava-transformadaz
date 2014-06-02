@@ -144,8 +144,7 @@ struct _node_t {
        such as MethodDeclaration, it might be TYPE_VOID. */
     ijavatype_t type;
 
-    /* The id, used with some nodes, such as MethodDecl and ParamDecl.
-       FIXME: We might need to create a special id node for this later on... */     
+    /* The id, used with some nodes, such as MethodDecl and ParamDecl. */
     char* id;
      
 
