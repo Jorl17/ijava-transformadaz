@@ -329,10 +329,11 @@ Acabámos de provar a ambiguidade da gramática. Tal como esta situação existe
 
 Uma vez que a gramática apresentada é ambígua e apresenta-se em notação \textbf{EBNF}, não aceite pela ferramenta utilizada para gerar o analisador sintático, necessitamos de alterar a gramática, de forma a eliminar as suas ambiguidades, tornando-a numa gramática aceite pela ferramenta utilizada.
 
-Como já referimos, a primeira alteração realizada prende-se com a separação dos operadores englobados pelos \emph{tokens} \emph{OP1, OP2, OP3 e OP4}, criando um novo \emph{token} para cada operador.
+Como já referimos, a primeira alteração realizada prende-se com a separação dos operadores englobados pelos \emph{tokens} \emph{OP1, OP2, OP3 e OP4}, criando um novo \emph{token} para cada operador, definindo de seguida a prioridade dos diferentes operadores representados pelos \emph{tokens} criados.
 
-FIXME: METER AQUI AS PRIORIDADES DOS OPERADORES
+Utilizando a ferramenta \emph{yacc} definimos do seguinte modo as prioridades dos operadores referidos:
 
+\begin{lstlisting}
 %left OR
 %left AND
 %left EQ NEQ
@@ -343,6 +344,7 @@ FIXME: METER AQUI AS PRIORIDADES DOS OPERADORES
 %left OBRACE
 %right UNARY_HIGHEST_VAL
 %left OSQUARE DOTLENGTH
+\end{lstlisting}
 
 FIXME: METER ALTERAÇÕES FEITAS À GRAMÁTICA. EXPLICAR QUAIS AS ALTERAÇÕES E PORQUE É QUE AS FIZEMOS
 
