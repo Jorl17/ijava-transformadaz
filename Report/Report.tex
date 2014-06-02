@@ -390,6 +390,41 @@ Na notação \emph{yacc} a prioridade de um \emph{token} é definida com as inst
 
 Na situação apresentada indicamos, por exemplo, que os operadores \emph{THEN} e \emph{ELSE} não têm qualquer associatividade, tendo o operador \emph{ELSE} maior prioridade do que o operador \emph{THEN}.
 
+Chamamos a atenção para os \emph{tokens} \emph{REDUCEEXPRESSION1}, \\* \emph{THEN}, \emph{ELSE}, e\emph{UNARY\_HIGHEST\_VAL}, que passamos a detalhar com maior detalhe nas secções que se seguem.
+
+\subsubsection{Tokens \emph{THEN} e \emph{ELSE} e o conflito \emph{IF-ELSE}}
+
+Um dos conflitos com os quais nos deparámos centrou-se, exactamente, no caso das instruções de controlo de fluxo \emph{if} e \emph{else}.
+
+Analisaremos as regras da gramática da linguagem nas quais estas instruções se encontram:
+\begin{itemize}
+\item \emph{Statement $\rightarrow$ IF OCURV Expr CCURV Statement \%prec THEN}
+
+\item \emph{Statement $\rightarrow$ IF OCURV Expr CCURV Statement ELSE Statement}
+\end{itemize}
+
+O analisador, ao ler uma sequência de \emph{tokens} correspondente a \emph{IF OCURV Expr CCURV Statement}, e tendo colocado o símbolo \emph{Statement} no topo da pilha (através de uma operação de reduce), encontra uma situação de não-determinismo na sua acção. Isto porque, com os \emph{tokens} lidos, este poderá realizar um reduce pela primeira regra analisada, colocando o símbolo \emph{Statement} no topo da pilha. Alternativamente, poderá também realizar um \emph{shift} pela segunda regra analisada , esperando ler \emph{ELSE Statement}.
+
+Coloca-se, então, a questão de qual a acção que o analisador deve realizar. Efectivamente, a resposta a esta questão não é trivial, visto que se o próximo \emph{token} lido corresponder a um \emph{ELSE} deveremos ter realizado um \emph{shift} previamente, mas se o próximo caracter não corresponder a um \emph{ELSE}, a realização do \emph{reduce} seria a mais adequada.
+
+Assim, interessa-nos, sempre que possível, realizar um \emph{shift}. Dado que o \emph{token} \emph{ELSE} apresenta maior prioridade que o \emph{token} \emph{THEN}, recorremos ao comando \emph{\%prec THEN} na primeira regra, para indicar que essa regra tem a mesma precedência que \emph{THEN}. Como este \emph{token} tem menor precedência que \emph{ELSE}, o nosso conflito \emph{shift-reduce} fica resolvido.
+
+\subsubsection{Token \emph{UNARY\_HIGHEST\_VAL} e as precedências dos operadores unários}
+
+Numa situação algo semelhante à analisada no ponto anterior para o caso \emph{IF-ELSE}, também os operadores unários requerem alguma atenção no que respeita às prioridades das operações a eles associadas.
+
+De facto, sempre que detectamos a ocorrência de um operador unário aliado a uma expressão, é do nosso interesse que este seja imediatamente associado à expressão. Por exemplo, no caso: $-2+3$ pretendemos obter o resultado da soma de $3$ ao número negativo $-2$, e não o simétrico do valor da soma de $2$ e $3$. Assim, definimos um \emph{token}, \emph{UNARY\_HIGHEST\_VAL}, ao qual demos o segundo maior valor de prioridade, associando-o a todas as regras que envolvem os operadores unários da linguagem. Desta forma, garantimos que este \emph{token} tem uma prioridade superior à de todos os outros \emph{tokens}, com excepção do operador \emph{.length} (reservado a arrays), e do sinal de parêntesis, que por definição matemática tem uma maior precedência que qualquer operador unário.
+
+\subsubsection{Token \emph{REDUCEEXPRESSON1} e as Expressões Indexáveis}
+
+Como já referimos em secções anteriores deste relatório, na nossa linguagem possuímos expressões indexáveis e não-indexáveis, sendo que as primeiras podem sofrer indexação, ao contrário das segundas.
+
+Por essa razão tivemos necessidade de separar estes dois \emph{``tipos"} de expressões na gramática, permitindo-nos fazer algumas verificações quanto à possibilidade, ou não, de indexar uma dada expressão.
+
+No entanto, como não permitimos mais do que uma indexação (dupla indexação não é permitida na nossa linguagem), pretendemos impedir que uma expressão indexada uma vez não o seja novamente. Por outras palavras, sempre que encontrarmos uma expressão indexável que já tenha sido indexada queremos reduzi-la a uma expressão (''normal"), de impedindo-a de ser novamente indexada.
+
+Assim, de uma forma semelhante ao que explicámos nas últimas duas secções, definimos um \emph{token} ao qual demos o nome de \emph{REDUCEEXPRESSON1}, atribuindo-lhe um valor de prioridade, que associámos à regra da gramática que nos permite reduzir uma expressão indexável a uma simples expressão, não indexável: \emph{Expr $\rightarrow$ exprIndexable}. Tal foi conseguido com o comando \emph{\%prec REDUCEEXPRESSON1}, já abordado em secções anteriores.
+
 \subsubsection{Alterações nas Regras da Gramática}
 
 Após a criação de novos \emph{tokens} e definição das respetivas prioridades procedemos a modificações na gramática, visando:
