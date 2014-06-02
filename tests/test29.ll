@@ -79,7 +79,7 @@ br label %.label1
 %27 = call %.IntArray (%.IntArray)* @change(%.IntArray %26)
 store %.IntArray %27, %.IntArray* %aux
 %28 = load %.IntArray* %aux
-%29 = call i32 (%.IntArray)* %sum(%.IntArray %28)
+%29 = call i32 (%.IntArray)* @sum(%.IntArray %28)
 store i32 %29, i32* %sum
 %30 = load i32* %sum
 %31 = call i32 (i32)* @fibonacci(i32 %30)

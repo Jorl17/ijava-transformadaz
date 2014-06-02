@@ -643,7 +643,6 @@ void llvm_lookup_symbol_from_table(llvm_var_t* ret, char* id, sym_t* class_table
   assert(ret);
   assert(id);
   assert(class_table);
-  assert(curr_method_table);
 
   int local;  
 
@@ -773,7 +772,7 @@ llvm_var_t* llvm_node_to_instr_call(node_t* node, sym_t* class_table, sym_t* cur
   ijavatype_t return_type = lookup_return_type(class_table, node->n1->id);
   assert(return_type != TYPE_VOID);
   llvm_var_t* function = llvm_var_create();
-  llvm_lookup_symbol_from_table(function, node->n1->id, class_table, curr_method_table);
+  llvm_lookup_symbol_from_table(function, node->n1->id, class_table, NULL); /* NULL indicates we want a function */
 
   llvm_var_t* ret = llvm_var_create(); ret->value = 1; ret->type = return_type;
 
