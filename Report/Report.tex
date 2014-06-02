@@ -393,12 +393,12 @@ Na situação apresentada indicamos, por exemplo, que os operadores \emph{THEN} 
 
 Chamamos a atenção para os \emph{tokens} \emph{REDUCEEXPRESSION1}, \\* \emph{THEN}, \emph{ELSE}, e\emph{UNARY\_HIGHEST\_VAL}, que passamos a detalhar mais à frente.
 
-\subsubsection{Expressões Indexáveis}
+\subsubsection{Indexação de Expressões}
 
 À semelhança do que acontece em \emph{Java}, também em \emph{iJava} existem expressões passíveis de serem indexadas e outras onde a operação de indexação não é possível. A nível sintáctico, optámos por estruturar a detecção destes erros de acordo com o seguinte catálogo:
 
 \begin{itemize}
-\item \textbf{Operações Não-Indexáveis:} Declarações de arrays (inteiros e booleanos), expressões compostas apenas por símbolos terminais (literais inteiros ou booleanos) e expressões onde já é realizada indexação (ou seja, indexáveis)
+\item \textbf{Expressões Não-Indexáveis:} Declarações de arrays (inteiros e booleanos), expressões compostas apenas por símbolos terminais (literais inteiros ou booleanos) e expressões onde já é realizada indexação (ou seja, indexáveis)
 
 \item \textbf{Expressões Indexáveis:} Todas as restantes
 \end{itemize}

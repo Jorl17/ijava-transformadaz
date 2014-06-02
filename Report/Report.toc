@@ -9,7 +9,7 @@
 \contentsline {subsubsection}{\numberline {3.1.1}Ambiguidade}{12}{subsubsection.3.1.1}
 \contentsline {subsection}{\numberline {3.2}Altera\IeC {\c c}\IeC {\~o}es \IeC {\`a} Gram\IeC {\'a}tica Fornecida}{12}{subsection.3.2}
 \contentsline {subsubsection}{\numberline {3.2.1}Defini\IeC {\c c}\IeC {\~a}o de Novos \emph {Tokens}}{12}{subsubsection.3.2.1}
-\contentsline {subsubsection}{\numberline {3.2.2}Express\IeC {\~o}es Index\IeC {\'a}veis}{13}{subsubsection.3.2.2}
+\contentsline {subsubsection}{\numberline {3.2.2}Indexa\IeC {\c c}\IeC {\~a}o de Express\IeC {\~o}es}{13}{subsubsection.3.2.2}
 \contentsline {subsubsection}{\numberline {3.2.3}Express\IeC {\~o}es N\IeC {\~a}o-Index\IeC {\'a}veis}{14}{subsubsection.3.2.3}
 \contentsline {subsubsection}{\numberline {3.2.4}Express\IeC {\~o}es Index\IeC {\'a}veis}{14}{subsubsection.3.2.4}
 \contentsline {subsubsection}{\numberline {3.2.5}Altera\IeC {\c c}\IeC {\~o}es nas Regras da Gram\IeC {\'a}tica}{14}{subsubsection.3.2.5}
