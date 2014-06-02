@@ -1312,4 +1312,10 @@ A implementação das restantes operações e statements é intuitiva e auto-exp
 
 \section{Apreciação do Trabalho}
 
+Fomos capazes de desenvolver um compilador para a linguagem apresentada no tempo disponível. Utilizámos boas técnicas de programação (uso frequente de $assert$s) para nos auxiliar neste processo. Tomámos várias decisões arquitecturais que moldaram o nosso programa, como a escolha de ter um nó único, um tipo único para a tabela de símbolos, tabelas de lookup, um único return, etc. Estas escolham provaram ser eficientes e práticas, uma vez que o nosso código está suficientemente faseado para podermos retirar os incrementos que adicionámos, mostando boas abstracções e práticas de engenharia de software que ``descolam'' os componentes uns dos outros.
+
+No processo, desenvolvemos sistemas internos de teste e aprofundámos os nossos conhecimentos sobre o $yacc$, o $flex$\footnote{Ao longo deste relatório não elaborámos quanto ao funcionamento interno destes analisadores por considerarmos que tal está fora do âmbito do projecto, mas foi no contexto desse mesmo que nos familiarizámos com estes.} e sobre formas de representar árvores de sintaxe abstractas, tabelas de símbolos e processos de geração de código. Ambientámo-nos ao $LLVM$, tendo uma aproximação ligeira de geração de código. Produzimos um compilador funcional, com boas abstracções e relativamente fácil de modificar (para adição de futuras funcionalidades).
+
+Achamos, por isso, que não voltaríamos atrás nas decisões de desenvolvimento que tivemos. De facto, durante o próprio projecto foram várias as vezes em que demos um passo atrás, anulando certas decisões (como, por exemplo, uma decisão inicial de não usar prioridades para tornar a gramática não ambígua). Estamos satisfeitos com o resultado do nosso trabalho, com a certeza de que num projecto com mais tempo estruturaríamos melhor certas partes do código e seríamos capazes de produzir compiladores para outras linguagens, inclusivamente linguagens que lidem com outros conceitos, como o de orientação a objectos e polimorfismo.
+
 \end{document}
