@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.31)  2 JUN 2014 23:32
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.1.31)  2 JUN 2014 23:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -703,10 +703,10 @@ LaTeX Font Info:    Font shape `OMS/cmr/bx/n' in size <10.95> not available
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
 l.348 
-       <./DiagramaLExYACC.png>] [12] [13] [14]
+       <./DiagramaLExYACC.png>] [12] [13] [14] [15]
 LaTeX Font Info:    Font shape `OMS/cmr/m/it' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 433.
- [15] [16] [17] [18] [19]
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 461.
+ [16] [17] [18] [19]
 [20] [21]
 Overfull \hbox (47.17708pt too wide) in paragraph at lines 716--717
 []\OT1/cmr/m/n/10.95 Vemos que in-ter-na-mente os ti-pos ``TYPE[]STRINGARRAY'',
@@ -801,13 +801,13 @@ Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 1356.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 1356.
 
 Package rerunfilecheck Info: File `Report.out' has not changed.
-(rerunfilecheck)             Checksum: 51F9CBF4C521706F20EE40A4EF35108C;4385.
+(rerunfilecheck)             Checksum: 36081F0435BB84B92D7399990EA8B0E6;4385.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 1356.
  ) 
 Here is how much of TeX's memory you used:
  10726 strings out of 495007
  147472 string characters out of 6180696
- 454717 words of memory out of 5000000
+ 453717 words of memory out of 5000000
  13186 multiletter control sequences out of 15000+600000
  14809 words of font info for 56 fonts, out of 8000000 for 9000
  16 hyphenation exceptions out of 8191
@@ -827,7 +827,7 @@ b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share
 /texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb>
-Output written on Report.pdf (44 pages, 425433 bytes).
+Output written on Report.pdf (44 pages, 425441 bytes).
 PDF statistics:
  1167 PDF objects out of 1200 (max. 8388607)
  1088 compressed objects within 11 object streams
