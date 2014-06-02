@@ -381,11 +381,38 @@ Assim, no caso apresentado anteriormente, correspondente à regra \emph{Args $\r
 \emph{RealArguments $\rightarrow$ Expr}
 \emph{RealArguments $\rightarrow$ Expr COMMA RealArguments}
 
-FIXME: EXPLICAÇÂO BUE MERDOSA. MAXI VE ISTO E DIZ DE TUA JUSTIÇA!!!!! O CARDOSO CURTE BLICA!
+FIXME: EXPLICAÇÂO BUE MERDOSA. MAXI VE ISTO E DIZ DE TUA JUSTIÇA!!!!!
 
 \subsubsection{Expressões Indexáveis}
 
-Indexável - Variaveis Indexaveis
+À semelhança do que acontece em \emph{Java}, também em \emph{iJava} existem expressões passíveis de serem indexadas e outras onde a operação de indexação não é possível. De seguida apresentamos uma lista das operações indexáveis e não-indexáveis em \emph{iJava}:
+
+\begin{itemize}
+\item \textbf{Operações Não-Indexáveis:} Declarações de arrays (inteiros e booleanos), expressões compostas apenas por símbolos terminais (literais inteiros ou booleanos) e expressões onde já é realizada indexação (ou seja, indexáveis)
+
+\item \textbf{Expressões Indexáveis:} Todas as restantes
+\end{itemize}
+
+\subsubsection{Expressões Não-Indexáveis}
+
+Dadas as características da linguagem descritas em secções anteriores, uma vez que em \emph{iJava} apenas está disponível a utilização de arrays uni-dimensionais, não podemos considerar as declarações de arrays indexáveis. Caso o fizéssemos, a operação \emph{new int[5][2]} seria válida na nossa linguagem.
+
+De facto, poderíamos entender esta instrução como a declaração de um array uni-dimensional de inteiros, e o posterior acesso à sua terceira posição. No entanto, esta operação corresponde, na linguagem \emph{Java} à declaração de um array bi-dimensional de inteiros, não permitido em \emph{iJava}.
+
+Assim, consideramos a operação \emph{new int[5][2]} inválida na linguagem \emph{iJava}, o que nos permite concluir que todas as declarações de arrays não são indexáveis. Para além disso, caso um programador pretenda declarar um array uni-dimensional e aceder de seguida a uma das suas posições, na mesma linha de código, também o poderá fazer em \emph{iJava}, devendo envolver a declaração do array numa expressão indexável, através da utilização de parêntesis: emph{(new int[5])[2]}.
+
+Pela mesma razão, somos obrigados a considerar expressões onde já é feita indexação (como por exemplo \emph{a[2]}, onde \emph{a} corresponde a um array uni-dimensional de inteiros ou booleanos) como sendo expressões não-indexáveis. Caso contrário operações como \emph{a[2][0]} seriam permitidas, implicando que \emph{a} fosse duplamente indexável. Ou seja, \emph{a} seria um array bi-dimensional, estrutura de dados não permitida na nossa linguagem.
+
+
+\subsubsection{Expressões Indexáveis}
+
+Todas as expressões que não declarações de arrays ou terminais são passíveis de serem indexadas na nossa linguagem.
+
+Queremos, contudo, chamar a atenção para situações não permitidas na linguagem, como por exemplo \emph{a[0]} caso \emph{a} seja uma variável do tipo inteiro ou booleano.
+
+De facto, a nível sintático esta expressão é considerada válida, sendo apenas na \emph{Análise Semântica} (a detalhar mais à frente) realizadas verificações dos tipos de dados envolvidos em cada operação, assegurando a adequação dos mesmos à operações a realizar. Naturalmente que o exemplo descrito levará à deteção de um erro semântico, que será posteriormente relatado ao utilizador.
+
+\subsubsection{Gramática Final}
 
 Apresentamos de seguida a gramática final da linguagem, após efetuar todas as alterações referidas:
 
@@ -398,7 +425,7 @@ Program: CLASS ID OBRACE Declarations CBRACE
 	;
 
 Declarations: Declarations FieldDecl
-	|     Declarations MethodDecl
+    |     Declarations MethodDecl
     |     FieldDecl
     |     MethodDecl
     ;
